@@ -8,16 +8,19 @@ This project uses [KWOK](https://kwok.sigs.k8s.io/) to establish a cluster of po
 
 Applications or workflows that run in Kubernetes specify resources they need. during launch Kubernetes will check to see if a node (a physcial server) has the resource types the application needs.  Resource types include: CPU, memory, and storage. Additional resource that could be evaluated include GPU and networking resources.
 
-## System Setup
+## Getting Started
 
-The system can be of any type. The particular system developed on is specified in the [setup instructions](docs/Setup.md). what's needed is a Linux-based system running K8s.  The enviroment used in this work is WSL2 running Docker Desktop with Kubernetes enabled.
+### System Setup
 
-## Setup Python Virtual Environment (Optional but Recommended)
-This is not necessary but it helps with development. Why?  Access to the cluster can be obtained external to the cluster using a Python module called `kubernetes`. This way the Python script can be developed externally and then built into a Docker container to run as a deployment in Kubernetes. Anaconda is a good choice. Visit the Anaconda website for [instructions on installing, setting up, and using virtual environments](). 
+The system can be of any type. The particular system developed on is specified in the [setup instructions](docs/Setup_dev_env.md). what's needed is a Linux-based system running K8s.  The enviroment used in this work is WSL2 running Docker Desktop with Kubernetes enabled.
 
-## Setup Kwok
+### Setup Python Virtual Environment
 
-Kwok was deployed to the single node cluster specified earlier. 
+Access to the cluster can be obtained external to the cluster using a Python module called `kubernetes`. This way the Python script can be developed externally and then built into a Docker container to run as a deployment in Kubernetes. Anaconda is a good choice. Visit the Anaconda website for [instructions on installing, setting up, and using virtual environments](https://docs.anaconda.com/free/anaconda/install/index.html). More on thi after the cluster is setup.
 
+### Setup Kwok
+
+Kwok was deployed to the single node cluster detailed so far. Two Kubernetes manifests (yaml files) are deployed to setup Kwok: [kwok.yaml](./kwok_yaml/kwok.yaml) and [stage-fast.yaml](./kwok_yaml/stage-fast.yaml) are deployed which create several Kubernetes artifacts. Please review the files for a list. These are only provided locally for completeness and reference. Be sure to reference the ones specified in the [kwok setup instructions](https://kwok.sigs.k8s.io/docs/user/kwok-in-cluster/) because changes are happening regularly.
 
 ## References:
+[1] “Configure Multiple Schedulers,” Kubernetes. https://kubernetes.io/docs/tasks/extend-kubernetes/configure-multiple-schedulers/ (accessed Sep. 06, 2023).V

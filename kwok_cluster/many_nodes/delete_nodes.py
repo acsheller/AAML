@@ -2,7 +2,7 @@ import subprocess
 
 def delete_kwok_ordinary_node(node_count):
     for i in range(1, node_count + 1):
-        node_name = f"kwok-standard-node-{i}"
+        node_name = f"kwok-std-node-{i}"
         subprocess.run(["kubectl", "delete", "node", node_name])
 
 if __name__ == "__main__":

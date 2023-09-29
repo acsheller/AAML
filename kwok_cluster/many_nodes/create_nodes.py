@@ -13,17 +13,12 @@ metadata:
     beta.kubernetes.io/arch: amd64
     beta.kubernetes.io/os: linux
     kubernetes.io/arch: amd64
-    kubernetes.io/hostname: kwok-standard-node-{i}
+    kubernetes.io/hostname: kwok-std-node-{i}
     kubernetes.io/os: linux
     kubernetes.io/role: agent
     node-role.kubernetes.io/agent: ""
     type: kwok
-  name: kwok-standard-node-{i}
-spec:
-  taints:
-  - effect: NoSchedule
-    key: kwok.x-k8s.io/node
-    value: fake
+  name: kwok-std-node-{i}
 status:
   allocatable:
     cpu: "32"

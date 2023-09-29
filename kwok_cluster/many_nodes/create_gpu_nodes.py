@@ -24,6 +24,9 @@ spec:
   - effect: NoSchedule
     key: kwok.x-k8s.io/node
     value: fake
+  - effect: NoSchedule
+    key: nvidia.com/gpu
+    value: "true"
 status:
   allocatable:
     cpu: "32"

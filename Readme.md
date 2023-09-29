@@ -22,5 +22,13 @@ Access to the cluster can be obtained external to the cluster using a Python mod
 
 Kwok was deployed to the single node cluster detailed so far. Two Kubernetes manifests (yaml files) are deployed to setup Kwok: [kwok.yaml](./kwok_yaml/kwok.yaml) and [stage-fast.yaml](./kwok_yaml/stage-fast.yaml) are deployed which create several Kubernetes artifacts. Please review the files for a list. These are only provided locally for completeness and reference. Be sure to reference the ones specified in the [kwok setup instructions](https://kwok.sigs.k8s.io/docs/user/kwok-in-cluster/) because changes are happening regularly.
 
+### Scripts for single/Multi Worker Nodes
+
+Python Scripts are provided to [create a single ordinary node](./kwok_cluster/single_node/kwok_node.yaml) as well as a script to [create a single GPU Node](./kwok_cluster/single_node/kwok_node_gpu.yaml). Other resources types, such as SR-IOV Virtual Functions can be added as well.
+
+There are also script to create 
+
+## External Scheduler
+
 ## References:
 [1] “Configure Multiple Schedulers,” Kubernetes. https://kubernetes.io/docs/tasks/extend-kubernetes/configure-multiple-schedulers/ (accessed Sep. 06, 2023).V

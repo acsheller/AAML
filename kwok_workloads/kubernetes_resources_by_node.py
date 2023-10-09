@@ -1,4 +1,5 @@
 from kubernetes import client, config
+import redis
 
 def convert_memory_to_gigabytes(memory_str):
     """Convert memory string to Gigabytes (GB)"""

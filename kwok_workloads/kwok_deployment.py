@@ -18,6 +18,7 @@ spec:
       labels:
         app: {deployment_name}
     spec:
+      schedulerName: custom-scheduler  # <-- Correct placement
       affinity:
         nodeAffinity:
           requiredDuringSchedulingIgnoredDuringExecution:
@@ -49,6 +50,7 @@ spec:
         - sleep
         - "3600"
 """
+
     subprocess.run(["kubectl", "apply", "-f", "-"], input=deployment_yaml, text=True)
 
 

@@ -1,4 +1,4 @@
-# build a mnay node cluster
+# build a many node cluster
 
 This folder contains scripts for dynamically creating many clusters.
 There is also a script for adding additional resources and simulating the allocation of those in the cluster. 

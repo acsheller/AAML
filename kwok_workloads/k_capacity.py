@@ -2,6 +2,21 @@ import subprocess
 import json
 from datetime import datetime, timezone
 
+
+def convert_memory_to_gigabytes(memory_str):
+    """Convert memory string to Gigabytes (GB)"""
+    if memory_str.endswith('Ki'):
+        return int(memory_str.rstrip('Ki')) / (1024 * 1024)
+    elif memory_str.endswith('Mi'):
+        return int(memory_str.rstrip('Mi')) / 1024
+    elif memory_str.endswith('Gi'):
+        return int(memory_str.rstrip('Gi'))
+    else:
+        return int(memory_str)  # Assuming it's already in Gi
+
+
+
+
 def calculate_age(creation_timestamp):
     creation_date = datetime.strptime(creation_timestamp, '%Y-%m-%dT%H:%M:%SZ')
     creation_date = creation_date.replace(tzinfo=timezone.utc)
@@ -24,7 +39,7 @@ def get_node_resources(name):
         for container in pod['spec']['containers']:
             resources = container.get('resources', {}).get('requests', {})
             total_cpu_used += int(resources.get('cpu', '0m').rstrip('m'))
-            total_memory_used += int(resources.get('memory', '0Mi').rstrip('Mi'))
+            total_memory_used += convert_memory_to_gigabytes(resources.get('memory', '0Gi'))
             total_gpu_used += int(resources.get('nvidia.com/gpu', '0'))
     return {
         'cpu_capacity': capacity['cpu'],

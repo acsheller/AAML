@@ -3,7 +3,7 @@ from kinfo import KubeInfo
 import redis
 import json
 import random
-
+import networkx as nx
 class CustomScheduler:
 
     def __init__(self):
@@ -11,7 +11,7 @@ class CustomScheduler:
         self.api = client.CoreV1Api()
         self.watcher = watch.Watch()
         self.kube_info = KubeInfo()
-        self.redis_client = redis.StrictRedis(host = "localhost",port=6379, db=0)
+        #self.redis_client = redis.StrictRedis(host = "localhost",port=6379, db=0)
 
     def push_scheduler_status_to_redis(self):
         nodes_data = self.kube_info.get_nodes_data()
@@ -105,17 +105,40 @@ class CustomScheduler:
             print(f"Exception when calling CoreV1Api->create_namespaced_binding: {e}")
 
 
+    def create_graph(self):
+        G = nx.Graph()
+
+        # Add the controller as the central node
+        G.add_node("controller", type="controller")
+
+        # Fetch all nodes data
+        nodes_data = self.kube_info.get_nodes_data()
+
+        # Add nodes to the graph
+        for node_data in nodes_data:
+            node_name = node_data['name']
+            
+            # Add or update node attributes
+            for key, value in node_data.items():
+                G.nodes[node_name][key] = value
+            
+            G.add_edge("controller", node_name, weight=1)
+
+        return G
+
     def run(self):
         
         # Push Iniital Status
-        print("Initial Status Pushed to Redis")
-        self.push_scheduler_status_to_redis()
+        #print("Initial Status Pushed to Redis")
+        #self.push_scheduler_status_to_redis()
         for event in self.watcher.stream(self.api.list_pod_for_all_namespaces):
             pod = event['object']
             if self.needs_scheduling(pod):
                 best_node = self.schedule_pod(pod)
                 print("Best Node Selected {}".format(best_node))
                 self.bind_pod_to_node(pod, best_node)
+
+
 
 if __name__ == "__main__":
     scheduler = CustomScheduler()

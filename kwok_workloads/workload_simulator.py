@@ -1,5 +1,7 @@
 from kubernetes import client, config
 import random
+import numpy as np
+import time
 
 class KwokDeploymentSimulator:
     def __init__(self):
@@ -8,8 +10,10 @@ class KwokDeploymentSimulator:
 
         # Create an instance of the API class
         self.api_instance = client.AppsV1Api()
-
+        self.v1 = client.CoreV1Api()
         self.batch_api_instance = client.BatchV1Api()
+        self.my_deployments = []
+
 
     def create_kwok_deployment(self, deployment_name, replicas=1, cpu_request="250m", memory_request="512Mi", cpu_limit="500m", memory_limit="1Gi"):
         # Define the deployment manifest
@@ -44,6 +48,7 @@ class KwokDeploymentSimulator:
         )
         # Create the deployment
         self.api_instance.create_namespaced_deployment(namespace="default", body=deployment)
+        self.my_deployments.append(deployment_name)
 
 
     def create_kwok_job(self, job_name, cpu_request="250m", memory_request="512Mi", cpu_limit="500m", memory_limit="1Gi"):
@@ -78,9 +83,12 @@ class KwokDeploymentSimulator:
 
 
     def generate_funny_name(self):
-        adjectives = ["funky", "jazzy", "silly", "wacky", "zany", "quirky", "goofy", "wonky", "spunky", "loony"]
-        nouns = ["penguin", "llama", "unicorn", "gnome", "kitten", "chimp", "octopus", "dino", "robot", "alien"]
-        return random.choice(adjectives) + '-' + random.choice(nouns)
+        import randomname
+        while True:
+            name = randomname.get_name().lower()
+            if name not in self.my_deployments:
+                return name
+
 
     def create_random_deployment_from_prompt(self):
         default_name = self.generate_funny_name()
@@ -99,38 +107,94 @@ class KwokDeploymentSimulator:
         
         # Generate random values for other parameters
         replicas = random.randint(1, 5)  # Random number of replicas between 1 and 5
-        cpu_request_values = ["100m", "250m", "500m"]
-        memory_request_values = ["256Mi", "512Mi", "1Gi"]
-        cpu_limit_values = ["500m", "750m", "1"]
-        memory_limit_values = ["512Mi", "1Gi", "2Gi"]
+        
+        cpu_request_values = {100: "100m", 250: "250m", 500: "500m"}
+        memory_request_values = {256: "256Mi", 512: "512Mi", 1024: "1Gi"}
+        cpu_limit_values = {500: "500m", 750: "750m", 1000: "1000m"}
+        memory_limit_values = {512: "512Mi", 1024: "1Gi", 2048: "2Gi"}
 
-        cpu_request = random.choice(cpu_request_values)
-        memory_request = random.choice(memory_request_values)
-        cpu_limit = random.choice(cpu_limit_values)
-        memory_limit = random.choice(memory_limit_values)
+        # Select a random CPU request and then choose a CPU limit that's greater than or equal to the request
+        cpu_request_key = random.choice(list(cpu_request_values.keys()))
+        cpu_request = cpu_request_values[cpu_request_key]
+        valid_cpu_limits = {k: v for k, v in cpu_limit_values.items() if k >= cpu_request_key}
+        cpu_limit = valid_cpu_limits[random.choice(list(valid_cpu_limits.keys()))]
+
+        # Select a random Memory request and then choose a Memory limit that's greater than or equal to the request
+        memory_request_key = random.choice(list(memory_request_values.keys()))
+        memory_request = memory_request_values[memory_request_key]
+        valid_memory_limits = {k: v for k, v in memory_limit_values.items() if k >= memory_request_key}
+        memory_limit = valid_memory_limits[random.choice(list(valid_memory_limits.keys()))]
 
         self.create_kwok_deployment(deployment_name, replicas, cpu_request, memory_request, cpu_limit, memory_limit)
 
-    def create_fully_random_job(self):
-        # Generate a random job name
-        job_name = self.generate_funny_name()
+ 
+
+    def get_pod_count_per_node(self, node_name):
+        """Get the number of pods running on a specific node."""
+        pods = self.v1.list_pod_for_all_namespaces(field_selector=f"spec.nodeName={node_name}").items
+        return len(pods)
+    
+    def get_nodes_data(self):
+        POD_LIMIT=110
+        nodes_data = []
+        nodes = self.v1.list_node().items
+
+        for node in nodes:
+            name = node.metadata.name
+            pod_count = self.get_pod_count_per_node(name)
+  
+            node_data = {
+                'name': name,
+                'pod_count':pod_count,
+                'pod_limit':POD_LIMIT,
+                'pod_percent': np.round(pod_count/POD_LIMIT,2)
+            }
+            nodes_data.append(node_data)
+        return nodes_data
+ 
         
-        # Generate random values for other parameters
-        cpu_request_values = ["100m", "250m", "500m"]
-        memory_request_values = ["256Mi", "512Mi", "1Gi"]
-        cpu_limit_values = ["500m", "750m", "1"]
-        memory_limit_values = ["512Mi", "1Gi", "2Gi"]
 
-        cpu_request = random.choice(cpu_request_values)
-        memory_request = random.choice(memory_request_values)
-        cpu_limit = random.choice(cpu_limit_values)
-        memory_limit = random.choice(memory_limit_values)
+    def initial_deployments(self,load = 0.5):
+        '''
+        Creates a set of initial deployments that will simulate a load
+        '''
+        total_pct = 0
+        while total_pct < load:
+            for node in self.get_nodes_data():
+                total_pct += node['pod_percent']
+            self.create_fully_random_deployment()
+            total_pct = total_pct/len(self.get_nodes_data())
+            print(f'total percentage is {total_pct}')
+    def poll_deployments(self):
+        '''
+        Every 20 seconds, do something to a deployment
+        '''
+        while True:
+            action = random.choice(['add','delete','nothing'])
+            if action == 'add':
+                self.create_fully_random_deployment()
+                print("added a deployment")
+            elif action == 'delete':
+                d_name = random.choice(self.my_deployments)
+                self.api_instance.delete_namespaced_deployment(name=d_name,namespace='default')
+                self.my_deployments.remove(d_name)
+                print(f'Removed deployment  {d_name}')
+            else:
+                print("Did Nothing")
 
-        self.create_kwok_job(job_name, cpu_request, memory_request, cpu_limit, memory_limit)
+            time.sleep(20)
+
+  
+    def run(self):
+        """
+        Run method to start the simulator.
+        """
+        self.initial_deployments()
+        self.poll_deployments()
 
 
 if __name__ == "__main__":
     simulator = KwokDeploymentSimulator()
     #simulator.create_fully_random_deployment()
-    simulator.create_fully_random_job()
+    simulator.run()
     print()

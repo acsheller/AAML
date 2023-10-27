@@ -2,9 +2,11 @@ from kubernetes import client, config
 import random
 import numpy as np
 import time
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-class KwokDeploymentSimulator:
-    def __init__(self):
+class WorkloadDeploymentSimulator:
+    def __init__(self,load=0.5):
         # Load the kube config from the default location
         config.load_kube_config()
 
@@ -13,6 +15,10 @@ class KwokDeploymentSimulator:
         self.v1 = client.CoreV1Api()
         self.batch_api_instance = client.BatchV1Api()
         self.my_deployments = []
+        self.my_pods = []
+        self.load = load
+        self.current_load = 0.0
+        logging.info("Deployment Simulator Initialized")
 
 
     def create_kwok_deployment(self, deployment_name, replicas=1, cpu_request="250m", memory_request="512Mi", cpu_limit="500m", memory_limit="1Gi"):
@@ -126,6 +132,7 @@ class KwokDeploymentSimulator:
         memory_limit = valid_memory_limits[random.choice(list(valid_memory_limits.keys()))]
 
         self.create_kwok_deployment(deployment_name, replicas, cpu_request, memory_request, cpu_limit, memory_limit)
+        return deployment_name
 
  
 
@@ -152,36 +159,43 @@ class KwokDeploymentSimulator:
             nodes_data.append(node_data)
         return nodes_data
  
-        
+    def get_load(self):
+        total_pct = 0
+        for node in self.get_nodes_data():
+            total_pct += node['pod_percent']
+        self.current_load = total_pct
+        return total_pct
 
-    def initial_deployments(self,load = 0.5):
+    def initial_deployments(self):
         '''
         Creates a set of initial deployments that will simulate a load
         '''
-        total_pct = 0
-        while total_pct < load:
-            for node in self.get_nodes_data():
-                total_pct += node['pod_percent']
+        total_pct = self.get_load()
+        while total_pct < self.load:
             self.create_fully_random_deployment()
             total_pct = total_pct/len(self.get_nodes_data())
-            print(f'total percentage is {total_pct}')
+            logging.info(f'total percentage is {total_pct}')
+            self.current_load = total_pct
+    
     def poll_deployments(self):
         '''
         Every 20 seconds, do something to a deployment
         '''
         while True:
-            action = random.choice(['add','delete','nothing'])
-            if action == 'add':
-                self.create_fully_random_deployment()
-                print("added a deployment")
-            elif action == 'delete':
-                d_name = random.choice(self.my_deployments)
-                self.api_instance.delete_namespaced_deployment(name=d_name,namespace='default')
-                self.my_deployments.remove(d_name)
-                print(f'Removed deployment  {d_name}')
+            if self.get_load() < 0.5:
+                action = random.choice(['add','delete','nothing'])
+                if action == 'add':
+                    d_name = self.create_fully_random_deployment()
+                    logging.info("added a deployment")
+                elif action == 'delete':
+                    d_name = random.choice(self.my_deployments)
+                    self.api_instance.delete_namespaced_deployment(name=d_name,namespace='default')
+                    self.my_deployments.remove(d_name)
+                    logging.info(f'Removed deployment  {d_name}')
+                else:
+                    logging.info("Doing Nothing")
             else:
-                print("Did Nothing")
-
+                logging.info(f"Cluster load: {self.current_load}, specified load: {self.load} ")
             time.sleep(20)
 
   
@@ -194,7 +208,6 @@ class KwokDeploymentSimulator:
 
 
 if __name__ == "__main__":
-    simulator = KwokDeploymentSimulator()
+    simulator = WorkloadDeploymentSimulator(load=0.5)
     #simulator.create_fully_random_deployment()
     simulator.run()
-    print()

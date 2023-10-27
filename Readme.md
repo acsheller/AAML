@@ -18,17 +18,44 @@ The system can be of any type. The particular system developed on is specified i
 
 Access to the cluster can be obtained external to the cluster using a Python module called `kubernetes`. This way the Python script can be developed externally and then built into a Docker container to run as a deployment in Kubernetes. Anaconda is a good choice. Visit the Anaconda website for [instructions on installing, setting up, and using virtual environments](https://docs.anaconda.com/free/anaconda/install/index.html). More on thi after the cluster is setup.
 
-### Setup Kwok
+### Is your cluster setup?
+Be sure to complete the steps in the [setup instructions]([setup instructions](docs/Setup_dev_env.md)).
+The cluster I setup has 10 fake nodes:
+```
+(base) asheller: many_nodes$ python create_nodes.py 
+Enter the total number of standard nodes to create: 10
+node/kwok-std-node-1 created
+node/kwok-std-node-2 created
+node/kwok-std-node-3 created
+node/kwok-std-node-4 created
+node/kwok-std-node-5 created
+node/kwok-std-node-6 created
+node/kwok-std-node-7 created
+node/kwok-std-node-8 created
+node/kwok-std-node-9 created
+node/kwok-std-node-10 created
 
-Kwok was deployed to the single node cluster detailed so far. Two Kubernetes manifests (yaml files) are deployed to setup Kwok: [kwok.yaml](./kwok_yaml/kwok.yaml) and [stage-fast.yaml](./kwok_yaml/stage-fast.yaml) are deployed which create several Kubernetes artifacts. Please review the files for a list. These are only provided locally for completeness and reference. Be sure to reference the ones specified in the [kwok setup instructions](https://kwok.sigs.k8s.io/docs/user/kwok-in-cluster/) because changes are happening regularly.
+(base) asheller: many_nodes$ kgn
+NAME               STATUS   ROLES           AGE     VERSION
+docker-desktop     Ready    control-plane   3h30m   v1.27.2
+kwok-std-node-1    Ready    agent           6s      fake
+kwok-std-node-10   Ready    agent           5s      fake
+kwok-std-node-2    Ready    agent           6s      fake
+kwok-std-node-3    Ready    agent           6s      fake
+kwok-std-node-4    Ready    agent           6s      fake
+kwok-std-node-5    Ready    agent           6s      fake
+kwok-std-node-6    Ready    agent           5s      fake
+kwok-std-node-7    Ready    agent           5s      fake
+kwok-std-node-8    Ready    agent           5s      fake
+kwok-std-node-9    Ready    agent           5s      fake
 
-### Scripts for single/Multi Worker Nodes
+```
 
-Python Scripts are provided to [create a single ordinary node](./kwok_cluster/single_node/kwok_node.yaml) as well as a script to [create a single GPU Node](./kwok_cluster/single_node/kwok_node_gpu.yaml). Other resources types, such as SR-IOV Virtual Functions can be added as well.
-
-There are also script to create 
 
 ## External Scheduler
+
+The scheduler will run and listen specificially for 
+
 
 ## References:
 [1] “Configure Multiple Schedulers,” Kubernetes. https://kubernetes.io/docs/tasks/extend-kubernetes/configure-multiple-schedulers/ (accessed Sep. 06, 2023).V

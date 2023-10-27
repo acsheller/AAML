@@ -4,13 +4,18 @@ import redis
 import json
 import random
 import networkx as nx
+
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 class CustomScheduler:
+
 
     def __init__(self):
         config.load_kube_config()
         self.api = client.CoreV1Api()
         self.watcher = watch.Watch()
         self.kube_info = KubeInfo()
+        logging.info("scheduler constructed.")
         #self.redis_client = redis.StrictRedis(host = "localhost",port=6379, db=0)
 
     def push_scheduler_status_to_redis(self):
@@ -41,7 +46,7 @@ class CustomScheduler:
         return selected_node
 
     def schedule_pod(self, pod):
-        print("Entering Scheduler Pod")
+
         nodes = self.api.list_node().items
         best_node = None
         gpu_agents = []
@@ -74,13 +79,13 @@ class CustomScheduler:
                 best_node = self.select_best_random_node(agents,pod)
 
 
-        print("Leaving Scheduler Pod {}".format(best_node.metadata.name))
         return best_node.metadata.name
 
 
     def bind_pod_to_node(self, pod, node_name):
         if node_name is None:
-            print("Node name is None. Cannot bind pod.")
+            logging.error("Node name is None. Cannot bind pod.")
+
             return
 
         binding = {
@@ -135,7 +140,7 @@ class CustomScheduler:
             pod = event['object']
             if self.needs_scheduling(pod):
                 best_node = self.schedule_pod(pod)
-                print("Best Node Selected {}".format(best_node))
+                logging.info(f"Best Node Selected {best_node}")
                 self.bind_pod_to_node(pod, best_node)
 
 

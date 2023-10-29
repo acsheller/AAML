@@ -1,7 +1,7 @@
 import subprocess
 import json
 from datetime import datetime, timezone
-
+import numpy as np
 
 def convert_memory_to_gigabytes(memory_str):
     """Convert memory string to Gigabytes (GB)"""
@@ -59,15 +59,22 @@ def get_node_status(conditions):
     ready_status = next((condition['status'] for condition in conditions if condition['type'] == 'Ready'), 'Unknown')
     return "Ready" if ready_status == "True" else "Not Ready"
 
+def get_pod_count_for_node(node_name):
+    pods_raw = subprocess.check_output(["kubectl", "get", "pods", "--all-namespaces", "--field-selector=spec.nodeName=" + node_name, "-o", "json"])
+    pods_json = json.loads(pods_raw)
+    return len(pods_json['items'])
+
+
 def main():
     nodes_raw = subprocess.check_output(["kubectl", "get", "nodes", "-o", "json"])
     nodes_json = json.loads(nodes_raw)
     nodes = nodes_json['items']
-    print("{:<20} {:<10} {:<15} {:<10} {:<13} {:<7} {:<10} {:<4}".format(
-        "NAME", "STATUS", "ROLES", "AGE", "VERSION", "CPU", "MEMORY", "GPU"
+    print("{:<20} {:<10} {:<15} {:<10} {:<13} {:<7} {:>13} {:>7}".format(
+        "NAME", "STATUS", "ROLES", "AGE", "VERSION", "CPU", "MEMORY", "Pods"
     ))
     for node in nodes:
         name = node['metadata']['name']
+        pod_count = get_pod_count_for_node(name)
         status = get_node_status(node['status']['conditions'])
         role_labels = [role.split("/")[-1] for role in node['metadata']['labels'].keys() if 'node-role.kubernetes.io/' in role]
         roles = ', '.join(role_labels) if role_labels else 'None'
@@ -75,18 +82,19 @@ def main():
         version = node['status']['nodeInfo']['kubeletVersion']
         if 'control-plane' in roles:
             resources = get_node_resources(name)
-            print("{:<20} {:<10} {:<15} {:<10} {:<10}  {}/{}  {}/{}  {}/{}".format(
+            print("{:<20} {:<10} {:<15} {:<10} {:<10}  {:>5}/{:<5}  {:>4}/{:<6}  {:>5}".format(
                 name, status, roles, age, version,
-                resources['total_cpu_used'], resources['cpu_capacity'],
-                resources['total_memory_used'], resources['memory_capacity'].rstrip("Gi") + "Mi",
-                resources['total_gpu_used'], resources['gpu_capacity']))
+                np.round(resources['total_cpu_used']/1000,2), resources['cpu_capacity'],
+                np.round(resources['total_memory_used']/1000,2), str(np.round(float(resources['memory_capacity'].rstrip("Gi").rstrip("K"))/(1000**2),2)) + "G",
+                pod_count
+            ))
             continue
         resources = get_node_resources(name)
-        print("{:<20} {:<10} {:<15} {:<10} {:<10} {}/{}  {}/{}  {}/{}".format(
+        print("{:<20} {:<10} {:<15} {:<10} {:<10}  {:>5}/{:<5}  {:>6}/{:<7}  {}".format(
             name, status, roles, age, version,
-            resources['total_cpu_used'], resources['cpu_capacity'],
-            resources['total_memory_used'], resources['memory_capacity'].rstrip("Gi") + "Mi",
-            resources['total_gpu_used'], resources['gpu_capacity']
+            np.round(resources['total_cpu_used']/1000,2), resources['cpu_capacity'],
+            np.round(resources['total_memory_used'],2), resources['memory_capacity'].rstrip("Mi"),
+            pod_count
         ))
 
 if __name__ == "__main__":

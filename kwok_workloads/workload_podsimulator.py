@@ -51,7 +51,7 @@ class WorkloadPodSimulator:
             if name not in self.my_pods:
                 return name
 
-    def poll_pods(self):
+    def poll_pods(self, period=20):
         '''
         Every 20 seconds, do something to a pod
         '''
@@ -63,7 +63,7 @@ class WorkloadPodSimulator:
             elif action == 'delete':
                 self.delete_random_pod()
                 print("Deleted a pod.")
-            time.sleep(20)
+            time.sleep(period)
 
 
 

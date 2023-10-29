@@ -18,6 +18,11 @@ class WorkloadDeploymentSimulator:
         self.my_pods = []
         self.load = load
         self.current_load = 0.0
+
+        self.cpu_request_values = {100: "100m", 250: "250m", 500: "500m", 1000: "1000m", 1500: "1500m",2000: "2000m",2500: "2500m",3000: "3000m",3500: "3500m"}
+        self.memory_request_values = {256: "256Mi", 512: "512Mi", 1024: "1.0Gi", 1536: "1.5Gi",2048: "2.0Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi"}
+        self.cpu_limit_values = {500: "500m", 750: "750m", 1000: "1000m",1500: "1500m",2000: "2000m",2500: "2500m",3000: "3000m",3500: "3500m",4000:"4000m"}
+        self.memory_limit_values = {512: "512Mi", 1024: "1Gi",1536: "1.5Gi", 2048: "2Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi",4096: "4.0Gi"}
         logging.info("Deployment Simulator Initialized")
 
 
@@ -114,21 +119,16 @@ class WorkloadDeploymentSimulator:
         # Generate random values for other parameters
         replicas = random.randint(1, 5)  # Random number of replicas between 1 and 5
         
-        cpu_request_values = {100: "100m", 250: "250m", 500: "500m"}
-        memory_request_values = {256: "256Mi", 512: "512Mi", 1024: "1Gi"}
-        cpu_limit_values = {500: "500m", 750: "750m", 1000: "1000m"}
-        memory_limit_values = {512: "512Mi", 1024: "1Gi", 2048: "2Gi"}
-
         # Select a random CPU request and then choose a CPU limit that's greater than or equal to the request
-        cpu_request_key = random.choice(list(cpu_request_values.keys()))
-        cpu_request = cpu_request_values[cpu_request_key]
-        valid_cpu_limits = {k: v for k, v in cpu_limit_values.items() if k >= cpu_request_key}
+        cpu_request_key = random.choice(list(self.cpu_request_values.keys()))
+        cpu_request = self.cpu_request_values[cpu_request_key]
+        valid_cpu_limits = {k: v for k, v in self.cpu_limit_values.items() if k >= cpu_request_key}
         cpu_limit = valid_cpu_limits[random.choice(list(valid_cpu_limits.keys()))]
 
         # Select a random Memory request and then choose a Memory limit that's greater than or equal to the request
-        memory_request_key = random.choice(list(memory_request_values.keys()))
-        memory_request = memory_request_values[memory_request_key]
-        valid_memory_limits = {k: v for k, v in memory_limit_values.items() if k >= memory_request_key}
+        memory_request_key = random.choice(list(self.memory_request_values.keys()))
+        memory_request = self.memory_request_values[memory_request_key]
+        valid_memory_limits = {k: v for k, v in self.memory_limit_values.items() if k >= memory_request_key}
         memory_limit = valid_memory_limits[random.choice(list(valid_memory_limits.keys()))]
 
         self.create_kwok_deployment(deployment_name, replicas, cpu_request, memory_request, cpu_limit, memory_limit)
@@ -163,26 +163,24 @@ class WorkloadDeploymentSimulator:
         total_pct = 0
         for node in self.get_nodes_data():
             total_pct += node['pod_percent']
-        self.current_load = total_pct
-        return total_pct
+        self.current_load = np.round(total_pct/ len(self.get_nodes_data()),2)
+        return self.current_load
 
     def initial_deployments(self):
         '''
         Creates a set of initial deployments that will simulate a load
         '''
-        total_pct = self.get_load()
-        while total_pct < self.load:
+
+        while self.get_load() < self.load:
             self.create_fully_random_deployment()
-            total_pct = total_pct/len(self.get_nodes_data())
-            logging.info(f'total percentage is {total_pct}')
-            self.current_load = total_pct
+            logging.info(f'Current load {self.current_load}')
     
     def poll_deployments(self):
         '''
         Every 20 seconds, do something to a deployment
         '''
         while True:
-            if self.get_load() < 0.5:
+            if self.get_load() < self.load:
                 action = random.choice(['add','delete','nothing'])
                 if action == 'add':
                     d_name = self.create_fully_random_deployment()

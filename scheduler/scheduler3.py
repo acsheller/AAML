@@ -102,12 +102,12 @@ class CustomScheduler:
             }
         }
 
-        print(f"Binding object: {binding}")
+        logging.info(f"Binding object: {binding}")
 
         try:
             self.api.create_namespaced_binding(namespace=pod.metadata.namespace, body=binding,_preload_content=False)
         except Exception as e:
-            print(f"Exception when calling CoreV1Api->create_namespaced_binding: {e}")
+            logging.error(f"Exception when calling CoreV1Api->create_namespaced_binding: {e}")
 
 
     def create_graph(self):
@@ -132,18 +132,25 @@ class CustomScheduler:
         return G
 
     def run(self):
-        
-        # Push Iniital Status
-        #print("Initial Status Pushed to Redis")
-        #self.push_scheduler_status_to_redis()
-        for event in self.watcher.stream(self.api.list_pod_for_all_namespaces):
-            pod = event['object']
-            if self.needs_scheduling(pod):
-                best_node = self.schedule_pod(pod)
-                logging.info(f"Best Node Selected {best_node}")
-                self.bind_pod_to_node(pod, best_node)
+        while True:
+            try:
+                # Push Iniital Status
+                #print("Initial Status Pushed to Redis")
+                #self.push_scheduler_status_to_redis()
+                for event in self.watcher.stream(self.api.list_pod_for_all_namespaces):
+                    pod = event['object']
+                    if self.needs_scheduling(pod):
+                        best_node = self.schedule_pod(pod)
+                        logging.info(f"Best Node Selected {best_node}")
+                        self.bind_pod_to_node(pod, best_node)
 
-
+            except client.exceptions.ApiException as e:
+                if e.status == 410:
+                    logging.warning("Watch timed out or resourceVersion too old. Restarting watch...")
+                else:
+                    logging.error(f"Unexpected API exception: {e}")
+            except Exception as e:
+                logging.error(f"Unexpected error: {e}")
 
 if __name__ == "__main__":
     scheduler = CustomScheduler()

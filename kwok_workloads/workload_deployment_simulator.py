@@ -3,28 +3,34 @@ import random
 import numpy as np
 import time
 from datetime import datetime, timezone
+import pandas as pd
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+import networkx
+
 
 class WorkloadDeploymentSimulator:
 
-
-    NAMESPACE= "default"
     POD_LIMIT = 110
 
-    def __init__(self,cpu_load=0.5,mem_load=0.5,pod_load=0.5):
+    def __init__(self,cpu_load=0.5,mem_load=0.5,pod_load=0.5,namespace='default',scheduler='default-scheduler'):
+
+        self.namespace = namespace
+        self.scheduler = scheduler
         # Load the kube config from the default location
         config.load_kube_config()
-
+        
         # Create an instance of the API class
         self.api_instance = client.AppsV1Api()
+        
         self.v1 = client.CoreV1Api()
         self.batch_api_instance = client.BatchV1Api()
         self.my_deployments = self.get_all_deployments()
-        self.my_pods = []
+
         self.cpu_load = cpu_load
         self.mem_load = mem_load
         self.pod_load = pod_load
+
         self.current_load = {}
         self.current_load['pod_pct'] = 0
         self.current_load['cpu_pct'] = 0
@@ -34,53 +40,59 @@ class WorkloadDeploymentSimulator:
         self.memory_request_values = {256: "256Mi", 512: "512Mi", 1024: "1.0Gi", 1536: "1.5Gi",2048: "2.0Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi"}
         self.cpu_limit_values = {500: "500m", 750: "750m", 1000: "1000m",1500: "1500m",2000: "2000m",2500: "2500m",3000: "3000m",3500: "3500m",4000:"4000m"}
         self.memory_limit_values = {512: "512Mi", 1024: "1Gi",1536: "1.5Gi", 2048: "2Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi",4096: "4.0Gi"}
+
+        columns = ['name', 'pod_count', 'cpu_request', 'cpu_limit', 'mem_request', 'mem_limit', 'action']
+        self.df = pd.DataFrame(columns=columns)
+        
         logging.info("Deployment Simulator Initialized")
 
 
+        
     def get_all_deployments(self):
-        # List all deployments across all namespaces
-        deployments = self.api_instance.list_namespaced_deployment(namespace="default")
-        # Extract the names of the deployments and return them as a list
+        deployments = self.api_instance.list_namespaced_deployment(namespace=self.namespace)
         deployment_names = [deployment.metadata.name for deployment in deployments.items]
         return deployment_names
             
             
-    def create_kwok_deployment(self, deployment_name, replicas=1, cpu_request="250m", memory_request="512Mi", cpu_limit="500m", memory_limit="1Gi",scheduler='default-scheduler'):
+    def create_kwok_deployment(self, deployment_name, replicas=1, cpu_request="250m", memory_request="512Mi", cpu_limit="500m", memory_limit="1Gi"):
         # Define the deployment manifest
-        sleep_duration = str(random.randint(5,300))
-        deployment = client.V1Deployment(
-            api_version="apps/v1",
-            kind="Deployment",
-            metadata=client.V1ObjectMeta(name=deployment_name),
-            spec=client.V1DeploymentSpec(
-                replicas=replicas,
-                selector=client.V1LabelSelector(
-                    match_labels={"app": deployment_name}
-                ),
-                template=client.V1PodTemplateSpec(
-                    metadata=client.V1ObjectMeta(labels={"app": deployment_name}),
-                    spec=client.V1PodSpec(
-                        scheduler_name=scheduler,
-                        containers=[
-                            client.V1Container(
-                                name=f"{deployment_name}-container",
-                                image="busybox",
-                                resources=client.V1ResourceRequirements(
-                                    requests={"cpu": cpu_request, "memory": memory_request},
-                                    limits={"cpu": cpu_limit, "memory": memory_limit}
-                                ),
-                                command=["sleep", sleep_duration]
-                            )
-                        ]
+        try:
+            sleep_duration = str(random.randint(5,300))
+            deployment = client.V1Deployment(
+                api_version="apps/v1",
+                kind="Deployment",
+                metadata=client.V1ObjectMeta(name=deployment_name),
+                spec=client.V1DeploymentSpec(
+                    replicas=replicas,
+                    selector=client.V1LabelSelector(
+                        match_labels={"app": deployment_name}
+                    ),
+                    template=client.V1PodTemplateSpec(
+                        metadata=client.V1ObjectMeta(labels={"app": deployment_name}),
+                        spec=client.V1PodSpec(
+                            scheduler_name=self.scheduler,
+                            containers=[
+                                client.V1Container(
+                                    name=f"{deployment_name}-container",
+                                    image="busybox",
+                                    resources=client.V1ResourceRequirements(
+                                        requests={"cpu": cpu_request, "memory": memory_request},
+                                        limits={"cpu": cpu_limit, "memory": memory_limit}
+                                    ),
+                                    command=["sleep", sleep_duration]
+                                )
+                            ]
+                        )
                     )
                 )
             )
-        )
-        # Create the deployment
-        self.api_instance.create_namespaced_deployment(namespace="default", body=deployment)
-        logging.info(f" {deployment_name } Deployed, cpu  r {cpu_request} l {cpu_limit}, mem r {memory_request} l {memory_limit}")
-        self.my_deployments.append(deployment_name)
-
+            # Create the deployment
+            self.api_instance.create_namespaced_deployment(namespace=self.namespace, body=deployment)
+            logging.info(f" {deployment_name } Deployed, cpu  r {cpu_request} l {cpu_limit}, mem r {memory_request} l {memory_limit}")
+            self.df.loc[len(self.df)] = {'name': deployment_name,'pod_count': replicas,'cpu_request': cpu_request,'cpu_limit': cpu_limit,'mem_request':memory_request,'mem_limit': memory_limit,'action': 'add'}
+            self.my_deployments.append(deployment_name)
+        except:
+            logger.error(f"something wrong with deployment {deployment_name}-- ignoring")
 
     def contains_non_alpha_or_dash(self,s):
         for char in s:
@@ -96,17 +108,6 @@ class WorkloadDeploymentSimulator:
                 if name not in self.my_deployments:    
                     return name
 
-
-    def create_random_deployment_from_prompt(self):
-        default_name = self.generate_funny_name()
-        deployment_name = input(f"Enter the deployment name (default: '{default_name}'): ") or default_name
-        replicas = int(input("Enter the number of replicas (default: 1): ") or 1)
-        cpu_request = input("Enter CPU request (default: 250m for 0.25 CPU): ") or "250m"
-        memory_request = input("Enter memory request (default: 512Mi): ") or "512Mi"
-        cpu_limit = input("Enter CPU limit (default: 500m for 0.5 CPU): ") or "500m"
-        memory_limit = input("Enter memory limit (default: 1Gi): ") or "1Gi"
-
-        self.create_kwok_deployment(deployment_name, replicas, cpu_request, memory_request, cpu_limit, memory_limit)
 
     def create_fully_random_deployment(self):
         # Generate a random deployment name
@@ -167,35 +168,6 @@ class WorkloadDeploymentSimulator:
         else:
             return int(memory_str)  # Assuming it's already in Gi
 
-    def get_node_resources(self, name):
-        '''
-        @TODO need to mod this.  
-        '''
-        v1 = client.CoreV1Api()
-        node = v1.read_node(name)
-        capacity = node.status.capacity
-        allocatable = node.status.allocatable
-        pod_limit = node.status.allocatable.get('pods',self.POD_LIMIT)
-        total_cpu_used = 0
-        total_memory_used = 0
-        total_gpu_used = 0
-        pods = v1.list_pod_for_all_namespaces(field_selector=f"spec.nodeName={name}").items
-        for pod in pods:
-            for container in pod.spec.containers:
-                resources = container.resources.requests if container.resources and container.resources.requests else {}
-                total_cpu_used += int(resources.get('cpu', '0m').rstrip('m'))
-                total_memory_used += self.convert_memory_to_gigabytes(resources.get('memory', '0Gi'))
-                total_gpu_used += int(resources.get('nvidia.com/gpu', '0'))
-            # @TODO Need to get resources returning in same format. 
-        return {
-            'cpu_capacity': int(capacity['cpu']) * 1000,
-            'memory_capacity': capacity['memory'],
-            'gpu_capacity': capacity.get('nvidia.com/gpu', '0'),
-            'total_cpu_used': total_cpu_used,
-            'total_memory_used': total_memory_used,
-            'total_gpu_used': total_gpu_used
-        }
-    
                     
     def get_node_resources(self, name):
         v1 = client.CoreV1Api()
@@ -226,7 +198,6 @@ class WorkloadDeploymentSimulator:
             'total_gpu_used': total_gpu_used
         }
 
-        # @TODO Need to modify this because of single digit returns on CPU usage go to get Node Resources
     def get_nodes_data(self): 
         POD_LIMIT=110
         nodes_data = []
@@ -263,9 +234,6 @@ class WorkloadDeploymentSimulator:
         return nodes_data
 
 
-
-
-
     def get_load(self):
         total_pods = 0
         total_pod_count = 0
@@ -299,13 +267,22 @@ class WorkloadDeploymentSimulator:
             self.get_load()
             logging.info(f'Current load {self.current_load}')
             
-    def poll_deployments(self):
+    def poll_deployments(self, interval =20,duration = 1):
         '''
+        Run for one hour after reaching capacity then
         Every 20 seconds, do something to a deployment
+
+        interval: polling interval -- default is every 20 seconds.
+        duration: runtime in hours -- default is 1 
         '''
-        while True:
+        start_time = time.time()
+        run_this_long = duration*3600 # 3600 seconds in an hour
+
+        while time.time() - start_time < run_this_long:
+            # Keep track of the load on the system
             self.get_load()
             logging.info(f"Polling: Load currently at {self.current_load}")  
+            # Try to add more frequently than delete
             action = random.choice(['add','delete','nothing','add'])
             if action == 'add':
                 if self.current_load['cpu_pct'] < self.cpu_load and self.current_load['mem_pct'] < self.mem_load and self.current_load['pod_pct'] < self.pod_load:
@@ -318,8 +295,11 @@ class WorkloadDeploymentSimulator:
             elif action == 'delete':
                 if len(self.my_deployments) > 0:
                     d_name = random.choice(self.my_deployments)
+                    record = self.df[self.df['name']==d_name].iloc[0].copy()
                     try: 
                         self.api_instance.delete_namespaced_deployment(name=d_name, namespace='default')
+                        record['action'] = 'delete'
+                        self.df.loc[len(self.df)] = record
                     except client.rest.ApiException as e:
                         logging.error(f"Error removing deployment {d_name}: {e.reason}")
                     except Exception as e:
@@ -330,7 +310,7 @@ class WorkloadDeploymentSimulator:
                 else:
                     logging.info("No deployments to delete")
             else:
-                logging.info("Doing Nothing")
+                logging.info("Skipping this one and doing nothing")
         else:
             logging.info(f"Cluster load: {self.current_load}, specified load: {self.load} ")
         time.sleep(20)
@@ -345,6 +325,6 @@ class WorkloadDeploymentSimulator:
 
 
 if __name__ == "__main__":
-    simulator = WorkloadDeploymentSimulator(cpu_load=0.75,mem_load=0.80,pod_load=0.80)
+    simulator = WorkloadDeploymentSimulator(cpu_load=0.75,mem_load=0.80,pod_load=0.80,scheduler='custom-scheduler')
     #simulator.create_fully_random_deployment()
     simulator.run()

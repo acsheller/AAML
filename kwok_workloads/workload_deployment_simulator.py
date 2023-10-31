@@ -2,11 +2,17 @@ from kubernetes import client, config
 import random
 import numpy as np
 import time
+from datetime import datetime, timezone
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 class WorkloadDeploymentSimulator:
-    def __init__(self,load=0.5):
+
+
+    NAMESPACE= "default"
+    POD_LIMIT = 110
+
+    def __init__(self,cpu_load=0.5,mem_load=0.5,pod_load=0.5):
         # Load the kube config from the default location
         config.load_kube_config()
 
@@ -14,10 +20,15 @@ class WorkloadDeploymentSimulator:
         self.api_instance = client.AppsV1Api()
         self.v1 = client.CoreV1Api()
         self.batch_api_instance = client.BatchV1Api()
-        self.my_deployments = []
+        self.my_deployments = self.get_all_deployments()
         self.my_pods = []
-        self.load = load
-        self.current_load = 0.0
+        self.cpu_load = cpu_load
+        self.mem_load = mem_load
+        self.pod_load = pod_load
+        self.current_load = {}
+        self.current_load['pod_pct'] = 0
+        self.current_load['cpu_pct'] = 0
+        self.current_load['mem_pct'] = 0
 
         self.cpu_request_values = {100: "100m", 250: "250m", 500: "500m", 1000: "1000m", 1500: "1500m",2000: "2000m",2500: "2500m",3000: "3000m",3500: "3500m"}
         self.memory_request_values = {256: "256Mi", 512: "512Mi", 1024: "1.0Gi", 1536: "1.5Gi",2048: "2.0Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi"}
@@ -26,7 +37,15 @@ class WorkloadDeploymentSimulator:
         logging.info("Deployment Simulator Initialized")
 
 
-    def create_kwok_deployment(self, deployment_name, replicas=1, cpu_request="250m", memory_request="512Mi", cpu_limit="500m", memory_limit="1Gi"):
+    def get_all_deployments(self):
+        # List all deployments across all namespaces
+        deployments = self.api_instance.list_namespaced_deployment(namespace="default")
+        # Extract the names of the deployments and return them as a list
+        deployment_names = [deployment.metadata.name for deployment in deployments.items]
+        return deployment_names
+            
+            
+    def create_kwok_deployment(self, deployment_name, replicas=1, cpu_request="250m", memory_request="512Mi", cpu_limit="500m", memory_limit="1Gi",scheduler='default-scheduler'):
         # Define the deployment manifest
         sleep_duration = str(random.randint(5,300))
         deployment = client.V1Deployment(
@@ -41,7 +60,7 @@ class WorkloadDeploymentSimulator:
                 template=client.V1PodTemplateSpec(
                     metadata=client.V1ObjectMeta(labels={"app": deployment_name}),
                     spec=client.V1PodSpec(
-                        scheduler_name="custom-scheduler",
+                        scheduler_name=scheduler,
                         containers=[
                             client.V1Container(
                                 name=f"{deployment_name}-container",
@@ -59,46 +78,23 @@ class WorkloadDeploymentSimulator:
         )
         # Create the deployment
         self.api_instance.create_namespaced_deployment(namespace="default", body=deployment)
+        logging.info(f" {deployment_name } Deployed, cpu  r {cpu_request} l {cpu_limit}, mem r {memory_request} l {memory_limit}")
         self.my_deployments.append(deployment_name)
 
 
-    def create_kwok_job(self, job_name, cpu_request="250m", memory_request="512Mi", cpu_limit="500m", memory_limit="1Gi"):
-        # Define the job manifest
-        sleep_duration = str(random.randint(5, 300))
-        job = client.V1Job(
-            api_version="batch/v1",
-            kind="Job",
-            metadata=client.V1ObjectMeta(name=job_name),
-            spec=client.V1JobSpec(
-                template=client.V1PodTemplateSpec(
-                    metadata=client.V1ObjectMeta(labels={"app": job_name}),
-                    spec=client.V1PodSpec(
-                        restart_policy="Never",  # Important for Jobs
-                        containers=[
-                            client.V1Container(
-                                name=f"{job_name}-container",
-                                image="busybox",
-                                resources=client.V1ResourceRequirements(
-                                    requests={"cpu": cpu_request, "memory": memory_request},
-                                    limits={"cpu": cpu_limit, "memory": memory_limit}
-                                ),
-                                command=["sleep", sleep_duration]
-                            )
-                        ]
-                    )
-                )
-            )
-        )
-        namespace="default"
-        self.batch_api_instance.create_namespaced_job(namespace, job)
-
-
+    def contains_non_alpha_or_dash(self,s):
+        for char in s:
+            if not char.isalpha() and char != '-':
+                return True
+        return False
+            
     def generate_funny_name(self):
         import randomname
         while True:
             name = randomname.get_name().lower()
-            if name not in self.my_deployments:
-                return name
+            if not self.contains_non_alpha_or_dash(name):
+                if name not in self.my_deployments:    
+                    return name
 
 
     def create_random_deployment_from_prompt(self):
@@ -134,67 +130,210 @@ class WorkloadDeploymentSimulator:
         self.create_kwok_deployment(deployment_name, replicas, cpu_request, memory_request, cpu_limit, memory_limit)
         return deployment_name
 
+    def get_node_status(self, conditions):
+        # If there's only one condition, return its status
+        if len(conditions) == 1:
+            return "Ready" if conditions[0].status == "True" else "Not Ready"
+        
+        # If there are multiple conditions, search for the 'Ready' condition
+        ready_status = next((condition.status for condition in conditions if condition.type == 'Ready'), 'Unknown')
+        return "Ready" if ready_status == "True" else "Not Ready"
  
+    def calculate_age(self, creation_timestamp):
+        if not isinstance(creation_timestamp, datetime):
+            creation_date = datetime.strptime(creation_timestamp, '%Y-%m-%dT%H:%M:%SZ')
+        else:
+            creation_date = creation_timestamp
 
+        creation_date = creation_date.replace(tzinfo=timezone.utc)
+        age_delta = datetime.now(timezone.utc) - creation_date
+        age_str = "{}d".format(age_delta.days)
+        return age_str
+    
     def get_pod_count_per_node(self, node_name):
         """Get the number of pods running on a specific node."""
         pods = self.v1.list_pod_for_all_namespaces(field_selector=f"spec.nodeName={node_name}").items
         return len(pods)
+
+
+    def convert_memory_to_gigabytes(self,memory_str):
+        """Convert memory string to Gigabytes (GB)"""
+        if memory_str.endswith('Ki'):
+            return int(memory_str.rstrip('Ki')) / (1024 * 1024)
+        elif memory_str.endswith('Mi'):
+            return np.round(int(memory_str.rstrip('Mi')) / 1024,3)
+        elif memory_str.endswith('Gi'):
+            return int(memory_str.rstrip('Gi'))
+        else:
+            return int(memory_str)  # Assuming it's already in Gi
+
+    def get_node_resources(self, name):
+        '''
+        @TODO need to mod this.  
+        '''
+        v1 = client.CoreV1Api()
+        node = v1.read_node(name)
+        capacity = node.status.capacity
+        allocatable = node.status.allocatable
+        pod_limit = node.status.allocatable.get('pods',self.POD_LIMIT)
+        total_cpu_used = 0
+        total_memory_used = 0
+        total_gpu_used = 0
+        pods = v1.list_pod_for_all_namespaces(field_selector=f"spec.nodeName={name}").items
+        for pod in pods:
+            for container in pod.spec.containers:
+                resources = container.resources.requests if container.resources and container.resources.requests else {}
+                total_cpu_used += int(resources.get('cpu', '0m').rstrip('m'))
+                total_memory_used += self.convert_memory_to_gigabytes(resources.get('memory', '0Gi'))
+                total_gpu_used += int(resources.get('nvidia.com/gpu', '0'))
+            # @TODO Need to get resources returning in same format. 
+        return {
+            'cpu_capacity': int(capacity['cpu']) * 1000,
+            'memory_capacity': capacity['memory'],
+            'gpu_capacity': capacity.get('nvidia.com/gpu', '0'),
+            'total_cpu_used': total_cpu_used,
+            'total_memory_used': total_memory_used,
+            'total_gpu_used': total_gpu_used
+        }
     
-    def get_nodes_data(self):
+                    
+    def get_node_resources(self, name):
+        v1 = client.CoreV1Api()
+        node = v1.read_node(name)
+        capacity = node.status.capacity
+        allocatable = node.status.allocatable
+        pod_limit = node.status.allocatable.get('pods',self.POD_LIMIT)
+        total_cpu_used = 0
+        total_memory_used = 0
+        total_gpu_used = 0
+        pods = v1.list_pod_for_all_namespaces(field_selector=f"spec.nodeName={name}").items
+        for pod in pods:
+            for container in pod.spec.containers:
+                resources = container.resources.requests if container.resources and container.resources.requests else {}
+                if not resources.get('cpu', '0m').endswith('m'):
+                    total_cpu_used += int(resources.get('cpu', '0m').rstrip('m')) *1000
+                else:
+                    total_cpu_used += int(resources.get('cpu', '0m').rstrip('m'))
+                
+                total_memory_used += self.convert_memory_to_gigabytes(resources.get('memory', '0Gi'))
+                total_gpu_used += int(resources.get('nvidia.com/gpu', '0'))
+        return {
+            'cpu_capacity': int(capacity['cpu']) * 1000,
+            'memory_capacity': capacity['memory'],
+            'gpu_capacity': capacity.get('nvidia.com/gpu', '0'),
+            'total_cpu_used': total_cpu_used,
+            'total_memory_used': total_memory_used,
+            'total_gpu_used': total_gpu_used
+        }
+
+        # @TODO Need to modify this because of single digit returns on CPU usage go to get Node Resources
+    def get_nodes_data(self): 
         POD_LIMIT=110
         nodes_data = []
         nodes = self.v1.list_node().items
 
         for node in nodes:
+
             name = node.metadata.name
+            if name == 'control_plane':
+                continue
             pod_count = self.get_pod_count_per_node(name)
-  
+            status = self.get_node_status(node.status.conditions)
+            role_labels = [role.split("/")[-1] for role in node.metadata.labels.keys() if 'node-role.kubernetes.io/' in role]
+            roles = ', '.join(role_labels) if role_labels else 'None'
+            age = self.calculate_age(node.metadata.creation_timestamp)
+            version = node.status.node_info.kubelet_version
+            resources = self.get_node_resources(name)
             node_data = {
                 'name': name,
+                'status': status,
+                'roles': roles,
+                'age': age,
+                'version': version,
+                'cpu_capacity': resources['cpu_capacity'],
+                'memory_capacity': np.round(self.convert_memory_to_gigabytes(resources['memory_capacity']),2),
+                'gpu_capacity': resources['gpu_capacity'],
+                'total_cpu_used': resources['total_cpu_used'],
+                'total_memory_used': resources['total_memory_used'],
+                'total_gpu_used': resources['total_gpu_used'],
                 'pod_count':pod_count,
-                'pod_limit':POD_LIMIT,
-                'pod_percent': np.round(pod_count/POD_LIMIT,2)
+                'pod_limit':POD_LIMIT
             }
             nodes_data.append(node_data)
         return nodes_data
- 
+
+
+
+
+
     def get_load(self):
-        total_pct = 0
+        total_pods = 0
+        total_pod_count = 0
+        total_cpu_used = 0
+        total_cpu = 0
+        total_mem = 0
+        total_mem_used =0
+
         for node in self.get_nodes_data():
-            total_pct += node['pod_percent']
-        self.current_load = np.round(total_pct/ len(self.get_nodes_data()),2)
+
+            if node['roles'] == 'control-plane':
+                continue
+            total_pods += node['pod_count']
+            total_pod_count += node['pod_limit']
+            total_cpu += node['cpu_capacity']
+            total_cpu_used += node['total_cpu_used']
+            total_mem += node['memory_capacity']
+            total_mem_used += node['total_memory_used']
+        self.current_load['pod_pct'] = np.round(total_pods/total_pod_count,2)
+        self.current_load['cpu_pct'] = np.round(total_cpu_used/total_cpu,2)
+        self.current_load['mem_pct'] = np.round(total_mem_used/total_mem,2)
         return self.current_load
 
     def initial_deployments(self):
         '''
         Creates a set of initial deployments that will simulate a load
         '''
-
-        while self.get_load() < self.load:
+        self.get_load()
+        while self.current_load['cpu_pct'] < self.cpu_load and self.current_load['mem_pct'] < self.mem_load and self.current_load['pod_pct'] < self.pod_load:
             self.create_fully_random_deployment()
+            self.get_load()
             logging.info(f'Current load {self.current_load}')
-    
+            
     def poll_deployments(self):
         '''
         Every 20 seconds, do something to a deployment
         '''
         while True:
-            if self.get_load() < self.load:
-                action = random.choice(['add','delete','nothing'])
-                if action == 'add':
+            self.get_load()
+            logging.info(f"Polling: Load currently at {self.current_load}")  
+            action = random.choice(['add','delete','nothing','add'])
+            if action == 'add':
+                if self.current_load['cpu_pct'] < self.cpu_load and self.current_load['mem_pct'] < self.mem_load and self.current_load['pod_pct'] < self.pod_load:
                     d_name = self.create_fully_random_deployment()
+                    self.my_deployments.append(d_name)
                     logging.info("added a deployment")
-                elif action == 'delete':
-                    d_name = random.choice(self.my_deployments)
-                    self.api_instance.delete_namespaced_deployment(name=d_name,namespace='default')
-                    self.my_deployments.remove(d_name)
-                    logging.info(f'Removed deployment  {d_name}')
+                    
                 else:
-                    logging.info("Doing Nothing")
+                    logging.info(f"Tried to add a deployment but would exceed {self.current_load} Limits")
+            elif action == 'delete':
+                if len(self.my_deployments) > 0:
+                    d_name = random.choice(self.my_deployments)
+                    try: 
+                        self.api_instance.delete_namespaced_deployment(name=d_name, namespace='default')
+                    except client.rest.ApiException as e:
+                        logging.error(f"Error removing deployment {d_name}: {e.reason}")
+                    except Exception as e:
+                        logging.error(f"Unexpected error while removing deployment {d_name}: {str(e)}")
+
+                    self.my_deployments.remove(d_name)
+                    logging.info(f'Removed deployment  {d_name}. Lenght of Deployment is {len(self.my_deployments)}')
+                else:
+                    logging.info("No deployments to delete")
             else:
-                logging.info(f"Cluster load: {self.current_load}, specified load: {self.load} ")
-            time.sleep(20)
+                logging.info("Doing Nothing")
+        else:
+            logging.info(f"Cluster load: {self.current_load}, specified load: {self.load} ")
+        time.sleep(20)
 
   
     def run(self):
@@ -206,6 +345,6 @@ class WorkloadDeploymentSimulator:
 
 
 if __name__ == "__main__":
-    simulator = WorkloadDeploymentSimulator(load=0.5)
+    simulator = WorkloadDeploymentSimulator(cpu_load=0.75,mem_load=0.80,pod_load=0.80)
     #simulator.create_fully_random_deployment()
     simulator.run()

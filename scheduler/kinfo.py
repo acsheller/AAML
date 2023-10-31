@@ -50,7 +50,11 @@ class KubeInfo:
         for pod in pods:
             for container in pod.spec.containers:
                 resources = container.resources.requests if container.resources and container.resources.requests else {}
-                total_cpu_used += int(resources.get('cpu', '0m').rstrip('m'))
+                if not resources.get('cpu', '0m').endswith('m'):
+                    total_cpu_used += int(resources.get('cpu', '0m').rstrip('m')) *1000
+                else:
+                    total_cpu_used += int(resources.get('cpu', '0m').rstrip('m'))
+                #print(f"total_cpu_used {total_cpu_used}")
                 total_memory_used += self.convert_memory_to_gigabytes(resources.get('memory', '0Gi'))
                 total_gpu_used += int(resources.get('nvidia.com/gpu', '0'))
         return {
@@ -92,7 +96,7 @@ class KubeInfo:
                 print("{:<18} {:<8} {:<14} {:<7} {:<10} {:>5}/{:<5}  {:>7}/{:<5}    {}/{}   {}/{}".format(
                     name, status, roles, age, version,
                     resources['total_cpu_used'], resources['cpu_capacity'],
-                    np.round(resources['total_memory_used'],4), str(int(resources['memory_capacity'].rstrip("Gi").rstrip("Ki"))//1024),
+                    np.round(resources['total_memory_used'],4), str(int(resources['memory_capacity'].rstrip("Gi").rstrip("Ki"))//1000**2) + "Gi",
                     resources['total_gpu_used'], resources['gpu_capacity'],
                     pod_count,POD_LIMIT))
                 continue
@@ -100,7 +104,7 @@ class KubeInfo:
             print("{:<18} {:<8} {:<14} {:<7} {:<10} {:>5}/{:<5}  {:>7}/{:<5}    {}/{}   {}/{}".format(
                 name, status, roles, age, version,
                 resources['total_cpu_used'], resources['cpu_capacity'],
-                resources['total_memory_used'], resources['memory_capacity'].rstrip("Gi") + "Mi",
+                resources['total_memory_used'], resources['memory_capacity'],
                 resources['total_gpu_used'], resources['gpu_capacity'],
                 pod_count,POD_LIMIT
             ))
@@ -119,7 +123,7 @@ class KubeInfo:
             age = self.calculate_age(node.metadata.creation_timestamp)
             version = node.status.node_info.kubelet_version
             resources = self.get_node_resources(name)
-            
+            cpu_capacity = resources['cpu_capacity']
             node_data = {
                 'name': name,
                 'status': status,

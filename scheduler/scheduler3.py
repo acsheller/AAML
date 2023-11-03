@@ -8,9 +8,14 @@ import networkx as nx
 import torch
 from torch_geometric.data import Data
 
+from gnn_sched import GNNPolicyNetwork, ReplayBuffer
+
 
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
+
+
 class CustomScheduler:
 
 
@@ -22,7 +27,21 @@ class CustomScheduler:
         self.kube_info = KubeInfo()
 
         self.gnn_input = []
-        logging.info("scheduler constructed.")
+        
+        # Need to get the input size starting out so to have
+        # something as the input size of the GNN.
+        self.input_size = self.graph_to_torch_data(self.create_graph()).x.size(1)
+        # Do the same for output size
+        self.output_size = len(self.api.list_node().items)
+        
+
+        self.gnn_model = GNNPolicyNetwork(input_dim=self.input_size,hidden_dim=64,output_dim=self.output_size)
+        logging.info("GNN Model Created")
+
+        self.replay_buffer = ReplayBuffer(100)
+        logger.info("Replay Buffer Created")
+
+        logging.info("scheduling Agent constructed.")
 
 
     def needs_scheduling(self, pod):

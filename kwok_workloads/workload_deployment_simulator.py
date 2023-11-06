@@ -92,7 +92,7 @@ class WorkloadDeploymentSimulator:
             self.df.loc[len(self.df)] = {'name': deployment_name,'pod_count': replicas,'cpu_request': cpu_request,'cpu_limit': cpu_limit,'mem_request':memory_request,'mem_limit': memory_limit,'action': 'add'}
             self.my_deployments.append(deployment_name)
         except:
-            logger.error(f"something wrong with deployment {deployment_name}-- ignoring")
+            logging.error(f"something wrong with deployment {deployment_name}-- ignoring")
 
     def contains_non_alpha_or_dash(self,s):
         for char in s:

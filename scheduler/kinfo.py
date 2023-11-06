@@ -9,6 +9,7 @@ class KubeInfo:
     def __init__(self):
         config.load_kube_config()
         self.v1 = client.CoreV1Api()
+        self.nodes = []
 
     def get_pod_count_per_node(self, node_name):
         """Get the number of pods running on a specific node."""
@@ -75,6 +76,14 @@ class KubeInfo:
         ready_status = next((condition.status for condition in conditions if condition.type == 'Ready'), 'Unknown')
         return "Ready" if ready_status == "True" else "Not Ready"
 
+    def update_node_index_mapping(self):
+        self.node_index_to_name_mapping = {}
+        self.node_name_to_index_mapping = {}
+        nodes = self.v1.list_node().items
+        for index, node in enumerate(self.get_nodes_data()):
+            if node['roles'] == 'agent':
+                self.node_index_to_name_mapping[index] = node['name']
+                self.node_name_to_index_mapping[node['name']] = index
 
     def display_nodes_info(self):
         POD_LIMIT = 110
@@ -147,4 +156,4 @@ if __name__ == "__main__":
     kube_info = KubeInfo()
     kube_info.display_nodes_info()
     ab = kube_info.get_nodes_data()
-    print("horray")
+    #print("horray")

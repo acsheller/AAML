@@ -1,6 +1,6 @@
 import subprocess
 
-def create_kwok_node(node_count):
+def create_kwok_node(node_count=10,cpu_count = 32,memory="256Gi"pod_limit=110):
     for i in range(1, node_count + 1):
         node_yaml = f"""
 apiVersion: v1
@@ -21,13 +21,13 @@ metadata:
   name: kwok-std-node-{i}
 status:
   allocatable:
-    cpu: "32"
-    memory: "256Gi"
-    pods: "110"
+    cpu: "{cpu_count}"
+    memory: {memory}
+    pods: "{pod_limit}"
   capacity:
-    cpu: "32"
-    memory: "256Gi"
-    pods: "110"
+    cpu: "{cpu_count}"
+    memory: {memory}
+    pods: "{pod_limit}"
   nodeInfo:
     architecture: amd64
     bootID: ""

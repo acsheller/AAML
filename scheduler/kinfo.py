@@ -132,7 +132,7 @@ class KubeInfo:
             version = node.status.node_info.kubelet_version
             resources = self.get_node_resources(name)
             cpu_capacity = resources['cpu_capacity']
-            memory_capacity = np.round(int(resources['memory_capacity'].rstrip('Gi').strip('K'))/1e6,2)
+            memory_capacity = np.round(int(resources['memory_capacity'].rstrip('Gi').strip('K')))
             node_data = {
                 'name': name,
                 'status': status,
@@ -155,5 +155,3 @@ class KubeInfo:
 if __name__ == "__main__":
     kube_info = KubeInfo()
     kube_info.display_nodes_info()
-    ab = kube_info.get_nodes_data()
-    #print("horray")

@@ -89,30 +89,20 @@ class SchedulerStatisticsLogger:
         logging.info(f"Statistics saved to {filename}")
 
     def run(self):
-        # Set up a signal handler to catch termination signals
-        def signal_handler(sig, frame):
-            logging.info('STATS :: Shutdown signal received.')
-            self.exit_requested = True
-
-        signal.signal(signal.SIGINT, signal_handler)
-        signal.signal(signal.SIGTERM, signal_handler)
-
-        self.exit_requested = False
-
-        while not self.exit_requested:
+        while True:
             try:
-                for event in self.watcher.stream(self.api.list_namespaced_pod, namespace=self.namespace,timeout_seconds=30):
+                #for event in self.watcher.stream(self.api.list_namespaced_pod, namespace=self.namespace,timeout_seconds=30):
+                for event in self.watcher.stream(self.api.list_pod_for_all_namespaces):
                     # Log statistics at a fixed interval or based on an event
-                    if event['type'] in ['ADDED', 'DELETED']:
+                    if event['raw_object']['metadata']['namespace'] == self.namespace and \
+                       event['type'] in ['ADDED', 'DELETED']:
                         logging.info(f"{event['type']}   {event['raw_object']['metadata']['name']}")
                         self.log_scheduler_stats(event['raw_object']['metadata']['name'])
-                    if self.exit_requested:
-                        break
 
             except client.exceptions.ApiException as e:
                 if e.status == 410:
-                    logging.warning("STATS :: Watch timed out or resourceVersion too old. Restarting watch...")
-                    self.watcher = watch.Watch()  # Restart the watcher
+                    logging.warning("STATS :: Watch timed out or resourceVersion too old.")
+                    break
                 else:
                     logging.error(f"STATS :: Unexpected API exception: {e}")
             except KeyboardInterrupt:
@@ -132,5 +122,5 @@ class SchedulerStatisticsLogger:
 # Usage example
 # You would need to define `kube_info` which should be an instance of a class that has a `get_nodes_data` method.
 if __name__ == "__main__":
-    scheduler_statistics_logger = SchedulerStatisticsLogger(scheduler_type='default-scheduler')
+    scheduler_statistics_logger = SchedulerStatisticsLogger(scheduler_type='custom_scheduler')
     scheduler_statistics_logger.run()

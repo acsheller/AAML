@@ -79,11 +79,14 @@ class KubeInfo:
     def update_node_index_mapping(self):
         self.node_index_to_name_mapping = {}
         self.node_name_to_index_mapping = {}
+        index =0
         nodes = self.v1.list_node().items
-        for index, node in enumerate(self.get_nodes_data()):
+        for node in self.get_nodes_data():
             if node['roles'] == 'agent':
                 self.node_index_to_name_mapping[index] = node['name']
                 self.node_name_to_index_mapping[node['name']] = index
+                index += 1
+
 
     def display_nodes_info(self):
         POD_LIMIT = 110
@@ -117,13 +120,38 @@ class KubeInfo:
                 pod_count,POD_LIMIT
             ))
 
+    def get_valid_nodes(self,cpu_limit=0.8,mem_limit=0.8,pod_limit=0.8):
+        """
+        Returns a list of node names that are under the specified capacity threshold.
+        :param capacity_threshold: The maximum capacity percentage that a node can be at to be considered valid.
+        :return: A list of valid node names.
+        """
+        valid_nodes = []
+        node_info = self.get_nodes_data() 
+
+        for node in node_info:
+            if node['roles'] != 'control-plane':
+                cpu_capacity_used = node['total_cpu_used'] / node['cpu_capacity']
+                memory_capacity_used = node['total_memory_used'] / node['memory_capacity']
+                pod_capacity_used = node['pod_count'] / node['pod_limit']
+
+                # Check if all capacities are below the threshold
+                if cpu_capacity_used < cpu_limit and memory_capacity_used < mem_limit and pod_capacity_used < pod_limit:
+                    valid_nodes.append(node)
+            
+
+        return valid_nodes
+
+
     def get_nodes_data(self):
         POD_LIMIT=110
         nodes_data = []
         nodes = self.v1.list_node().items
 
         for node in nodes:
+
             name = node.metadata.name
+
             pod_count = self.get_pod_count_per_node(name)
             status = self.get_node_status(node.status.conditions)
             role_labels = [role.split("/")[-1] for role in node.metadata.labels.keys() if 'node-role.kubernetes.io/' in role]
@@ -133,6 +161,7 @@ class KubeInfo:
             resources = self.get_node_resources(name)
             cpu_capacity = resources['cpu_capacity']
             memory_capacity = np.round(int(resources['memory_capacity'].rstrip('Gi').strip('K')))
+
             node_data = {
                 'name': name,
                 'status': status,

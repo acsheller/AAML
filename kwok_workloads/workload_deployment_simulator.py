@@ -47,9 +47,9 @@ class WorkloadDeploymentSimulator:
 
 
         self.cpu_request_values = {100: "100m", 250: "250m", 500: "500m", 1000: "1000m", 1500: "1500m",2000: "2000m",2500: "2500m",3000: "3000m",3500: "3500m"}
-        self.memory_request_values = {256: "256Mi", 512: "512Mi", 1024: "1.0Gi", 1536: "1.5Gi",2048: "2.0Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi"}
-        self.cpu_limit_values = {500: "500m", 750: "750m", 1000: "1000m",1500: "1500m",2000: "2000m",2500: "2500m",3000: "3000m",3500: "3500m",4000:"4000m"}
-        self.memory_limit_values = {512: "512Mi", 1024: "1Gi",1536: "1.5Gi", 2048: "2Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi",4096: "4.0Gi"}
+        self.memory_request_values = {256: "256Mi", 512: "512Mi", 1024: "1.0Gi", 1536: "1.5Gi",2048: "2.0Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi",4096: "4.0Gi",5120:"5.0Gi",10240:"10Gi",20480:"20Gi"}
+        self.cpu_limit_values = {500: "500m", 750: "750m", 1000: "1000m",1500: "1500m",2000: "2000m",2500: "2500m",3000: "3000m",3500: "3500m"}
+        self.memory_limit_values = { 1024: "1Gi",1536: "1.5Gi", 2048: "2Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi",4096: "4.0Gi",5120:"5.0Gi",10240:"10Gi",20480:"20Gi"}
 
         columns = ['name', 'pod_count', 'cpu_request', 'cpu_limit', 'mem_request', 'mem_limit', 'action']
         self.df = pd.DataFrame(columns=columns)
@@ -104,7 +104,7 @@ class WorkloadDeploymentSimulator:
             )
             # Create the deployment
             self.api_instance.create_namespaced_deployment(namespace=self.namespace, body=deployment)
-            logging.info(f"WDS :: {deployment_name } Deployed, cpu  r {cpu_request} l {cpu_limit}, mem r {memory_request} l {memory_limit}")
+            logging.info(f"WDS :: {deployment_name } Deployed, cpu requests {cpu_request} limits {cpu_limit}, mem requests {memory_request} limits {memory_limit} pods {replicas}")
             self.df.loc[len(self.df)] = {'name': deployment_name,'pod_count': replicas,'cpu_request': cpu_request,'cpu_limit': cpu_limit,'mem_request':memory_request,'mem_limit': memory_limit,'action': 'add'}
             self.my_deployments.append(deployment_name)
         except:
@@ -141,7 +141,7 @@ class WorkloadDeploymentSimulator:
         deployment_name = self.generate_funny_name()
         
         # Generate random values for other parameters
-        replicas = random.randint(1, 5)  # Random number of replicas between 1 and 5
+        replicas = random.randint(5, 15)  # Random number of replicas between 5 and 15
         
         # Select a random CPU request and then choose a CPU limit that's greater than or equal to the request
         cpu_request_key = random.choice(list(self.cpu_request_values.keys()))
@@ -149,12 +149,19 @@ class WorkloadDeploymentSimulator:
         valid_cpu_limits = {k: v for k, v in self.cpu_limit_values.items() if k >= cpu_request_key}
         cpu_limit = valid_cpu_limits[random.choice(list(valid_cpu_limits.keys()))]
 
-        # Select a random Memory request and then choose a Memory limit that's greater than or equal to the request
-        memory_request_key = random.choice(list(self.memory_request_values.keys()))
+        # Select a random Memory request that is larger than or equal to the CPU request
+        valid_memory_request_keys = [k for k in self.memory_request_values.keys() if k >= cpu_request_key]
+        if not valid_memory_request_keys:
+            raise ValueError("No memory request values larger than or equal to the CPU request are available.")
+        
+        memory_request_key = random.choice(valid_memory_request_keys)
         memory_request = self.memory_request_values[memory_request_key]
+        
+        # Choose a Memory limit that's greater than or equal to the memory request
         valid_memory_limits = {k: v for k, v in self.memory_limit_values.items() if k >= memory_request_key}
         memory_limit = valid_memory_limits[random.choice(list(valid_memory_limits.keys()))]
 
+        # Create the deployment with the selected values
         self.create_kwok_deployment(deployment_name, replicas, cpu_request, memory_request, cpu_limit, memory_limit)
         return deployment_name
 
@@ -306,9 +313,11 @@ class WorkloadDeploymentSimulator:
         '''
         self.get_load()
         while self.current_load['cpu_pct'] < self.max_load['cpu_pct'] and self.current_load['mem_pct'] < self.max_load['mem_pct'] and self.current_load['pod_pct'] < self.max_load['pod_pct']:
-            self.create_fully_random_deployment()
-            self.get_load()
-            logging.info(f'Current load {self.current_load}')
+            pods = self.v1.list_namespaced_pod(namespace = self.namespace)
+            if sum(1 for pod in pods.items if pod.status.phase == 'Pending') < 10:
+                self.create_fully_random_deployment()
+                self.get_load()
+                logging.info(f'Current load {self.current_load}')
             time.sleep(interval)
             
     def poll_deployments(self, interval =20,duration = 1):
@@ -324,38 +333,42 @@ class WorkloadDeploymentSimulator:
 
         while time.time() - start_time < run_this_long:
             # Keep track of the load on the system
-            self.get_load()
-            logging.info(f"WDS :: Polling: Load currently at {self.current_load}")  
-            # Try to add more frequently than delete
-            action = random.choice(['add','delete','nothing','add'])
-            if action == 'add':
-                if self.current_load['cpu_pct'] < self.max_load['cpu_pct'] and self.current_load['mem_pct'] < self.max_load['mem_pct'] and self.current_load['pod_pct'] < self.max_load['pod_pct']:
-                    d_name = self.create_fully_random_deployment()
-                    self.my_deployments.append(d_name)
-                    
-                else:
-                    logging.info(f"WDS :: Tried to add a deployment but would exceed {self.current_load} Limits")
-            elif action == 'delete':
-                if len(self.my_deployments) > 0:
-                    d_name = random.choice(self.my_deployments)
-                    record = self.df[self.df['name']==d_name].iloc[0].copy()
-                    try: 
-                        self.api_instance.delete_namespaced_deployment(name=d_name, namespace='default')
-                        record['action'] = 'delete'
-                        self.df.loc[len(self.df)] = record
-                    except client.rest.ApiException as e:
-                        logging.error(f"WDS :: Error removing deployment {d_name}: {e.reason}")
-                    except Exception as e:
-                        logging.error(f"WDS :: Unexpected error while removing deployment {d_name}: {str(e)}")
+                self.get_load()
+                logging.info(f"WDS :: Polling: Load currently at {self.current_load}")  
+                # Try to add more frequently than delete
+                action = random.choice(['add','delete','nothing','add','delete'])
+                if action == 'add':
+                    pods = self.v1.list_namespaced_pod(namespace = self.namespace)
+                    if sum(1 for pod in pods.items if pod.status.phase == 'Pending') < 10:
+                        if self.current_load['cpu_pct'] < self.max_load['cpu_pct'] and self.current_load['mem_pct'] < self.max_load['mem_pct'] and self.current_load['pod_pct'] < self.max_load['pod_pct']:
+                            d_name = self.create_fully_random_deployment()
+                            self.my_deployments.append(d_name)
+                            
+                        else:
+                            logging.info(f"WDS :: Tried to add a deployment but would exceed {self.current_load} Limits")
+                    else:
+                        logging.info(f"WDS :: Too Many Pods Pending")
+                elif action == 'delete':
+                    if len(self.my_deployments) > 0:
+                        d_name = random.choice(self.my_deployments)
+                        record = self.df[self.df['name']==d_name].iloc[0].copy()
+                        try: 
+                            self.api_instance.delete_namespaced_deployment(name=d_name, namespace='default')
+                            record['action'] = 'delete'
+                            self.df.loc[len(self.df)] = record
+                        except client.rest.ApiException as e:
+                            logging.error(f"WDS :: Error removing deployment {d_name}: {e.reason}")
+                        except Exception as e:
+                            logging.error(f"WDS :: Unexpected error while removing deployment {d_name}: {str(e)}")
 
-                    self.my_deployments.remove(d_name)
-                    logging.info(f'WDS :: Removed deployment  {d_name}. Lenght of Deployment is {len(self.my_deployments)}')
+                        self.my_deployments.remove(d_name)
+                        logging.info(f'WDS :: Removed deployment  {d_name}. Lenght of Deployment is {len(self.my_deployments)}')
+                    else:
+                        logging.info("WDS :: No deployments to delete")
                 else:
-                    logging.info("WDS :: No deployments to delete")
-            else:
-                logging.info("WDS ::Skipping this go-around and doing nothing")
-            logging.info(f"WDS :: Cluster load: {self.current_load}, specified load: {self.max_load} ")
-            time.sleep(interval)
+                    logging.info("WDS ::Skipping this go-around and doing nothing")
+                logging.info(f"WDS :: Cluster load: {self.current_load}, specified load: {self.max_load} ")
+                time.sleep(interval)
         # Save the dataframe with a unique name after the loop completes its one-hour run
         unique_filename = f"deployment_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         self.df.to_csv(unique_filename,index=False)
@@ -365,7 +378,7 @@ class WorkloadDeploymentSimulator:
         """
         Run method to start the simulator.
         """
-        self.initial_deployments(interval =5)
+        self.initial_deployments(interval =interval)
         self.poll_deployments(interval=interval,duration = duration)
 
 
@@ -405,11 +418,11 @@ class WorkloadDeploymentSimulator:
 
 if __name__ == "__main__":
     # Add this to the constructor to use custom scheduler: scheduler='custom-scheduler'
-    simulator = WorkloadDeploymentSimulator(cpu_load=0.75,mem_load=0.80,pod_load=0.80)
+    simulator = WorkloadDeploymentSimulator(cpu_load=0.75,mem_load=0.80,pod_load=0.80,scheduler='custom-scheduler')
 
     # Duration is in hours so 1 is 1 hour worth of data collected and then r
-    simulator.run(interval =10, duration = 1)
+    simulator.run(interval =40, duration = 1)
     
     ## Uncomment this for playback.
     #playback_df = pd.read_csv("deployment_data_20231107_094336.csv")
-    #simulator.playback(playback_df)
+    #simulator.playback(playback_df,sleep_interval=15)

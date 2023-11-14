@@ -10,6 +10,7 @@ class KubeInfo:
         config.load_kube_config()
         self.v1 = client.CoreV1Api()
         self.nodes = []
+        self.update_node_index_mapping()
 
     def get_pod_count_per_node(self, node_name):
         """Get the number of pods running on a specific node."""
@@ -143,7 +144,8 @@ class KubeInfo:
         return valid_nodes
 
 
-    def get_nodes_data(self):
+    def get_nodes_data(self,sort_by_cpu=False,include_controller=True):
+        
         POD_LIMIT=110
         nodes_data = []
         nodes = self.v1.list_node().items
@@ -177,9 +179,27 @@ class KubeInfo:
                 'pod_count':pod_count,
                 'pod_limit':POD_LIMIT
             }
-            nodes_data.append(node_data)
+            if not include_controller and node_data['roles'] != 'control-plane':
+                nodes_data.append(node_data)
+            if include_controller:
+                nodes_data.append(node_data)
+        if sort_by_cpu:
+            nodes_data.sort(key=lambda x: x['total_cpu_used'] / x['cpu_capacity'] if x['cpu_capacity'] > 0 else float('inf'))
         return nodes_data
 
+    def get_node_data_single_input(self,sort_by_cpu=False,include_controller=False):
+        '''
+        To use as input to ordinary NN.  One single row of data as input.  
+        '''
+        single_row_of_data = []
+        data = self.get_nodes_data(sort_by_cpu=False,include_controller=include_controller)
+        for node in data:
+            #node_index = self.node_name_to_index_mapping(node['name'])
+            single_row_of_data.append(1- np.round(node['total_cpu_used']/node['cpu_capacity'],4))
+            single_row_of_data.append(1- np.round(node['total_memory_used']/node['memory_capacity'],4))
+            single_row_of_data.append(1- np.round(node['pod_count']/node['pod_limit'],4))
+
+        return single_row_of_data
 
 if __name__ == "__main__":
     kube_info = KubeInfo()

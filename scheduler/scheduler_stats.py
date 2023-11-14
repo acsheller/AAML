@@ -6,6 +6,7 @@ from kinfo import KubeInfo
 import numpy as np
 import signal
 import sys
+import os
 
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -88,8 +89,17 @@ class SchedulerStatisticsLogger:
         self.stats_df.to_csv(filename, index=False)
         logging.info(f"Statistics saved to {filename}")
 
+    def should_shutdown(self):
+        '''
+        So everything can shutdown about the same time
+        '''
+        logging.info("AGENT :: checking shutdown status")
+        return os.path.exists("shutdown_signal.txt")
+
+
+
     def run(self):
-        while True:
+        while not self.should_shutdown():
             try:
                 #for event in self.watcher.stream(self.api.list_namespaced_pod, namespace=self.namespace,timeout_seconds=30):
                 for event in self.watcher.stream(self.api.list_pod_for_all_namespaces):

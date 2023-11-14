@@ -15,19 +15,19 @@ import datetime
 from datetime import datetime, timezone
 import time
 from cluster_env import ClusterEnvironment
-from gnn_sched import GNNPolicyNetwork,GNNPolicyNetwork2, ReplayBuffer
+from gnn_sched import GNNPolicyNetwork,GNNPolicyNetwork2, ReplayBuffer,DQN
 import numpy as np
 
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-class CustomScheduler:
+class CustomSchedulerDQN:
     '''
     Implementation of RL agent using a GNN as the Deep protion of Deep Reinforcement Learning.
     '''
 
-    def __init__(self,scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16):
+    def __init__(self,scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=25,target_update_frequency=50):
         
         self.scheduler_name = scheduler_name
 
@@ -38,19 +38,28 @@ class CustomScheduler:
         self.kube_info = KubeInfo()
         self.env = ClusterEnvironment()
 
+        self.use_target_network = True
+        self.target_update_frequency = target_update_frequency
         #self.gnn_input = [] TODO Delete if its not useful
         self.BATCH_SIZE = batch_size
         self.replay_buffer_size = replay_buffer_size
         # Need to get the input size of the GNN.
-        self.input_size = self.env.graph_to_torch_data(self.env.create_graph(self.kube_info.get_nodes_data())).x.size(1)
+        #self.input_size = self.env.graph_to_torch_data(self.env.create_graph(self.kube_info.get_nodes_data())).x.size(1)
         # Do the same for output size
         self.output_size = len(self.api.list_node().items) -1 # -1 because of 1 controller TODO Consider making this dynamic or an argument
-        self.gnn_model = GNNPolicyNetwork2(input_dim=self.input_size,hidden_dim=64,output_dim=self.output_size)
-        
-        logging.info("AGENT :: GNN Model Created")
+        #self.gnn_model = GNNPolicyNetwork2(input_dim=self.input_size,hidden_dim=64,output_dim=self.output_size)
+        # Hardcoding num_inputs to 33 as that's the valeus being returned for a 10 node cluster or 11*3 which is 
+        self.dqn = DQN(num_inputs=30, num_outputs=self.output_size)
+
+        self.target_network = DQN(num_inputs=30,num_outputs=self.output_size)
+        self.target_network.load_state_dict(self.dqn.state_dict())
+        self.target_network.eval()
+        logging.info("AGENT :: DQN Models Created")
 
         # Set up the optimizer
-        self.optimizer = optim.Adam(self.gnn_model.parameters(), lr=learning_rate)
+        #elf.optimizer = optim.Adam(self.gnn_model.parameters(), lr=learning_rate)
+        
+        self.optimizer = optim.Adam(self.dqn.parameters(), lr=learning_rate)
         
         self.replay_buffer = ReplayBuffer(replay_buffer_size)
         logging.info("AGENT :: Replay Buffer Created")
@@ -62,6 +71,7 @@ class CustomScheduler:
         self.epsi_decay = epsi_decay
         self.action_list = []
         self.action_select_count = 0
+        self.step_count = 0
         logging.info("AGENT :: scheduling Agent constructed.")
 
 
@@ -88,28 +98,27 @@ class CustomScheduler:
         """
         Decays epsilon by the decay rate until it reaches the minimum value.
         """
+        if self.epsilon < 0.9:
+            self.epsi_decay=0.995
         if self.epsilon > self.min_epsi:
             self.epsilon *= self.epsi_decay
             self.epsilon = max(self.epsilon, self.min_epsi)
 
-    
-    
 
     def select_action(self, state,pod):
         '''
         Policy networks selects action. 
-        '''
-        
+        ''' 
         while True:
             available_nodes = [nd['name'] for nd in self.kube_info.get_valid_nodes()]
             randval = random.random()
             if randval > self.epsilon:
                 with torch.no_grad():
                     # Use the model to choose the best action
-                    #action_index = self.gnn_model(state).max(1)[1].view(1, -1).item()
-                    action_index = self.gnn_model(state).max(1)[1].view(1, -1).item()
+                    
+                    action_index = self.dqn(torch.tensor([state], dtype=torch.float32)).max(1)[1].view(1, -1).item()
                     node_name = self.env.kube_info.node_index_to_name_mapping[action_index]
-                    logging.info(f"AGENT :: GNN-Selected ACTION: Assign Pod to {node_name}")
+                    logging.info(f"AGENT :: DQN-Selected ACTION: Assign {pod.metadata.name} to {node_name}")
             else:
                 # Choose a random action
                 #action_index = random.randrange(0,self.output_size)
@@ -121,14 +130,16 @@ class CustomScheduler:
                 # Map the action index to a node name using the environment's mapping
                 action_index = self.env.kube_info.node_name_to_index_mapping[selected_node['name']]
                 node_name = selected_node['name']
-                logging.info(f"AGENT :: Random-Selected ACTION: Assign Pod to {node_name}")
+                logging.info(f"AGENT :: Random-Selected ACTION: Assign {pod.metadata.name} to {node_name}")
             if node_name in available_nodes:
-               return action_index,node_name
+               return action_index
             else:
                 self.action_select_count += 1
                 if self.action_select_count > 4:
-                    self.env.reset()
+                    ## TODO Reconsider this
+                    #self.env.reset()
                     time.sleep(2)
+                    self.action_select_count =0
                 self.replay_buffer.push(state,action_index,0,state,False)
                 logging.info(f"AGENT :: {node_name} is at capacity, Selecting Again")
 
@@ -144,19 +155,26 @@ class CustomScheduler:
 
     def update_policy_network(self, experiences):
         # Unpack experiences
-        states_batch = Batch.from_data_list([e[0] for e in experiences])
+        ### This one for a graph
+        #states_batch = Batch.from_data_list([e[0] for e in experiences])
+        ### This one for a list  -- for NN
+        states_batch = torch.tensor([e[0] for e in experiences],dtype =torch.float32)
         actions = torch.tensor([e[1] for e in experiences], dtype=torch.int64)  # Assuming actions are indices
         rewards = torch.tensor([e[2] for e in experiences], dtype=torch.float)
-        next_states_batch = Batch.from_data_list([e[3] for e in experiences])
+        # for GRaph
+        # next_states_batch = Batch.from_data_list([e[3] for e in experiences])
+        ## For NN
+        next_states_batch = torch.tensor([e[3] for e in experiences],dtype =torch.float32)
         dones = torch.tensor([e[4] for e in experiences], dtype=torch.float)
         
         # Compute predicted Q-values (Q_expected) from policy network
-        Q_expected = self.gnn_model(states_batch).gather(1, actions.unsqueeze(-1))
-        
+        Q_expected = self.dqn(states_batch).gather(1, actions.unsqueeze(-1))
         # Compute target Q-values (Q_targets) from next states
-        # If using a target network, it would be involved here
-        Q_targets_next = self.gnn_model(next_states_batch).detach().max(1)[0].unsqueeze(-1)
+        # Using a target Network
+        Q_targets_next = self.target_network(next_states_batch).detach().max(1)[0].unsqueeze(-1)
+        
         Q_targets_next = Q_targets_next * (1-dones.unsqueeze(-1)) # Zero out the QValues for ones that are done
+        
         
         Q_targets = rewards.unsqueeze(-1) + (self.gamma * Q_targets_next)
         
@@ -168,10 +186,12 @@ class CustomScheduler:
         loss.backward()
         self.optimizer.step()
         logging.info(f"AGENT :: Updated the Policy Network. Loss: {np.round(loss.detach().numpy().item(),5)}")
-
+        
+        self.step_count += 1
         # Update target network, if necessary
-        #if self.use_target_network and self.step_count % self.target_update_frequency == 0:
-        #    self.target_network.load_state_dict(self.gnn_model.state_dict())
+        if self.use_target_network and self.step_count % self.target_update_frequency == 0:
+            logging.info("*** AGENT :: Updating the target Network")
+            self.target_network.load_state_dict(self.dqn.state_dict())
 
 
     def should_shutdown(self):
@@ -194,11 +214,11 @@ class CustomScheduler:
                 for event in self.watcher.stream(self.api.list_pod_for_all_namespaces,timeout_seconds=120):
                     pod = event['object']
                     if self.needs_scheduling(pod):
-                        current_state= self.env.get_state()
-                        action,node_name = self.select_action(current_state,pod)
+                        current_state= self.env.get_state(dqn=True)
+                        action = self.select_action(current_state,pod,)
                         #logging.info(f"AGENT :: Action selected: assign pod to  {node_name}")
-                        new_state, reward, done = self.env.step(pod,action)
-                        logging.info(f"AGENT :: Reward for binding to {node_name} is {np.round(reward,6)}")
+                        new_state, reward, done = self.env.step(pod,action,dqn=True)
+                        logging.info(f"AGENT :: Reward for binding {pod.metadata.name} is {np.round(reward,6)}")
                         # Store the experience in the replay buffer
                         self.add_to_buffer(current_state, action, reward, new_state,done)
                         
@@ -212,6 +232,7 @@ class CustomScheduler:
                             #logging.info("AGENT :: Policy Network Updated")
                         # Reset the environment if the episode is done
                         if done:
+                            logging.info("AGENT :: calling environment reset")
                             self.env.reset()
 
             except client.exceptions.ApiException as e:
@@ -223,7 +244,6 @@ class CustomScheduler:
                     else:
                         logging.info("AGENT :: Restarting Watch")
                         self.watcher = watch.Watch()
-
                 else:
                     logging.error(f"AGENT :: Unexpected API exception: {e}")
             except Exception as e:
@@ -231,9 +251,8 @@ class CustomScheduler:
 
         logging.info("AGENT :: Saving GNN Model for Reuse")
 
-        
         filename = f"GNN_Model_{self.scheduler_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
-        torch.save(self.gnn_model.state_dict(),filename)
+        torch.save(self.dqn.state_dict(),filename)
 
     def load_model(self,f_name):
         '''
@@ -248,5 +267,5 @@ if __name__ == "__main__":
 
     # Possible Values for the CustomerScheduler Constructor
     # scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16
-    scheduler = CustomScheduler(init_epsi=1.0,gamma=0.8,epsi_decay=0.9954,replay_buffer_size=100,batch_size=16)
+    scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,epsi_decay=0.9995,replay_buffer_size=500,batch_size=20,target_update_frequency=50)
     scheduler.run()

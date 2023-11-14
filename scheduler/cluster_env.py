@@ -37,46 +37,83 @@ class ClusterEnvironment:
         # and return the initial observation
         # TODO Need to reset the cluster from here.  wipe it clean -- need to check this works but it looks like it will.
         try:
-            self.app_api.delete_collection_namespaced_deployment(namespace=self.namespace)
-            logging.info(f"ENV :: All deployments in the '{self.namespace}' namespace have been deleted.")
+            logging.info("ENV :: Resetting Cluster for some reason")
+            #self.app_api.delete_collection_namespaced_deployment(namespace=self.namespace)
+            #logging.info(f"ENV :: All deployments in the '{self.namespace}' namespace have been deleted.")
         
             # Delete all pods in the specified namespace
-            self.api.delete_collection_namespaced_pod(namespace=self.namespace)
-            logging.info(f"ENV :: All pods in the '{self.namespace}' namespace have been deleted.")
+            #self.api.delete_collection_namespaced_pod(namespace=self.namespace)
+            #logging.info(f"ENV :: All pods in the '{self.namespace}' namespace have been deleted.")
         
         except client.rest.ApiException as e:
             logging.error(f"ENV :: Exception when calling Kubernetes API: {e}")
+
         except Exception as e:
             logging.error(f"Unexpected error: {e}")
         
-        G = self.create_graph()
+        G = self.create_graph(self.kube_info.get_nodes_data())
         initial_state = G # self.graph_to_torch_data(G)
         return initial_state
 
 
 
-    def step(self,pod, action):
+    def step(self,pod, action,dqn=False):
         # Apply the action to the environment (schedule a pod)
         # Update the state (create a new graph)
         # Calculate the reward
         # Check if the episode is done
-        node_name = self.apply_action(pod,action)
-        new_state = self.graph_to_torch_data(self.create_graph())
-        reward = self.calc_reward()
-        done = self.done()
+        beforeState = self.kube_info.get_nodes_data()
+     
+        if not dqn:
+            node_name = self.apply_action(pod,action)
+            # For a GNN
+            afterState = self.kube_info.get_nodes_data()   
+            new_state = self.graph_to_torch_data(self.create_graph(afterState))
+            reward = self.calc_reward(beforeState,afterState)
+            #reward = self.calc_reward()
+            done = self.done()
+        else:
+            node_name = self.apply_action(pod,action)
+            # For an NN or DQN
+            new_state = self.kube_info.get_node_data_single_input(include_controller=False)
+            afterState = self.kube_info.get_nodes_data()
+            reward = self.calc_reward(beforeState,afterState)
+
+            done = self.done()
+
         return new_state, reward, done
 
-    def get_state(self,cpu_limit=0.8,mem_limit=0.8,pod_limit=0.8):
+
+    def get_state(self,cpu_limit=0.8,mem_limit=0.8,pod_limit=0.8,dqn=False):
         '''
         Will return nodes that can be scheduled - whose capacity is less than 0.8
         '''
-        G = self.create_graph(cpu_limit,mem_limit,pod_limit)
-        data = self.graph_to_torch_data(G)
-        return data
+        if not dqn:
+            G = self.create_graph(self.kube_info.get_nodes_data(),cpu_limit,mem_limit,pod_limit)
+            data = self.graph_to_torch_data(G)
+            return data
+        else:
+            return self.kube_info.get_node_data_single_input()
 
     def apply_action(self, pod,action):
         node_name = self.kube_info.node_index_to_name_mapping[action]
         self.bind_pod_to_node(pod,node_name)
+
+
+    def pod_exists(self, pod_name):
+        '''
+        Double check if pod exists
+        '''
+        try:
+            v1 = client.CoreV1Api()
+            v1.read_namespaced_pod(name=pod_name, namespace=self.namespace)
+            return True
+        except client.exceptions.ApiException as e:
+            if e.status == 404:
+                # Pod not found
+                return False
+            else:
+                raise e
 
     def bind_pod_to_node(self, pod, node_name):
         if node_name is None:
@@ -97,21 +134,25 @@ class ClusterEnvironment:
         }
         #logging.info(f"ENV :: Binding pod to : {node_name}")
         try:
-            self.api.create_namespaced_binding(namespace=pod.metadata.namespace, body=binding,_preload_content=False)
-            self.create_graph()
+            if self.pod_exists(pod.metadata.name):
+                self.api.create_namespaced_binding(namespace=pod.metadata.namespace, body=binding,_preload_content=False)
+                self.create_graph(self.kube_info.get_nodes_data())
+            else:
+                logging.info("ENV :: Pod did not exists so not creating it.")
         except Exception as e:
             logging.error(f"ENV :: Exception when calling CoreV1Api->create_namespaced_binding: {e}")
             
 
-    def create_graph(self,cpu_limit=0.8,mem_limit=0.8,pod_limit=0.8):
+    def create_graph(self,nodeData,cpu_limit=0.8,mem_limit=0.8,pod_limit=0.8):
         '''
         The graph will be the state of the system after adding the node
         '''
         G = nx.Graph()
 
         # Fetch all nodes data
-        nodes_data = self.kube_info.get_nodes_data()
-        self.kube_info.update_node_index_mapping()
+        #nodes_data = self.kube_info.get_nodes_data()
+        nodes_data = nodeData
+        #self.kube_info.update_node_index_mapping()
         # Filter Nodes that are at 80% capacity.
 
         # Add nodes to the graph
@@ -177,6 +218,23 @@ class ClusterEnvironment:
         return reward
 
 
+    def calculate_improvement_reward(self, previous_state, current_state):
+        # Calculate the standard deviation of resource usage for both states
+        prev_std_dev = self.calculate_resource_std_dev(previous_state)
+        curr_std_dev = self.calculate_resource_std_dev(current_state)
+
+        # Reward is based on the improvement in standard deviation
+        improvement = prev_std_dev - curr_std_dev
+        reward = max(improvement, 0)  # Ensure that the reward is non-negative
+
+        return reward
+
+    def calculate_resource_std_dev(self, state):
+        # Calculate the standard deviation of resource usage across nodes
+
+        return np.std(list(state.values()))
+
+
     def calculate_balance_reward(self,node_values, max_value_per_node=0.80):
         '''
         Calculates the level of "balance" by taking pairwise different and summing
@@ -205,7 +263,40 @@ class ClusterEnvironment:
         return reward
 
 
-    def calc_reward(self):
+    def calc_reward(self,beforeState,afterState):
+        '''
+
+        '''
+        # 1. Get the state of the cluster
+        #node_info = self.kube_info.get_nodes_data()
+        node_info_before = beforeState
+        node_info_after = afterState
+        #2. Get the CpuInfo for each node
+        cpu_info_before = {}
+        cpu_info_after = {}
+        mem_info_before = {}
+        mem_info_after = {}
+        pod_info = {}
+        for index,node in enumerate(node_info_before):
+            if node['roles'] != 'control-plane':
+                cpu_info_before[node['name']] = 1 - np.round(node['total_cpu_used']/node['cpu_capacity'],4)
+                node2 = node_info_after[index]
+                cpu_info_after[node2['name']]= 1 - np.round(node2['total_cpu_used']/node2['cpu_capacity'],4)
+                mem_info_before[node['name']] = 1 - np.round(node['total_memory_used'] / node['memory_capacity'],4)
+                mem_info_after[node2['name']] = 1- np.round(node2['total_memory_used'] / node2['memory_capacity'],4)
+        # 3. Calculate balance score for CPU and Memory
+        #cpu_balance_score = np.round(self.calculate_balance_reward_avg(cpu_info),3)
+        #memory_balance_score = np.round(self.calculate_balance_reward(memory_info),3)
+        #pod_info_score = np.round(self.calculate_balance_reward(pod_info),3)
+        cpu_reward = self.calculate_improvement_reward(cpu_info_before,cpu_info_after)
+        mem_reward = self.calculate_improvement_reward(mem_info_before,mem_info_after)
+        #3. Now calculate reward -- note that defference functions can be tried here. 
+        #reward = self.calculate_balance_reward_avg(cpu_info)
+        #reward = min(cpu_balance_score,memory_balance_score,pod_info_score)
+        return cpu_reward
+
+
+    def calc_reward2(self):
         '''
         # TODO Return a reward for CPU, Memory, and Pod distribution.  All similar percentages. But for now just return CPU.  :-) So Cool
         total_reward = (cpu_weight * cpu_reward + memory_weight * memory_reward + pod_count_weight * pod_count_reward) / (cpu_weight + memory_weight + pod_count_weight)
@@ -235,6 +326,7 @@ class ClusterEnvironment:
         #reward = self.calculate_balance_reward_avg(cpu_info)
         reward = min(cpu_balance_score,memory_balance_score,pod_info_score)
         return reward
+
 
 
     def done(self):

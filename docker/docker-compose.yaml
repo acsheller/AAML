@@ -1,0 +1,20 @@
+version: '3'
+services:
+  kwok-cluster:
+    image: registry.k8s.io/kwok/cluster:v0.4.0-k8s.v1.28.0
+    ports:
+      - "8080:8080"
+    networks:
+      - my-network
+
+  pytorch-container:
+    # Replace with your PyTorch container details
+    image: aaml_kwok:latest
+    user: appuser
+    ports:
+      - "8888:8888"
+    networks:
+      - my-network
+
+networks:
+  my-network:

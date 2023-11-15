@@ -1,9 +1,15 @@
 import subprocess
 
-def create_kwok_node(node_count=10,cpu_count = 32,memory="256Gi"pod_limit=110):
+
+def create_kwok_node(node_count=10,cpu_count = 64,memory="256Gi",pod_limit=110,type='agent'):
+    base_name = 'kwok-std-node'
+    if type =='control-plane':
+      base_name = 'kwok-ctl-node'
     for i in range(1, node_count + 1):
+
         node_yaml = f"""
 apiVersion: v1
+
 kind: Node
 metadata:
   annotations:
@@ -13,12 +19,12 @@ metadata:
     beta.kubernetes.io/arch: amd64
     beta.kubernetes.io/os: linux
     kubernetes.io/arch: amd64
-    kubernetes.io/hostname: kwok-std-node-{i}
+    kubernetes.io/hostname: {base_name}-{i}
     kubernetes.io/os: linux
-    kubernetes.io/role: agent
-    node-role.kubernetes.io/agent: ""
+    kubernetes.io/role: {type}
+    #node-role.kubernetes.io/{base_name}: ""
     type: kwok
-  name: kwok-std-node-{i}
+  name: {base_name}-{i}
 status:
   allocatable:
     cpu: "{cpu_count}"
@@ -45,4 +51,5 @@ status:
 
 if __name__ == "__main__":
     node_count = int(input("Enter the total number of standard nodes to create: "))
-    create_kwok_node(node_count)
+    create_kwok_node(node_count=1,type='control-plane')
+    create_kwok_node(node_count=node_count)

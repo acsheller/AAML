@@ -54,6 +54,7 @@ class CustomSchedulerDQN:
         self.target_network = DQN(num_inputs=30,num_outputs=self.output_size)
         self.target_network.load_state_dict(self.dqn.state_dict())
         self.target_network.eval()
+        self.increase_decay = True
         logging.info("AGENT :: DQN Models Created")
 
         # Set up the optimizer
@@ -98,7 +99,9 @@ class CustomSchedulerDQN:
         """
         Decays epsilon by the decay rate until it reaches the minimum value.
         """
-        if self.epsilon < 0.9:
+        if self.increase_decay and self.epsilon < 0.9:
+            self.increase_decay = False
+            logging.info("Setting epsilon decay rate to 0.995")
             self.epsi_decay=0.995
         if self.epsilon > self.min_epsi:
             self.epsilon *= self.epsi_decay
@@ -130,7 +133,7 @@ class CustomSchedulerDQN:
                 # Map the action index to a node name using the environment's mapping
                 action_index = self.env.kube_info.node_name_to_index_mapping[selected_node['name']]
                 node_name = selected_node['name']
-                logging.info(f"AGENT :: Random-Selected ACTION: Assign {pod.metadata.name} to {node_name}")
+                logging.info(f"AGENT :: Random {np.round(randval,4)} Heuristic-Selected ACTION: Assign {pod.metadata.name} to {node_name}")
             if node_name in available_nodes:
                return action_index
             else:
@@ -201,6 +204,15 @@ class CustomSchedulerDQN:
         logging.info("AGENT :: checking shutdown status")
         return os.path.exists("shutdown_signal.txt")
 
+    def should_reset(self):
+        '''
+        Checking for epoch reset of parameters
+        '''
+        if os.path.exists('epoch_complete.txt'):
+            logging.info("AGENT :: Epoch Complete")
+            os.remove('epoch_complete.txt')
+            return True
+        return False
 
     def run(self):
         '''
@@ -231,9 +243,11 @@ class CustomSchedulerDQN:
                             self.update_policy_network(experiences)
                             #logging.info("AGENT :: Policy Network Updated")
                         # Reset the environment if the episode is done
-                        if done:
+                        if self.should_reset():
                             logging.info("AGENT :: calling environment reset")
-                            self.env.reset()
+                            self.epsi_decay = 0.995
+                            self.epsi = 1.0
+                            self.increase_decay=True
 
             except client.exceptions.ApiException as e:
                 if e.status == 410:
@@ -267,5 +281,5 @@ if __name__ == "__main__":
 
     # Possible Values for the CustomerScheduler Constructor
     # scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16
-    scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,epsi_decay=0.9995,replay_buffer_size=500,batch_size=20,target_update_frequency=50)
+    scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.995,replay_buffer_size=500,batch_size=20,target_update_frequency=50)
     scheduler.run()

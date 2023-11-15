@@ -99,8 +99,8 @@ class KubeInfo:
             name = node.metadata.name
             pod_count = self.get_pod_count_per_node(name)
             status = self.get_node_status(node.status.conditions)
-            role_labels = [role.split("/")[-1] for role in node.metadata.labels.keys() if 'node-role.kubernetes.io/' in role]
-            roles = ', '.join(role_labels) if role_labels else 'None'
+            roles = node.metadata.labels['kubernetes.io/role']
+            #roles = ', '.join(role_labels) if role_labels else 'None'
             age = self.calculate_age(node.metadata.creation_timestamp)
             version = node.status.node_info.kubelet_version
             if 'control-plane' in roles:
@@ -156,8 +156,7 @@ class KubeInfo:
 
             pod_count = self.get_pod_count_per_node(name)
             status = self.get_node_status(node.status.conditions)
-            role_labels = [role.split("/")[-1] for role in node.metadata.labels.keys() if 'node-role.kubernetes.io/' in role]
-            roles = ', '.join(role_labels) if role_labels else 'None'
+            roles = node.metadata.labels['kubernetes.io/role']
             age = self.calculate_age(node.metadata.creation_timestamp)
             version = node.status.node_info.kubelet_version
             resources = self.get_node_resources(name)

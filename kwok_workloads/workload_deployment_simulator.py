@@ -27,7 +27,7 @@ class WorkloadDeploymentSimulator:
         self.v1 = client.CoreV1Api()
         self.batch_api_instance = client.BatchV1Api()
         self.my_deployments = self.get_all_deployments()
-
+        self.total_pods_deployed = 0
      
 
         self.pod_load = pod_load
@@ -46,10 +46,16 @@ class WorkloadDeploymentSimulator:
         self.current_load['mem_pct'] = 0
 
 
-        self.cpu_request_values = {100: "100m", 250: "250m", 500: "500m", 1000: "1000m", 1500: "1500m",2000: "2000m",2500: "2500m",3000: "3000m",3500: "3500m"}
-        self.memory_request_values = {256: "256Mi", 512: "512Mi", 1024: "1.0Gi", 1536: "1.5Gi",2048: "2.0Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi",4096: "4.0Gi",5120:"5.0Gi",10240:"10Gi",20480:"20Gi"}
-        self.cpu_limit_values = {500: "500m", 750: "750m", 1000: "1000m",1500: "1500m",2000: "2000m",2500: "2500m",3000: "3000m",3500: "3500m"}
-        self.memory_limit_values = { 1024: "1Gi",1536: "1.5Gi", 2048: "2Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi",4096: "4.0Gi",5120:"5.0Gi",10240:"10Gi",20480:"20Gi"}
+        #self.cpu_request_values = {100: "100m", 250: "250m", 500: "500m", 1000: "1000m", 1500: "1500m",2000: "2000m",2500: "2500m",3000: "3000m",3500: "3500m"}
+        #self.memory_request_values = {256: "256Mi", 512: "512Mi", 1024: "1.0Gi", 1536: "1.5Gi",2048: "2.0Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi",4096: "4.0Gi",5120:"5.0Gi",10240:"10Gi",20480:"20Gi"}
+        #self.cpu_limit_values = {500: "500m", 750: "750m", 1000: "1000m",1500: "1500m",2000: "2000m",2500: "2500m",3000: "3000m",3500: "3500m"}
+        #self.memory_limit_values = { 1024: "1Gi",1536: "1.5Gi", 2048: "2Gi",2560: "2.5Gi", 3072: "3.0Gi",3584:"3.5Gi",4096: "4.0Gi",5120:"5.0Gi",10240:"10Gi",20480:"20Gi"}
+
+        self.cpu_request_values = {500: "500m", 1000: "1000m", }
+        self.memory_request_values = {1024: "1.0Gi",2048: "2.0Gi"}
+        self.cpu_limit_values = {1000: "1000m",2000: "2000m"}
+        self.memory_limit_values = { 2048: "2Gi",3072: "3.0Gi"}
+
 
         columns = ['name', 'pod_count', 'cpu_request', 'cpu_limit', 'mem_request', 'mem_limit', 'action']
         self.df = pd.DataFrame(columns=columns)
@@ -107,6 +113,7 @@ class WorkloadDeploymentSimulator:
             logging.info(f"WDS :: {deployment_name } Deployed, cpu requests {cpu_request} limits {cpu_limit}, mem requests {memory_request} limits {memory_limit} pods {replicas}")
             self.df.loc[len(self.df)] = {'name': deployment_name,'pod_count': replicas,'cpu_request': cpu_request,'cpu_limit': cpu_limit,'mem_request':memory_request,'mem_limit': memory_limit,'action': 'add'}
             self.my_deployments.append(deployment_name)
+            self.total_pods_deployed += replicas
         except:
             logging.error(f"something wrong with deployment {deployment_name}-- ignoring")
 
@@ -317,7 +324,7 @@ class WorkloadDeploymentSimulator:
             if sum(1 for pod in pods.items if pod.status.phase == 'Pending') < 1:
                 self.create_fully_random_deployment()
                 self.get_load()
-                logging.info(f'Current load {self.current_load}')
+                logging.info('WDS :: Current load CPU {} MEM {} POD {}'.format(self.current_load['cpu_pct'],self.current_load['mem_pct'],self.current_load['pod_pct']))
             time.sleep(interval)
 
     def deployment_pending(self,deployment_name):
@@ -368,11 +375,11 @@ class WorkloadDeploymentSimulator:
                     record = self.df[self.df['name']==d_name].iloc[0].copy()
                     if not self.deployment_pending(d_name):
                         try:
-                            self.api_instance.delete_namespaced_deployment(name=d_name, namespace='default')
+                            self.api_instance.delete_namespaced_deployment(name=d_name, namespace=self.namespace)
                             record['action'] = 'delete'
                             self.df.loc[len(self.df)] = record
                             self.my_deployments.remove(d_name)
-                            logging.info(f'WDS :: Removed deployment  {d_name}. Lenght of Deployment is {len(self.my_deployments)}')
+                            logging.info(f'WDS :: Removed deployment  {d_name}. Length of Deployment is {len(self.my_deployments)}')
                         except client.rest.ApiException as e:
                             logging.error(f"WDS :: Error removing deployment {d_name}: {e.reason}")
                         except Exception as e:
@@ -382,6 +389,7 @@ class WorkloadDeploymentSimulator:
 
                 else:
                     logging.info("WDS :: No deployments to delete")
+                    self.my_deployments = self.get_all_deployments()
             else:
                 logging.info("WDS ::Skipping this go-around and doing nothing")
             logging.info(f"WDS :: Cluster load: {self.current_load}, specified load: {self.max_load} ")
@@ -397,8 +405,29 @@ class WorkloadDeploymentSimulator:
         """
         Run method to start the simulator.
         """
-        self.initial_deployments(interval =interval)
-        self.poll_deployments(interval=interval,duration = duration)
+        for epoch in range(5):
+            logging.info(f"WDS :: Epoch {epoch+1} Running")
+            self.initial_deployments(interval =interval)
+            self.my_deployments = self.get_all_deployments()
+            for d_name in self.my_deployments:
+                try:
+                    self.api_instance.delete_namespaced_deployment(name=d_name, namespace=self.namespace)
+                    self.my_deployments.remove(d_name)
+                    #logging.info(f'WDS :: Removed deployment  {d_name}. Length of Deployment is {len(self.my_deployments)}')
+                except client.rest.ApiException as e:
+                    logging.error(f"WDS :: Error removing deployment {d_name}: {e.reason}")
+                except Exception as e:
+                    logging.error(f"WDS :: Unexpected error while removing deployment {d_name}: {str(e)}")
+
+            with open(f"epoch_complete.txt","w") as file:
+                file.write(f"{epoch}")
+            time.sleep(10)
+        unique_filename = f"deployment_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        self.df.to_csv(unique_filename,index=False)
+        logging.info(f"Data saved to {unique_filename}")
+        with open("shutdown_signal.txt","w") as file:
+            file.write("shutdown")
+        #self.poll_deployments(interval=interval,duration = duration)
 
 
     def playback(self,df,sleep_interval=5):
@@ -437,10 +466,10 @@ class WorkloadDeploymentSimulator:
 
 if __name__ == "__main__":
     # Add this to the constructor to use custom scheduler: scheduler='custom-scheduler'
-    simulator = WorkloadDeploymentSimulator(cpu_load=0.50,mem_load=0.50,pod_load=0.50,scheduler='custom-scheduler')
+    simulator = WorkloadDeploymentSimulator(cpu_load=0.10,mem_load=0.10,pod_load=0.10,scheduler='custom-scheduler')
 
     # Duration is in hours so 1 is 1 hour worth of data collected and then r
-    simulator.run(interval =20, duration = 2)
+    simulator.run(interval =20, duration = 4)
     
     ## Uncomment this for playback.
     #playback_df = pd.read_csv("deployment_data_20231107_094336.csv")

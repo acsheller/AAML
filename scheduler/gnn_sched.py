@@ -7,6 +7,9 @@ import random
 
 from collections import deque
 
+import logging
+logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+
 class GNNPolicyNetwork(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
         super(GNNPolicyNetwork, self).__init__()
@@ -74,9 +77,9 @@ class GNNPolicyNetwork2(torch.nn.Module):
 class DQN(nn.Module):
     def __init__(self,num_inputs,num_outputs):
         super().__init__()
-        self.fc1 = nn.Linear(num_inputs, 128)
-        self.fc2 = nn.Linear(128, 128)
-        self.fc3 = nn.Linear(128, num_outputs)
+        self.fc1 = nn.Linear(num_inputs, 64)
+        self.fc2 = nn.Linear(64, 64)
+        self.fc3 = nn.Linear(64, num_outputs)
 
         self._initialize_weights()
 
@@ -86,12 +89,14 @@ class DQN(nn.Module):
                 # He initialization for layers with ReLU activation
                 nn.init.kaiming_normal_(module.weight, mode='fan_in', nonlinearity='relu')
                 if module.bias is not None:
-                    module.bias.data.fill_(0.01)  # Initialize biases, if needed
+                    module.bias.data.fill_(0.001)  # Initialize biases, if needed
 
     def forward(self, x):        
         x = F.relu(self.fc1(x))
         x = F.relu(self.fc2(x))
-        return self.fc3(x)
+        x = self.fc3(x)
+        #logging.info(f"DQN :: {x} ")
+        return x
 
 class ReplayBuffer:
     '''

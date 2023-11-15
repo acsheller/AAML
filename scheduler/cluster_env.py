@@ -218,6 +218,30 @@ class ClusterEnvironment:
         return reward
 
 
+    def calculate_resource_balance_metric(self,node_resources):
+        """
+        Calculate a metric representing the balance of resource usage across nodes.
+        :param node_resources: A list of resource usage values for each node.
+        :return: A metric value representing resource balance.
+        """
+        # You can use standard deviation as a metric for balance
+        return np.std(node_resources)
+
+    def reward_for_balance(self,previous_state, current_state):
+        """
+        Calculate the reward based on improvement in resource balance.
+        :param previous_state: Resource usage of each node in the previous state.
+        :param current_state: Resource usage of each node in the current state.
+        :return: Reward value.
+        """
+        prev_balance_metric = self.calculate_resource_balance_metric(list(previous_state.values()))
+        curr_balance_metric = self.calculate_resource_balance_metric(list(current_state.values()))
+
+        # Reward is based on the improvement in balance (reduction in std deviation)
+        improvement = prev_balance_metric - curr_balance_metric
+        reward = max(improvement, 0)  # Ensure non-negative reward
+        return reward
+
     def calculate_improvement_reward(self, previous_state, current_state):
         # Calculate the standard deviation of resource usage for both states
         prev_std_dev = self.calculate_resource_std_dev(previous_state)
@@ -276,7 +300,8 @@ class ClusterEnvironment:
         cpu_info_after = {}
         mem_info_before = {}
         mem_info_after = {}
-        pod_info = {}
+        pod_info_before = {}
+        pod_info_after = {}
         for index,node in enumerate(node_info_before):
             if node['roles'] != 'control-plane':
                 cpu_info_before[node['name']] = 1 - np.round(node['total_cpu_used']/node['cpu_capacity'],4)
@@ -284,12 +309,19 @@ class ClusterEnvironment:
                 cpu_info_after[node2['name']]= 1 - np.round(node2['total_cpu_used']/node2['cpu_capacity'],4)
                 mem_info_before[node['name']] = 1 - np.round(node['total_memory_used'] / node['memory_capacity'],4)
                 mem_info_after[node2['name']] = 1- np.round(node2['total_memory_used'] / node2['memory_capacity'],4)
+
+                pod_info_before[node['name']] = 1 - np.round(node['pod_count'] / node['pod_limit'],4)
+                pod_info_after[node2['name']] = 1- np.round(node2['pod_count'] / node2['pod_limit'],4)
         # 3. Calculate balance score for CPU and Memory
         #cpu_balance_score = np.round(self.calculate_balance_reward_avg(cpu_info),3)
         #memory_balance_score = np.round(self.calculate_balance_reward(memory_info),3)
         #pod_info_score = np.round(self.calculate_balance_reward(pod_info),3)
-        cpu_reward = self.calculate_improvement_reward(cpu_info_before,cpu_info_after)
-        mem_reward = self.calculate_improvement_reward(mem_info_before,mem_info_after)
+        #cpu_reward = self.calculate_improvement_reward(cpu_info_before,cpu_info_after)
+        #mem_reward = self.calculate_improvement_reward(mem_info_before,mem_info_after)
+        cpu_reward= np.round(self.reward_for_balance(cpu_info_before,cpu_info_after)*100,5)
+        mem_reward= np.round(self.reward_for_balance(mem_info_before,mem_info_after)*100,5)
+        pod_reward = np.round(self.reward_for_balance(pod_info_before,pod_info_after)*100,5)
+        logging.info(f"ENV  :: Reward: CPU {cpu_reward} MEM {mem_reward} POD {pod_reward}")
         #3. Now calculate reward -- note that defference functions can be tried here. 
         #reward = self.calculate_balance_reward_avg(cpu_info)
         #reward = min(cpu_balance_score,memory_balance_score,pod_info_score)
@@ -297,15 +329,7 @@ class ClusterEnvironment:
 
 
     def calc_reward2(self):
-        '''
-        # TODO Return a reward for CPU, Memory, and Pod distribution.  All similar percentages. But for now just return CPU.  :-) So Cool
-        total_reward = (cpu_weight * cpu_reward + memory_weight * memory_reward + pod_count_weight * pod_count_reward) / (cpu_weight + memory_weight + pod_count_weight)
-        total_reward = min(cpu_reward, memory_reward, pod_count_reward)
-        total_reward = (cpu_weight * cpu_reward + memory_weight * memory_reward + pod_count_weight * pod_count_reward) / (cpu_weight + memory_weight + pod_count_weight)
-        
-        TODO Return the lowest scoring attribute. For example if Memory is more imbalanced then return it.  :-) This way we can keep adding metrics
 
-        '''
         # 1. Get the state of the cluster
         node_info = self.kube_info.get_nodes_data()
         #2. Get the CpuInfo for each node

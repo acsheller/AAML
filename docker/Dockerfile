@@ -48,7 +48,6 @@ RUN mkdir /home/appuser/tlogs
 # Copy the contents of /app/build into /desired/directory within the container
 COPY kwok_cluster /home/appuser/kwok_cluster
 COPY kwok_workloads /home/appuser/kwok_workloads
-COPY kwok_yaml /home/appuser/kwok_yaml
 COPY scheduler /home/appuser/scheduler
 COPY docker/entrypoint.sh /home/appuser/entrypoint.sh
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf

@@ -31,6 +31,7 @@ class CustomSchedulerDQN:
         
         self.scheduler_name = scheduler_name
 
+
         # Do K8s stuff
         config.load_kube_config()
         self.api = client.CoreV1Api()
@@ -57,6 +58,11 @@ class CustomSchedulerDQN:
         self.increase_decay = True
         logging.info("AGENT :: DQN Models Created")
 
+        if torch.cuda.is_available():
+            logging.info("AGENT :: GPU Available")
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.dqn.to(self.device)
+        self.target_network.to(self.device)
         # Set up the optimizer
         #elf.optimizer = optim.Adam(self.gnn_model.parameters(), lr=learning_rate)
         
@@ -119,9 +125,9 @@ class CustomSchedulerDQN:
                 with torch.no_grad():
                     # Use the model to choose the best action
                     
-                    action_index = self.dqn(torch.tensor([state], dtype=torch.float32)).max(1)[1].view(1, -1).item()
+                    action_index = self.dqn(torch.tensor([state], dtype=torch.float32).to(self.device)).max(1)[1].view(1, -1).item()
                     node_name = self.env.kube_info.node_index_to_name_mapping[action_index]
-                    logging.info(f"AGENT :: DQN-Selected ACTION: Assign {pod.metadata.name} to {node_name}")
+                    logging.info(f"  DQN :: DQN-Selected ACTION: Assign {pod.metadata.name} to {node_name}")
             else:
                 # Choose a random action
                 #action_index = random.randrange(0,self.output_size)
@@ -156,19 +162,61 @@ class CustomSchedulerDQN:
         self.replay_buffer.push(state, action, reward, next_state,done)
 
 
+    def train_policy_network(self, experiences, epochs=3):
+        for epoch in range(epochs):
+            logging.info(f"Starting epoch {epoch + 1}/{epochs}")
+
+            # Unpack experiences
+            # Use the appropriate format for states and next_states (graph or list)
+            states_batch = torch.tensor([e[0] for e in experiences], dtype=torch.float32).to(self.device)
+            actions = torch.tensor([e[1] for e in experiences], dtype=torch.int64).to(self.device)
+            rewards = torch.tensor([e[2] for e in experiences], dtype=torch.float).to(self.device)
+            next_states_batch = torch.tensor([e[3] for e in experiences], dtype=torch.float32).to(self.device)
+            dones = torch.tensor([e[4] for e in experiences], dtype=torch.float).to(self.device)
+
+            # Compute predicted Q-values (Q_expected) from policy network
+            Q_expected = self.dqn(states_batch).gather(1, actions.unsqueeze(-1))
+
+            # Compute target Q-values (Q_targets) from next states using a target Network
+            Q_targets_next = self.target_network(next_states_batch).detach().max(1)[0].unsqueeze(-1)
+            Q_targets_next = Q_targets_next * (1 - dones.unsqueeze(-1))
+
+            Q_targets = rewards.unsqueeze(-1) + (self.gamma * Q_targets_next)
+
+            # Compute loss
+            loss = F.mse_loss(Q_expected, Q_targets)
+
+            # Zero gradients, perform a backward pass, and update the weights.
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+            logging.info(f"Epoch {epoch + 1}/{epochs} - Loss: {np.round(loss.cpu().detach().numpy().item(), 5)}")
+
+            # Update step count and potentially update target network
+            self.step_count += 1
+            if self.use_target_network and self.step_count % self.target_update_frequency == 0:
+                logging.info("*** Updating the target Network")
+                self.target_network.load_state_dict(self.dqn.state_dict())
+
+        logging.info("Training complete.")
+
+
+
+
+
     def update_policy_network(self, experiences):
         # Unpack experiences
         ### This one for a graph
         #states_batch = Batch.from_data_list([e[0] for e in experiences])
         ### This one for a list  -- for NN
-        states_batch = torch.tensor([e[0] for e in experiences],dtype =torch.float32)
-        actions = torch.tensor([e[1] for e in experiences], dtype=torch.int64)  # Assuming actions are indices
-        rewards = torch.tensor([e[2] for e in experiences], dtype=torch.float)
+        states_batch = torch.tensor([e[0] for e in experiences],dtype =torch.float32).to(self.device)
+        actions = torch.tensor([e[1] for e in experiences], dtype=torch.int64).to(self.device)  # Assuming actions are indices
+        rewards = torch.tensor([e[2] for e in experiences], dtype=torch.float).to(self.device)
         # for GRaph
         # next_states_batch = Batch.from_data_list([e[3] for e in experiences])
         ## For NN
-        next_states_batch = torch.tensor([e[3] for e in experiences],dtype =torch.float32)
-        dones = torch.tensor([e[4] for e in experiences], dtype=torch.float)
+        next_states_batch = torch.tensor([e[3] for e in experiences],dtype =torch.float32).to(self.device)
+        dones = torch.tensor([e[4] for e in experiences], dtype=torch.float).to(self.device)
         
         # Compute predicted Q-values (Q_expected) from policy network
         Q_expected = self.dqn(states_batch).gather(1, actions.unsqueeze(-1))
@@ -188,7 +236,7 @@ class CustomSchedulerDQN:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-        logging.info(f"AGENT :: Updated the Policy Network. Loss: {np.round(loss.detach().numpy().item(),5)}")
+        logging.info(f"AGENT :: Updated the Policy Network. Loss: {np.round(loss.cpu().detach().numpy().item(),5)}")
         
         self.step_count += 1
         # Update target network, if necessary
@@ -240,7 +288,8 @@ class CustomSchedulerDQN:
                         # Periodically update the policy network
                         if len(self.replay_buffer) > self.BATCH_SIZE:
                             experiences = self.replay_buffer.sample(self.BATCH_SIZE)
-                            self.update_policy_network(experiences)
+                            #self.update_policy_network(experiences)
+                            self.train_policy_network(experiences)
                             #logging.info("AGENT :: Policy Network Updated")
                         # Reset the environment if the episode is done
                         if self.should_reset():
@@ -273,7 +322,7 @@ class CustomSchedulerDQN:
         Got a model to load then load it
         TODO needs more work
         '''
-        model = GNNPolicyNetwork()
+        model = DQN()
         model.load_state_dict(torch.load(f_name))
         model.eval()
 
@@ -281,5 +330,5 @@ if __name__ == "__main__":
 
     # Possible Values for the CustomerScheduler Constructor
     # scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16
-    scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.995,replay_buffer_size=500,batch_size=20,target_update_frequency=50)
+    scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.9995,replay_buffer_size=500,batch_size=50,target_update_frequency=50)
     scheduler.run()

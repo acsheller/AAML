@@ -37,16 +37,16 @@ class ClusterEnvironment:
         # and return the initial observation
         # TODO Need to reset the cluster from here.  wipe it clean -- need to check this works but it looks like it will.
         try:
-            logging.info("ENV :: Resetting Cluster for some reason")
+            logging.info("  ENV :: Resetting Cluster for some reason")
             #self.app_api.delete_collection_namespaced_deployment(namespace=self.namespace)
-            #logging.info(f"ENV :: All deployments in the '{self.namespace}' namespace have been deleted.")
+            #logging.info(f"  ENV :: All deployments in the '{self.namespace}' namespace have been deleted.")
         
             # Delete all pods in the specified namespace
             #self.api.delete_collection_namespaced_pod(namespace=self.namespace)
-            #logging.info(f"ENV :: All pods in the '{self.namespace}' namespace have been deleted.")
+            #logging.info(f"  ENV :: All pods in the '{self.namespace}' namespace have been deleted.")
         
         except client.rest.ApiException as e:
-            logging.error(f"ENV :: Exception when calling Kubernetes API: {e}")
+            logging.error(f"  ENV :: Exception when calling Kubernetes API: {e}")
 
         except Exception as e:
             logging.error(f"Unexpected error: {e}")
@@ -117,7 +117,7 @@ class ClusterEnvironment:
 
     def bind_pod_to_node(self, pod, node_name):
         if node_name is None:
-            logging.error("ENV :: Node name is None. Cannot bind pod.")
+            logging.error("  ENV :: Node name is None. Cannot bind pod.")
             return
         binding = {
             "apiVersion": "v1",
@@ -132,15 +132,15 @@ class ClusterEnvironment:
                 "name": node_name
             }
         }
-        #logging.info(f"ENV :: Binding pod to : {node_name}")
+
         try:
             if self.pod_exists(pod.metadata.name):
                 self.api.create_namespaced_binding(namespace=pod.metadata.namespace, body=binding,_preload_content=False)
                 self.create_graph(self.kube_info.get_nodes_data())
             else:
-                logging.info("ENV :: Pod did not exists so not creating it.")
+                logging.info("  ENV :: Pod did not exists so not creating it.")
         except Exception as e:
-            logging.error(f"ENV :: Exception when calling CoreV1Api->create_namespaced_binding: {e}")
+            logging.error(f"  ENV :: Exception when calling CoreV1Api->create_namespaced_binding: {e}")
             
 
     def create_graph(self,nodeData,cpu_limit=0.8,mem_limit=0.8,pod_limit=0.8):
@@ -321,7 +321,7 @@ class ClusterEnvironment:
         cpu_reward= np.round(self.reward_for_balance(cpu_info_before,cpu_info_after)*100,5)
         mem_reward= np.round(self.reward_for_balance(mem_info_before,mem_info_after)*100,5)
         pod_reward = np.round(self.reward_for_balance(pod_info_before,pod_info_after)*100,5)
-        logging.info(f"ENV  :: Reward: CPU {cpu_reward} MEM {mem_reward} POD {pod_reward}")
+        logging.info(f"  ENV  :: Reward: CPU {cpu_reward} MEM {mem_reward} POD {pod_reward}")
         #3. Now calculate reward -- note that defference functions can be tried here. 
         #reward = self.calculate_balance_reward_avg(cpu_info)
         #reward = min(cpu_balance_score,memory_balance_score,pod_info_score)

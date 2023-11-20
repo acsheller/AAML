@@ -15,5 +15,5 @@ def delete_all_deployments_and_pods(namespace):
         print(f"Unexpected error: {e}")
 
 if __name__ == "__main__":
-    namespace = input("Enter the namespace to clean up: ")
+    namespace = input("Enter the namespace to clean up: (default 'default') ") or "default"
     delete_all_deployments_and_pods(namespace)

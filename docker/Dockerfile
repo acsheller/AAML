@@ -33,8 +33,7 @@ RUN chown -R appuser:appuser /home/appuser
 # Expose port 8888 for Jupyter Lab
 EXPOSE 8888 6006
 
-# Switch to the non-root user
-USER appuser
+
 
 # Set default shell for the user to bash
 ENV SHELL=/bin/bash
@@ -76,7 +75,14 @@ RUN echo "alias k='kubectl'" >> .bashrc && \
 # Create or modify .bash_profile to source .bashrc
 RUN echo "if [ -f ~/.bashrc ]; then source ~/.bashrc; fi" >> .bash_profile
 
+RUN ["chmod", "+x", "/home/appuser/entrypoint.sh"]
+RUN  ["chmod", "+r", "/etc/supervisor/conf.d/supervisord.conf"]
+# Switch to the non-root user
+# Give the user ownership of their home directory
+RUN chown -R appuser:appuser /home/appuser
 
+
+USER appuser
 ENTRYPOINT ["/home/appuser/entrypoint.sh"]
 
 

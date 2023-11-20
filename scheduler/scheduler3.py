@@ -1,6 +1,5 @@
 from kubernetes import client, config, watch
 from kinfo import KubeInfo
-import redis
 import json
 import random
 import networkx as nx
@@ -248,5 +247,5 @@ if __name__ == "__main__":
 
     # Possible Values for the CustomerScheduler Constructor
     # scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16
-    scheduler = CustomScheduler(init_epsi=1.0,gamma=0.8,epsi_decay=0.9954,replay_buffer_size=100,batch_size=16)
+    scheduler = CustomScheduler(init_epsi=1.0,gamma=0.8,epsi_decay=0.99954,replay_buffer_size=100,batch_size=16)
     scheduler.run()

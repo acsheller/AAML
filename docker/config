@@ -1,0 +1,14 @@
+# The following kubeconfig can be used to connect to the Kubernetes API server
+apiVersion: v1
+clusters:
+- cluster:
+    server: http://kwok-cluster:8080
+  name: kwok
+contexts:
+- context:
+    cluster: kwok
+  name: kwok
+current-context: kwok
+kind: Config
+preferences: {}
+users: null

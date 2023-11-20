@@ -8,13 +8,19 @@ services:
       - my-network
 
   pytorch-container:
-    # Replace with your PyTorch container details
+    build:
+      context: ./
+      dockerfile: docker/Dockerfile
     image: aaml_kwok:latest
     user: appuser
     ports:
       - "8888:8888"
+      - "6006:6006"
     networks:
       - my-network
+    depends_on:
+      - kwok-cluster
+
 
 networks:
   my-network:

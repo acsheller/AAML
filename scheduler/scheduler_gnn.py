@@ -17,16 +17,21 @@ from cluster_env import ClusterEnvironment
 from gnn_sched import GNNPolicyNetwork,GNNPolicyNetwork2, ReplayBuffer
 import numpy as np
 
+from torch.utils.tensorboard import SummaryWriter
+
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 
-class CustomScheduler:
+class CustomSchedulerGNN:
     '''
     Implementation of RL agent using a GNN as the Deep protion of Deep Reinforcement Learning.
     '''
 
-    def __init__(self,scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16):
+#    def __init__(self,scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16):
+
+    def __init__(self,scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=25,target_update_frequency=50):
+        
         
         self.scheduler_name = scheduler_name
 
@@ -35,16 +40,27 @@ class CustomScheduler:
         self.api = client.CoreV1Api()
         self.watcher = watch.Watch()
         self.kube_info = KubeInfo()
+
+        # Create the environment
         self.env = ClusterEnvironment()
 
-        #self.gnn_input = [] TODO Delete if its not useful
+        # These are used for Tensorboard
+        self.writer = SummaryWriter('tlogs')
+        self.train_iter =0
+
+        # Should we use a target network
+        self.use_target_network = True
+        self.target_update_frequency = target_update_frequency
+
+        # BATCH_SIZE is used in the replay buffer
         self.BATCH_SIZE = batch_size
         self.replay_buffer_size = replay_buffer_size
-        # Need to get the input size of the GNN.
+
+        # Need to get the input size for the network.
         self.input_size = self.env.graph_to_torch_data(self.env.create_graph(self.kube_info.get_nodes_data())).x.size(1)
         # Do the same for output size
         self.output_size = len(self.api.list_node().items) -1 # -1 because of 1 controller TODO Consider making this dynamic or an argument
-        self.gnn_model = GNNPolicyNetwork2(input_dim=self.input_size,hidden_dim=64,output_dim=self.output_size)
+        self.gnn = GNNPolicyNetwork2(input_dim=self.input_size,hidden_dim=64,output_dim=self.output_size)
         
         logging.info("AGENT :: GNN Model Created")
 

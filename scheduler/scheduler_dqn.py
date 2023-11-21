@@ -18,6 +18,8 @@ from cluster_env import ClusterEnvironment
 from gnn_sched import GNNPolicyNetwork,GNNPolicyNetwork2, ReplayBuffer,DQN
 import numpy as np
 
+from torch.utils.tensorboard import SummaryWriter
+
 import logging
 logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
@@ -30,21 +32,28 @@ class CustomSchedulerDQN:
     def __init__(self,scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=25,target_update_frequency=50):
         
         self.scheduler_name = scheduler_name
-
-
         # Do K8s stuff
         config.load_kube_config()
         self.api = client.CoreV1Api()
         self.watcher = watch.Watch()
         self.kube_info = KubeInfo()
+
+        # Create the environment
         self.env = ClusterEnvironment()
 
+        # These are used for Tensorboard
+        self.writer = SummaryWriter('tlogs')
+        self.train_iter =0
+
+        # use a target network
         self.use_target_network = True
         self.target_update_frequency = target_update_frequency
-        #self.gnn_input = [] TODO Delete if its not useful
+
+        #BATCH_SIZE is used in the replay_buffer
         self.BATCH_SIZE = batch_size
         self.replay_buffer_size = replay_buffer_size
-        # Need to get the input size of the GNN.
+
+        # Need to get the input size for the network.
         #self.input_size = self.env.graph_to_torch_data(self.env.create_graph(self.kube_info.get_nodes_data())).x.size(1)
         # Do the same for output size
         self.output_size = len(self.api.list_node().items) -1 # -1 because of 1 controller TODO Consider making this dynamic or an argument
@@ -107,7 +116,7 @@ class CustomSchedulerDQN:
         """
         if self.increase_decay and self.epsilon < 0.9:
             self.increase_decay = False
-            logging.info("Setting epsilon decay rate to 0.995")
+            logging.info("AGENT :: Setting epsilon decay rate to 0.995")
             self.epsi_decay=0.995
         if self.epsilon > self.min_epsi:
             self.epsilon *= self.epsi_decay
@@ -127,26 +136,28 @@ class CustomSchedulerDQN:
                     
                     action_index = self.dqn(torch.tensor([state], dtype=torch.float32).to(self.device)).max(1)[1].view(1, -1).item()
                     node_name = self.env.kube_info.node_index_to_name_mapping[action_index]
-                    logging.info(f"  DQN :: DQN-Selected ACTION: Assign {pod.metadata.name} to {node_name}")
+                    logging.info(f"  DQN :: DQN-Selected {np.round(randval,3)} ACTION: Assign {pod.metadata.name} to {node_name}")
             else:
-                # Choose a random action
-                #action_index = random.randrange(0,self.output_size)
-                sorted_nodes = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
-                lowest_cpu = np.round(sorted_nodes[0]['total_cpu_used'] / sorted_nodes[0]['cpu_capacity'],4)
-                lowest_nodes = [node for node in sorted_nodes if np.round(node['total_cpu_used'] / node['cpu_capacity'],4) == lowest_cpu]
-                selected_node = random.choice(lowest_nodes)
-                #logging.info(f"AGENT :: Random ACTION {action_index} selected")
-                # Map the action index to a node name using the environment's mapping
-                action_index = self.env.kube_info.node_name_to_index_mapping[selected_node['name']]
-                node_name = selected_node['name']
-                logging.info(f"AGENT :: Random {np.round(randval,4)} Heuristic-Selected ACTION: Assign {pod.metadata.name} to {node_name}")
+                if random.randrange(1,2):
+                    # Choose a random action
+                    nodes = self.kube_info.get_nodes_data(include_controller=False)
+                    selected_node = random.choice(nodes)
+                    action_index = self.env.kube_info.node_name_to_index_mapping[selected_node['name']]
+                    node_name = selected_node['name']
+                    logging.info(f"AGENT :: Random {np.round(randval,3)} Selection: Assign {pod.metadata.name} to {node_name}")
+                else:
+                    sorted_nodes = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
+                    lowest_cpu = np.round(sorted_nodes[0]['total_cpu_used'] / sorted_nodes[0]['cpu_capacity'],4)
+                    lowest_nodes = [node for node in sorted_nodes if np.round(node['total_cpu_used'] / node['cpu_capacity'],4) == lowest_cpu]
+                    selected_node = random.choice(lowest_nodes)
+                    action_index = self.env.kube_info.node_name_to_index_mapping[selected_node['name']]
+                    node_name = selected_node['name']
+                    logging.info(f"AGENT :: Heuristic {np.round(randval,3)} Selection: Assign {pod.metadata.name} to {node_name}")
             if node_name in available_nodes:
                return action_index
             else:
                 self.action_select_count += 1
                 if self.action_select_count > 4:
-                    ## TODO Reconsider this
-                    #self.env.reset()
                     time.sleep(2)
                     self.action_select_count =0
                 self.replay_buffer.push(state,action_index,0,state,False)
@@ -164,7 +175,7 @@ class CustomSchedulerDQN:
 
     def train_policy_network(self, experiences, epochs=3):
         for epoch in range(epochs):
-            logging.info(f"Starting epoch {epoch + 1}/{epochs}")
+            #logging.info(f"Starting epoch {epoch + 1}/{epochs}")
 
             # Unpack experiences
             # Use the appropriate format for states and next_states (graph or list)
@@ -185,20 +196,22 @@ class CustomSchedulerDQN:
 
             # Compute loss
             loss = F.mse_loss(Q_expected, Q_targets)
-
+            
             # Zero gradients, perform a backward pass, and update the weights.
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            logging.info(f"Epoch {epoch + 1}/{epochs} - Loss: {np.round(loss.cpu().detach().numpy().item(), 5)}")
+            #logging.info(f"Epoch {epoch + 1}/{epochs} - Loss: {np.round(loss.cpu().detach().numpy().item(), 5)}")
 
             # Update step count and potentially update target network
             self.step_count += 1
             if self.use_target_network and self.step_count % self.target_update_frequency == 0:
-                logging.info("*** Updating the target Network")
+                logging.info("AGENT :: *** Updating the target Network")
                 self.target_network.load_state_dict(self.dqn.state_dict())
-
-        logging.info("Training complete.")
+        logging.info(f"AGENT :: Updated the Policy Network. Loss: {np.round(loss.cpu().detach().numpy().item(),5)}")
+        self.train_iter += 1
+        self.writer.add_scalar('Loss/Train',np.round(loss.cpu().detach().numpy().item()),self.train_iter)
+        #logging.info("Training complete.")
 
 
 
@@ -295,7 +308,7 @@ class CustomSchedulerDQN:
                         if self.should_reset():
                             logging.info("AGENT :: calling environment reset")
                             self.epsi_decay = 0.995
-                            self.epsi = 1.0
+                            self.epsilon = 1.0
                             self.increase_decay=True
 
             except client.exceptions.ApiException as e:
@@ -330,5 +343,6 @@ if __name__ == "__main__":
 
     # Possible Values for the CustomerScheduler Constructor
     # scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16
-    scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.9995,replay_buffer_size=500,batch_size=50,target_update_frequency=50)
+    #scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.9995,replay_buffer_size=500,batch_size=50,target_update_frequency=50)
+    scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.95,learning_rate=1e-3,epsi_decay=0.9975,replay_buffer_size=100,batch_size=50,target_update_frequency=50)
     scheduler.run()

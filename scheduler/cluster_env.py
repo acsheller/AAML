@@ -62,14 +62,14 @@ class ClusterEnvironment:
         # Update the state (create a new graph)
         # Calculate the reward
         # Check if the episode is done
-        beforeState = self.kube_info.get_nodes_data()
-     
+        #beforeState = self.kube_info.get_nodes_data()
+        beforeState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
         if not dqn:
             node_name = self.apply_action(pod,action)
             # For a GNN
-            afterState = self.kube_info.get_nodes_data()   
+            afterState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
             new_state = self.graph_to_torch_data(self.create_graph(afterState))
-            reward = self.calc_reward(beforeState,afterState)
+            reward = self.calc_reward(beforeState,afterState,action)
             #reward = self.calc_reward()
             done = self.done()
         else:
@@ -77,7 +77,7 @@ class ClusterEnvironment:
             # For an NN or DQN
             new_state = self.kube_info.get_node_data_single_input(include_controller=False)
             afterState = self.kube_info.get_nodes_data()
-            reward = self.calc_reward(beforeState,afterState)
+            reward = self.calc_reward(beforeState,afterState,action)
 
             done = self.done()
 
@@ -287,7 +287,18 @@ class ClusterEnvironment:
         return reward
 
 
-    def calc_reward(self,beforeState,afterState):
+    def calc_scaled_reward(self,beforeState,action):
+        #1. Get the nodes in sorted order
+        #2. 
+        step  = 2 / (len(beforeState)-1)
+        values = [np.round(1 - i*step,4) for i in range(len(beforeState))]
+        for index, ii in enumerate(beforeState):
+            if ii['name'] == self.kube_info.node_index_to_name_mapping[action]:
+                return values[index]
+
+
+
+    def calc_reward(self,beforeState,afterState,action):
         '''
 
         '''
@@ -295,6 +306,9 @@ class ClusterEnvironment:
         #node_info = self.kube_info.get_nodes_data()
         node_info_before = beforeState
         node_info_after = afterState
+
+        reward = self.calc_scaled_reward(beforeState,action)
+        return reward
         #2. Get the CpuInfo for each node
         cpu_info_before = {}
         cpu_info_after = {}
@@ -321,7 +335,7 @@ class ClusterEnvironment:
         cpu_reward= np.round(self.reward_for_balance(cpu_info_before,cpu_info_after)*100,5)
         mem_reward= np.round(self.reward_for_balance(mem_info_before,mem_info_after)*100,5)
         pod_reward = np.round(self.reward_for_balance(pod_info_before,pod_info_after)*100,5)
-        logging.info(f"  ENV  :: Reward: CPU {cpu_reward} MEM {mem_reward} POD {pod_reward}")
+        logging.info(f"  ENV :: Reward: CPU {cpu_reward} MEM {mem_reward} POD {pod_reward}")
         #3. Now calculate reward -- note that defference functions can be tried here. 
         #reward = self.calculate_balance_reward_avg(cpu_info)
         #reward = min(cpu_balance_score,memory_balance_score,pod_info_score)

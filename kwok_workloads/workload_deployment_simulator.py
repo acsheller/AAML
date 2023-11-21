@@ -401,12 +401,12 @@ class WorkloadDeploymentSimulator:
         with open("shutdown_signal.txt","w") as file:
             file.write("shutdown")
   
-    def run(self,interval=10,duration=1):
+    def run(self,interval=10,duration=1,epochs=1):
         """
         Run method to start the simulator.
         """
-        for epoch in range(5):
-            logging.info(f"WDS :: Epoch {epoch+1} Running")
+        for epoch in range(epochs):
+            logging.info(f"WDS :: Iteration {epoch+1}/{epochs} Running")
             self.initial_deployments(interval =interval)
             self.my_deployments = self.get_all_deployments()
             for d_name in self.my_deployments:
@@ -466,10 +466,10 @@ class WorkloadDeploymentSimulator:
 
 if __name__ == "__main__":
     # Add this to the constructor to use custom scheduler: scheduler='custom-scheduler'
-    simulator = WorkloadDeploymentSimulator(cpu_load=0.60,mem_load=0.60,pod_load=0.60,scheduler='custom-scheduler')
+    simulator = WorkloadDeploymentSimulator(cpu_load=0.50,mem_load=0.50,pod_load=0.50,scheduler='custom-scheduler')
 
     # Duration is in hours so 1 is 1 hour worth of data collected and then r
-    simulator.run(interval =20, duration = 4)
+    simulator.run(interval =20, duration = 1, epochs =1)
     
     ## Uncomment this for playback.
     #playback_df = pd.read_csv("deployment_data_20231107_094336.csv")

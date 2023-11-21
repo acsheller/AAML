@@ -344,5 +344,5 @@ if __name__ == "__main__":
     # Possible Values for the CustomerScheduler Constructor
     # scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16
     #scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.9995,replay_buffer_size=500,batch_size=50,target_update_frequency=50)
-    scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.95,learning_rate=1e-3,epsi_decay=0.9975,replay_buffer_size=100,batch_size=50,target_update_frequency=50)
+    scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.9985,replay_buffer_size=200,batch_size=50,target_update_frequency=50)
     scheduler.run()

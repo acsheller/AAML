@@ -57,7 +57,7 @@ COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 #set a working directory
 WORKDIR /home/appuser/
 
-# Handy Aliases to have on hand
+# Handy Aliases
 RUN echo "alias k='kubectl'" >> .bashrc && \
     echo "alias kdp='kubectl describe pod'" >> .bashrc && \
     echo "alias kd='kubectl describe'" >> .bashrc && \
@@ -69,6 +69,10 @@ RUN echo "alias k='kubectl'" >> .bashrc && \
     echo "alias kg='kubectl get'" >> .bashrc && \
     echo "alias kl='kubectl logs'" >> .bashrc && \
     echo "alias runredis='docker run --name redis-container -p 6379:6379 redis'" >> .bashrc && \
+    echo "alias gnnsched='python scheduler/scheduler_gnn.py'" >> .bashrc && \
+    echo "alias dqnsched='python scheduler/scheduler_dqn.py'" >> .bashrc && \
+    echo "alias depsim='python kwok_workloads/workload_deployment_simulator.py '" >> .bashrc && \ 
+    echo "alias ktop='watch python scheduler/kinfo.py'" >> .bashrc && \
     echo "alias cleancluster='python3 /home/appuser/kwok_workloads/cleanup_cluster.py'" >> .bashrc
 
 # Create or modify .bash_profile to source .bashrc

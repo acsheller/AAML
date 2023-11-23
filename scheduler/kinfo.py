@@ -194,9 +194,9 @@ class KubeInfo:
         data = self.get_nodes_data(sort_by_cpu=False,include_controller=include_controller)
         for node in data:
             #node_index = self.node_name_to_index_mapping(node['name'])
-            single_row_of_data.append(1- np.round(node['total_cpu_used']/node['cpu_capacity'],4))
-            single_row_of_data.append(1- np.round(node['total_memory_used']/node['memory_capacity'],4))
-            single_row_of_data.append(1- np.round(node['pod_count']/node['pod_limit'],4))
+            single_row_of_data.append(np.round(1- np.round(node['total_cpu_used']/node['cpu_capacity'],4),4))
+            single_row_of_data.append(np.round(1- np.round(node['total_memory_used']/node['memory_capacity'],4),4))
+            single_row_of_data.append(np.round(1- np.round(node['pod_count']/node['pod_limit'],4)))
 
         return single_row_of_data
 

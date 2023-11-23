@@ -58,14 +58,28 @@ class CustomSchedulerGNN:
 
         # Need to get the input size for the network.
         self.input_size = self.env.graph_to_torch_data(self.env.create_graph(self.kube_info.get_nodes_data())).x.size(1)
+        #self.input_size = self.env.graph_to_torch_data(self.env.create_full_connected_worker_graph(self.kube_info.get_nodes_data(include_controller=False))).x.size(1)
         # Do the same for output size
         self.output_size = len(self.api.list_node().items) -1 # -1 because of 1 controller TODO Consider making this dynamic or an argument
         self.gnn = GNNPolicyNetwork2(input_dim=self.input_size,hidden_dim=64,output_dim=self.output_size)
         
+        self.target_network = GNNPolicyNetwork2(input_dim=self.input_size,hidden_dim=64,output_dim=self.output_size)
+        self.target_network.load_state_dict(self.gnn.state_dict())
+        self.target_network.eval()
+
+        # Increase the decay rate
+        self.increase_decay = False
+
         logging.info("AGENT :: GNN Model Created")
 
+        if torch.cuda.is_available():
+            logging.info("AGENT :: GPU Available")
+        self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
+        self.gnn.to(self.device)
+        self.target_network.to(self.device)
+
         # Set up the optimizer
-        self.optimizer = optim.Adam(self.gnn_model.parameters(), lr=learning_rate)
+        self.optimizer = optim.Adam(self.gnn.parameters(), lr=learning_rate)
         
         self.replay_buffer = ReplayBuffer(replay_buffer_size)
         logging.info("AGENT :: Replay Buffer Created")
@@ -77,6 +91,7 @@ class CustomSchedulerGNN:
         self.epsi_decay = epsi_decay
         self.action_list = []
         self.action_select_count = 0
+        self.step_count = 1
         logging.info("AGENT :: scheduling Agent constructed.")
 
 
@@ -103,12 +118,13 @@ class CustomSchedulerGNN:
         """
         Decays epsilon by the decay rate until it reaches the minimum value.
         """
+        if self.increase_decay and self.epsilon < 0.9:
+            self.increase_decay = False
+            #logging.info("AGENT :: Setting epsilon decay rate to 0.995")
         if self.epsilon > self.min_epsi:
             self.epsilon *= self.epsi_decay
             self.epsilon = max(self.epsilon, self.min_epsi)
 
-    
-    
 
     def select_action(self, state,pod):
         '''
@@ -119,24 +135,32 @@ class CustomSchedulerGNN:
             available_nodes = [nd['name'] for nd in self.kube_info.get_valid_nodes()]
             randval = random.random()
             if randval > self.epsilon:
+                # use the network
                 with torch.no_grad():
                     # Use the model to choose the best action
-                    #action_index = self.gnn_model(state).max(1)[1].view(1, -1).item()
-                    action_index = self.gnn_model(state).max(1)[1].view(1, -1).item()
+                    
+                    action_index = self.gnn(state.to(self.device)).max(1)[1].view(1, -1).item()
+                    #action_index = self.gnn(state).max(1)[1].view(1, -1).item()
                     node_name = self.env.kube_info.node_index_to_name_mapping[action_index]
-                    logging.info(f"AGENT :: GNN-Selected ACTION: Assign Pod to {node_name}")
+                    logging.info(f"  GNN :: {np.round(randval,3)} assign {pod.metadata.name} to {node_name}")
             else:
-                # Choose a random action
-                #action_index = random.randrange(0,self.output_size)
-                sorted_nodes = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
-                lowest_cpu = np.round(sorted_nodes[0]['total_cpu_used'] / sorted_nodes[0]['cpu_capacity'],4)
-                lowest_nodes = [node for node in sorted_nodes if np.round(node['total_cpu_used'] / node['cpu_capacity'],4) == lowest_cpu]
-                selected_node = random.choice(lowest_nodes)
-                #logging.info(f"AGENT :: Random ACTION {action_index} selected")
-                # Map the action index to a node name using the environment's mapping
-                action_index = self.env.kube_info.node_name_to_index_mapping[selected_node['name']]
-                node_name = selected_node['name']
-                logging.info(f"AGENT :: Random-Selected ACTION: Assign Pod to {node_name}")
+                ## Will be random -- always 1 -- set equal to 0 or put a not in front of it to be heuristic
+                if random.randrange(1,2): 
+                    # Choose an action Randomly
+                    nodes = self.kube_info.get_nodes_data(include_controller=False)
+                    selected_node = random.choice(nodes)
+                    action_index = self.env.kube_info.node_name_to_index_mapping[selected_node['name']]
+                    node_name = selected_node['name']
+                    logging.info(f' RAND :: {np.round(randval,3)} Selection: Assign {pod.metadata.name} to {node_name}')
+                else:
+                    # Heuristic Selection
+                    sorted_nodes = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
+                    lowest_cpu = np.round(sorted_nodes[0]['total_cpu_used'] / sorted_nodes[0]['cpu_capacity'],4)
+                    lowest_nodes = [node for node in sorted_nodes if np.round(node['total_cpu_used'] / node['cpu_capacity'],4) == lowest_cpu]
+                    selected_node = random.choice(lowest_nodes)
+                    action_index = self.env.kube_info.node_name_to_index_mapping[selected_node['name']]
+                    node_name = selected_node['name']
+                    logging.info(f" HEUR :: Heuristic {np.round(randval,3)} Selection: Assign {pod.metadata.name} to {node_name}")
             if node_name in available_nodes:
                return action_index,node_name
             else:
@@ -145,7 +169,7 @@ class CustomSchedulerGNN:
                     self.env.reset()
                     time.sleep(2)
                 self.replay_buffer.push(state,action_index,0,state,False)
-                logging.info(f"AGENT :: {node_name} is at capacity, Selecting Again")
+                logging.info(f"agent :: {node_name} is at capacity, Selecting Again")
 
 
     def add_to_buffer(self, state, action, reward, next_state,done):
@@ -157,6 +181,54 @@ class CustomSchedulerGNN:
         self.replay_buffer.push(state, action, reward, next_state,done)
 
 
+
+    def train_policy_network(self, experiences, epochs=1):
+        '''
+        Trains the policy network.  Only needs one epoch because loss remains the same. 
+        '''
+        
+        for epoch in range(epochs):
+            #logging.info(f"Starting epoch {epoch + 1}/{epochs}")
+
+            # Unpack experiences
+            # Use the appropriate format for states and next_states (graph or list)
+            
+            states_batch = Batch.from_data_list([e[0].to(self.device) for e in experiences])
+            actions = torch.tensor([e[1] for e in experiences], dtype=torch.int64).to(self.device)
+            rewards = torch.tensor([e[2] for e in experiences], dtype=torch.float).to(self.device)
+            next_states_batch = Batch.from_data_list([e[0].to(self.device) for e in experiences])
+            dones = torch.tensor([e[4] for e in experiences], dtype=torch.float).to(self.device)
+
+            # Compute predicted Q-values (Q_expected) from policy network
+            Q_expected = self.gnn(states_batch).gather(1, actions.unsqueeze(-1))
+
+            # Compute target Q-values (Q_targets) from next states using a target Network
+            Q_targets_next = self.target_network(next_states_batch).detach().max(1)[0].unsqueeze(-1)
+            Q_targets_next = Q_targets_next * (1 - dones.unsqueeze(-1))
+
+            Q_targets = rewards.unsqueeze(-1) + (self.gamma * Q_targets_next)
+
+            # Compute loss
+            loss = F.mse_loss(Q_expected, Q_targets)
+            
+            # Zero gradients, perform a backward pass, and update the weights.
+            self.optimizer.zero_grad()
+            loss.backward()
+            self.optimizer.step()
+            #logging.info(f"Epoch {epoch + 1}/{epochs} - Loss: {np.round(loss.cpu().detach().numpy().item(), 5)}")
+            #logging.info(f"1 AGENT :: Updated the Policy Network. Loss: {np.round(loss.cpu().detach().numpy().item(),5)}")
+            # Update step count and potentially update target network
+
+            # Update target Network
+            logging.info(f"step_count {self.step_count}")
+            if self.step_count % self.BATCH_SIZE == 0:
+                logging.info("AGENT :: *** Updating the target Network")
+                self.target_network.load_state_dict(self.gnn.state_dict())
+        logging.info(f"AGENT :: Updated the Policy Network. Loss: {np.round(loss.cpu().detach().numpy().item(),5)}")
+        self.train_iter += 1
+        self.writer.add_scalar('Loss/Train',np.round(loss.cpu().detach().numpy().item()),self.train_iter)
+
+
     def update_policy_network(self, experiences):
         # Unpack experiences
         states_batch = Batch.from_data_list([e[0] for e in experiences])
@@ -166,11 +238,11 @@ class CustomSchedulerGNN:
         dones = torch.tensor([e[4] for e in experiences], dtype=torch.float)
         
         # Compute predicted Q-values (Q_expected) from policy network
-        Q_expected = self.gnn_model(states_batch).gather(1, actions.unsqueeze(-1))
+        Q_expected = self.gnn(states_batch).gather(1, actions.unsqueeze(-1))
         
         # Compute target Q-values (Q_targets) from next states
         # If using a target network, it would be involved here
-        Q_targets_next = self.gnn_model(next_states_batch).detach().max(1)[0].unsqueeze(-1)
+        Q_targets_next = self.gnn(next_states_batch).detach().max(1)[0].unsqueeze(-1)
         Q_targets_next = Q_targets_next * (1-dones.unsqueeze(-1)) # Zero out the QValues for ones that are done
         
         Q_targets = rewards.unsqueeze(-1) + (self.gamma * Q_targets_next)
@@ -182,11 +254,11 @@ class CustomSchedulerGNN:
         self.optimizer.zero_grad()
         loss.backward()
         self.optimizer.step()
-        logging.info(f"AGENT :: Updated the Policy Network. Loss: {np.round(loss.detach().numpy().item(),5)}")
-
+        logging.info(f"AGENT :: **Updated the Policy Network. Loss: {np.round(loss.detach().numpy().item(),5)} **")
         # Update target network, if necessary
-        #if self.use_target_network and self.step_count % self.target_update_frequency == 0:
-        #    self.target_network.load_state_dict(self.gnn_model.state_dict())
+        if self.step_count % self.BATCH_SIZE == 0:
+            logging.info("AGENT :: ** Updating the target Network **")
+            self.target_network.load_state_dict(self.gnn.state_dict())
 
 
     def should_shutdown(self):
@@ -196,14 +268,25 @@ class CustomSchedulerGNN:
         logging.info("AGENT :: checking shutdown status")
         return os.path.exists("shutdown_signal.txt")
 
+    def should_reset(self):
+        '''
+        Checking for epoch reset of parameters
+        '''
+        if os.path.exists('epoch_complete.txt'):
+            logging.info("AGENT :: Epoch Complete")
+            os.remove('epoch_complete.txt')
+            return True
+        return False
 
-    def run(self):
+
+    def run(self,epochs=1):
         '''
         
         It receives node selection to bind the pod to.
         It then takes the action and calulates the reward based on that action.
         
         '''
+        itercount = 0
         while not self.should_shutdown():
             try:
                 for event in self.watcher.stream(self.api.list_pod_for_all_namespaces,timeout_seconds=120):
@@ -211,9 +294,8 @@ class CustomSchedulerGNN:
                     if self.needs_scheduling(pod):
                         current_state= self.env.get_state()
                         action,node_name = self.select_action(current_state,pod)
-                        #logging.info(f"AGENT :: Action selected: assign pod to  {node_name}")
                         new_state, reward, done = self.env.step(pod,action)
-                        logging.info(f"AGENT :: Reward for binding to {node_name} is {np.round(reward,6)}")
+                        logging.info(f"AGENT :: Pod {pod.metadata.name} to {node_name} Reward {np.round(reward,6)} {self.step_count}")
                         # Store the experience in the replay buffer
                         self.add_to_buffer(current_state, action, reward, new_state,done)
                         
@@ -221,14 +303,22 @@ class CustomSchedulerGNN:
                         self.decay_epsilon()
                         logging.info(f"AGENT :: Decay Rate at {np.round(self.epsilon,3)}")
                         # Periodically update the policy network
-                        if len(self.replay_buffer) > self.BATCH_SIZE:
+                   
+                        logging.info(f"step_count {self.step_count}")
+                        if len(self.replay_buffer) >= self.BATCH_SIZE and not self.step_count % self.BATCH_SIZE // 2:
                             experiences = self.replay_buffer.sample(self.BATCH_SIZE)
-                            self.update_policy_network(experiences)
+                            #self.update_policy_network(experiences)
+                            self.train_policy_network(experiences,epochs=epochs)
                             #logging.info("AGENT :: Policy Network Updated")
+                        self.step_count += 1
                         # Reset the environment if the episode is done
-                        if done:
-                            self.env.reset()
-
+                        # TODO -- reconsider this
+                        #if self.should_reset():
+                        #    logging.info("AGENT :: resenting the environment.")
+                            #self.epsi_decay = 0.995
+                            #self.epsilon =1.0
+                            #self.increase_decay = True
+                            
             except client.exceptions.ApiException as e:
                 if e.status == 410:
                     logging.warning("AGENT :: Watch timed out")
@@ -248,14 +338,14 @@ class CustomSchedulerGNN:
 
         
         filename = f"GNN_Model_{self.scheduler_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
-        torch.save(self.gnn_model.state_dict(),filename)
+        torch.save(self.gnn.state_dict(),filename)
 
     def load_model(self,f_name):
         '''
         Got a model to load then load it
         TODO needs more work
         '''
-        model = GNNPolicyNetwork()
+        model = ()
         model.load_state_dict(torch.load(f_name))
         model.eval()
 
@@ -263,5 +353,6 @@ if __name__ == "__main__":
 
     # Possible Values for the CustomerScheduler Constructor
     # scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16
-    scheduler = CustomScheduler(init_epsi=1.0,gamma=0.8,epsi_decay=0.99954,replay_buffer_size=100,batch_size=16)
-    scheduler.run()
+    #scheduler = CustomSchedulerGNN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.99954,replay_buffer_size=100,batch_size=25,target_update_frequency=50)
+    scheduler = CustomSchedulerGNN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.9985,replay_buffer_size=100,batch_size=20,target_update_frequency=40)
+    scheduler.run(epochs=1)

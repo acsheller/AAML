@@ -63,20 +63,25 @@ class ClusterEnvironment:
         # Calculate the reward
         # Check if the episode is done
         #beforeState = self.kube_info.get_nodes_data()
-        beforeState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
-        if not dqn:
+        #
+        if not dqn: # It is GNN
+            beforeStateReward = self.kube_info.get_node_data_single_input(sort_by_cpu=True,include_controller=False)
+            beforeState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=True)            
             node_name = self.apply_action(pod,action)
             # For a GNN
-            afterState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
+            afterState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=True)
+            afterState2 = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
             new_state = self.graph_to_torch_data(self.create_graph(afterState))
-            reward = self.calc_reward(beforeState,afterState,action)
+            
+            reward = self.calc_reward(beforeState,afterState2,action)
             #reward = self.calc_reward()
             done = self.done()
-        else:
+        else: # It is a DQN
+            beforeState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=True)
             node_name = self.apply_action(pod,action)
-            # For an NN or DQN
+            
             new_state = self.kube_info.get_node_data_single_input(include_controller=False)
-            afterState = self.kube_info.get_nodes_data()
+            afterState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
             reward = self.calc_reward(beforeState,afterState,action)
 
             done = self.done()
@@ -176,6 +181,40 @@ class ClusterEnvironment:
 
         return G
 
+
+    def create_full_connected_worker_graph(self,nodeData,cpu_limit=0.8,mem_limit=0.8,pod_limit=0.8):
+        '''
+        The graph will be the state of the system after adding the node. It represents the state
+        as the worker nodes which are fully connected. 
+        '''
+        G = nx.Graph()
+
+        # Fetch all nodes data
+        #nodes_data = self.kube_info.get_nodes_data()
+        nodes_data = nodeData
+        #self.kube_info.update_node_index_mapping()
+        # Filter Nodes that are at 80% capacity.
+
+        # Add nodes to the graph
+        for node_data in nodes_data:
+            node_name = node_data['name']
+            G.add_node(node_name)
+            # Add or update node attributes
+            for key, value in node_data.items():
+                if key in ['roles','cpu_capacity','memory_capacity','total_cpu_used','total_memory_used','pod_count','pod_limit']:
+                    if value == 'agent':
+                        value = 1
+                    G.nodes[node_name][key] = value
+
+        for node in G.nodes:
+            for node2 in G.nodes:
+                if node != node2:
+                    G.add_edge(node,node2)
+
+        return G
+
+
+
     def graph_to_torch_data(self,G):
         '''
         Transform a networkx graph into a pytorch data thing
@@ -196,106 +235,59 @@ class ClusterEnvironment:
         return data
 
 
-    def calculate_balance_reward_avg(self, node_values, max_value_per_node=0.80):
-        values = list(node_values.values())
-        num_nodes = len(values)
-        
-        # Calculate the average absolute difference
-        average_difference = sum(abs(values[i] - values[j]) for i in range(num_nodes) for j in range(i + 1, num_nodes)) / (num_nodes * (num_nodes - 1) / 2)
-        
-        # Define a realistic maximum average difference (e.g., half the nodes are full, the other half are empty)
-        max_average_difference = max_value_per_node / 2
-        
-        # Normalize the average difference
-        normalized_difference = min(average_difference / max_average_difference, 1)
-        
-        # Invert the result so that a higher value means more balance
-        balance_score = 1 - normalized_difference
-        
-        # Ensure the reward is non-negative
-        reward = max(balance_score, 0)
-        
-        return reward
 
 
-    def calculate_resource_balance_metric(self,node_resources):
-        """
-        Calculate a metric representing the balance of resource usage across nodes.
-        :param node_resources: A list of resource usage values for each node.
-        :return: A metric value representing resource balance.
-        """
-        # You can use standard deviation as a metric for balance
-        return np.std(node_resources)
-
-    def reward_for_balance(self,previous_state, current_state):
-        """
-        Calculate the reward based on improvement in resource balance.
-        :param previous_state: Resource usage of each node in the previous state.
-        :param current_state: Resource usage of each node in the current state.
-        :return: Reward value.
-        """
-        prev_balance_metric = self.calculate_resource_balance_metric(list(previous_state.values()))
-        curr_balance_metric = self.calculate_resource_balance_metric(list(current_state.values()))
-
-        # Reward is based on the improvement in balance (reduction in std deviation)
-        improvement = prev_balance_metric - curr_balance_metric
-        reward = max(improvement, 0)  # Ensure non-negative reward
-        return reward
-
-    def calculate_improvement_reward(self, previous_state, current_state):
-        # Calculate the standard deviation of resource usage for both states
-        prev_std_dev = self.calculate_resource_std_dev(previous_state)
-        curr_std_dev = self.calculate_resource_std_dev(current_state)
-
-        # Reward is based on the improvement in standard deviation
-        improvement = prev_std_dev - curr_std_dev
-        reward = max(improvement, 0)  # Ensure that the reward is non-negative
-
-        return reward
-
-    def calculate_resource_std_dev(self, state):
-        # Calculate the standard deviation of resource usage across nodes
-
-        return np.std(list(state.values()))
-
-
-    def calculate_balance_reward(self,node_values, max_value_per_node=0.80):
-        '''
-        Calculates the level of "balance" by taking pairwise different and summing
-        Then the max value per 
-        '''
-        values = list(node_values.values())
-        num_nodes = len(values)
-        
-        # Calculate all pairwise absolute differences
-        pairwise_differences = sum(abs(values[i] - values[j]) for i in range(num_nodes) for j in range(i + 1, num_nodes))
-        
-        # The maximum possible sum of differences occurs when one node is at max value and all others are at zero
-        # NOTE -- for future, the -1 is for the one controller- there may be more so this can be an argument or a feature.
-        max_possible_difference = (num_nodes - 1) * max_value_per_node
-        
-        # Normalize the sum of differences
-        normalized_difference = pairwise_differences / max_possible_difference
-        
-        # Invert the result so that a higher value means more balance <--- TODO Verify and Double check this!
-        balance_score = 1 - normalized_difference
-        
-        # Scale the balance score to determine the final reward
-        base_reward = 1.0  # Assume a base reward of 1.0 for maximum balance
-        reward = balance_score * base_reward
-        
-        return reward
-
-
-    def calc_scaled_reward(self,beforeState,action):
+    def calc_scaled_reward(self,State,action):
         #1. Get the nodes in sorted order
         #2. 
-        step  = 2 / (len(beforeState)-1)
-        values = [np.round(1 - i*step,4) for i in range(len(beforeState))]
-        for index, ii in enumerate(beforeState):
+        step  = 2 / (len(State)-1)
+        values = [np.round(1 - i*step,4) for i in range(len(State))]
+        for index, ii in enumerate(State):
             if ii['name'] == self.kube_info.node_index_to_name_mapping[action]:
                 return values[index]
 
+    def calc_scaled_reward2(self, State, action):
+        # Extract CPU usages and get unique values
+        cpu_usages = [np.round(node['total_cpu_used']/node['cpu_capacity'],4) for node in State]
+        unique_cpu_usages = sorted(set(cpu_usages))
+
+        # If all CPU usages are the same, return maximum reward
+        if len(unique_cpu_usages) == 1:
+            return 1
+
+        # Calculate reward values based on unique CPU usages
+        step = 1 / (len(unique_cpu_usages) - 1)
+        values = {usage: np.round(1 - i * step,4) for i, usage in enumerate(unique_cpu_usages)}
+
+        # Find the CPU usage of the node chosen by the action
+        for index,ii in enumerate(State):
+            if ii['name'] == self.kube_info.node_index_to_name_mapping[action]:
+                return values[np.round(ii['total_cpu_used']/ii['cpu_capacity'],4)]
+
+    def calc_scaled_reward3(self, State, action):
+        # Extract CPU usages and get unique values
+        cpu_usages = [np.round(node['total_cpu_used']/node['cpu_capacity'], 4) for node in State]
+        unique_cpu_usages = sorted(set(cpu_usages))
+
+        # If all CPU usages are the same, return maximum reward (which is 1 in this new scale)
+        if len(unique_cpu_usages) == 1:
+            return 1
+
+        # Calculate the original values (scaled between 0 and 1)
+        step = 1 / (len(unique_cpu_usages) - 1)
+        values = {usage: np.round(1 - i * step, 4) for i, usage in enumerate(unique_cpu_usages)}
+
+        # Transform values from [0, 1] to [-1, 1]
+        values = {key: 2 * value - 1 for key, value in values.items()}
+
+
+        # Find the CPU usage of the node chosen by the action
+        for index, ii in enumerate(State):
+            if ii['name'] == self.kube_info.node_index_to_name_mapping[action]:
+                return values[np.round(ii['total_cpu_used']/ii['cpu_capacity'], 4)]
+
+        # Fallback in case no matching node is found
+        return -1  # You might want to handle this case based on your specific requirements
 
 
     def calc_reward(self,beforeState,afterState,action):
@@ -304,10 +296,11 @@ class ClusterEnvironment:
         '''
         # 1. Get the state of the cluster
         #node_info = self.kube_info.get_nodes_data()
+
         node_info_before = beforeState
         node_info_after = afterState
 
-        reward = self.calc_scaled_reward(beforeState,action)
+        reward = self.calc_scaled_reward3(beforeState,action)
         return reward
         #2. Get the CpuInfo for each node
         cpu_info_before = {}
@@ -340,30 +333,6 @@ class ClusterEnvironment:
         #reward = self.calculate_balance_reward_avg(cpu_info)
         #reward = min(cpu_balance_score,memory_balance_score,pod_info_score)
         return cpu_reward
-
-
-    def calc_reward2(self):
-
-        # 1. Get the state of the cluster
-        node_info = self.kube_info.get_nodes_data()
-        #2. Get the CpuInfo for each node
-        cpu_info = {}
-        memory_info = {}
-        pod_info = {}
-        for node in node_info:
-            if node['roles'] != 'control-plane':
-                cpu_info[node['name']] = node['total_cpu_used']/node['cpu_capacity']
-                memory_info[node['name']] = np.round(node['total_memory_used'] / node['memory_capacity'],3)
-                pod_info[node['name']] = np.round(node['pod_count']/node['pod_limit'],3)
-        # 3. Calculate balance score for CPU and Memory
-        cpu_balance_score = np.round(self.calculate_balance_reward_avg(cpu_info),3)
-        memory_balance_score = np.round(self.calculate_balance_reward(memory_info),3)
-        pod_info_score = np.round(self.calculate_balance_reward(pod_info),3)
-
-        #3. Now calculate reward -- note that defference functions can be tried here. 
-        #reward = self.calculate_balance_reward_avg(cpu_info)
-        reward = min(cpu_balance_score,memory_balance_score,pod_info_score)
-        return reward
 
 
 

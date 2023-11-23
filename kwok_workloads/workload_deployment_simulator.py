@@ -409,15 +409,16 @@ class WorkloadDeploymentSimulator:
             logging.info(f"WDS :: Iteration {epoch+1}/{epochs} Running")
             self.initial_deployments(interval =interval)
             self.my_deployments = self.get_all_deployments()
-            for d_name in self.my_deployments:
-                try:
-                    self.api_instance.delete_namespaced_deployment(name=d_name, namespace=self.namespace)
-                    self.my_deployments.remove(d_name)
-                    #logging.info(f'WDS :: Removed deployment  {d_name}. Length of Deployment is {len(self.my_deployments)}')
-                except client.rest.ApiException as e:
-                    logging.error(f"WDS :: Error removing deployment {d_name}: {e.reason}")
-                except Exception as e:
-                    logging.error(f"WDS :: Unexpected error while removing deployment {d_name}: {str(e)}")
+
+#            for d_name in self.my_deployments:
+#                try:
+#                    self.api_instance.delete_namespaced_deployment(name=d_name, namespace=self.namespace)
+#                    self.my_deployments.remove(d_name)
+#                    #logging.info(f'WDS :: Removed deployment  {d_name}. Length of Deployment is {len(self.my_deployments)}')
+#                except client.rest.ApiException as e:
+#                    logging.error(f"WDS :: Error removing deployment {d_name}: {e.reason}")
+#                except Exception as e:
+#                    logging.error(f"WDS :: Unexpected error while removing deployment {d_name}: {str(e)}")
 
             with open(f"epoch_complete.txt","w") as file:
                 file.write(f"{epoch}")
@@ -469,7 +470,7 @@ if __name__ == "__main__":
     simulator = WorkloadDeploymentSimulator(cpu_load=0.50,mem_load=0.50,pod_load=0.50,scheduler='custom-scheduler')
 
     # Duration is in hours so 1 is 1 hour worth of data collected and then r
-    simulator.run(interval =20, duration = 1, epochs =1)
+    simulator.run(interval =10, duration = 1, epochs =1)
     
     ## Uncomment this for playback.
     #playback_df = pd.read_csv("deployment_data_20231107_094336.csv")

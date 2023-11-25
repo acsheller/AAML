@@ -44,6 +44,7 @@ RUN mkdir /home/appuser/.kube
 COPY docker/config /home/appuser/.kube/config
 
 RUN mkdir /home/appuser/tlogs
+RUN mkdir /home/appuser/logs
 
 # Copy the contents of /app/build into /desired/directory within the container
 COPY kwok_cluster /home/appuser/kwok_cluster
@@ -51,8 +52,9 @@ COPY kwok_workloads /home/appuser/kwok_workloads
 COPY scheduler /home/appuser/scheduler
 COPY docker/entrypoint.sh /home/appuser/entrypoint.sh
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
+COPY ProjectNotebook.ipynb /home/appuser/ProjectNotebook.ipynb
 
-#COPY ../tmux /home/appuser/tmux
+
 
 #set a working directory
 WORKDIR /home/appuser/
@@ -73,7 +75,8 @@ RUN echo "alias k='kubectl'" >> .bashrc && \
     echo "alias dqnsched='python scheduler/scheduler_dqn.py'" >> .bashrc && \
     echo "alias depsim='python kwok_workloads/workload_deployment_simulator.py '" >> .bashrc && \ 
     echo "alias ktop='watch python scheduler/kinfo.py'" >> .bashrc && \
-    echo "alias cleancluster='python3 /home/appuser/kwok_workloads/cleanup_cluster.py'" >> .bashrc
+    echo "alias cleancluster='python3 /home/appuser/kwok_workloads/cleanup_cluster.py'" >> .bashrc && \
+    echo ""
 
 # Create or modify .bash_profile to source .bashrc
 RUN echo "if [ -f ~/.bashrc ]; then source ~/.bashrc; fi" >> .bash_profile

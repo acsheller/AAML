@@ -74,16 +74,16 @@ class GNNPolicyNetwork2(torch.nn.Module):
         return x
     
 class DQN(nn.Module):
-    def __init__(self, num_inputs, num_outputs):
+    def __init__(self, num_inputs, num_outputs,num_hidden):
         super().__init__()
         # Increased depth: Adding additional layers
-        self.fc1 = nn.Linear(num_inputs, 128)  # First layer
-        self.fc2 = nn.Linear(128, 128)         # Second layer
-        self.fc3 = nn.Linear(128, 64)          # Third layer
-        self.fc4 = nn.Linear(64, 64)           # Fourth layer
-        self.fc5 = nn.Linear(64, 32)           # Fifth layer
-        self.fc6 = nn.Linear(32, 32)           # Sixth layer
-        self.fc7 = nn.Linear(32, num_outputs)  # Output layer
+        self.fc1 = nn.Linear(num_inputs, int(num_hidden*2))  # First layer
+        self.fc2 = nn.Linear(int(num_hidden*2), int(num_hidden*2))         # Second layer
+        self.fc3 = nn.Linear(int(num_hidden*2), num_hidden)          # Third layer
+        self.fc4 = nn.Linear(num_hidden, num_hidden)           # Fourth layer
+        self.fc5 = nn.Linear(num_hidden, int(num_hidden//2))           # Fifth layer
+        self.fc6 = nn.Linear(int(num_hidden//2), int(num_hidden//2))           # Sixth layer
+        self.fc7 = nn.Linear(int(num_hidden//2), num_outputs)  # Output layer
 
         self._initialize_weights()
 

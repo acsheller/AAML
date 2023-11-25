@@ -311,14 +311,14 @@ class ClusterEnvironment:
         pod_info_after = {}
         for index,node in enumerate(node_info_before):
             if node['roles'] != 'control-plane':
-                cpu_info_before[node['name']] = 1 - np.round(node['total_cpu_used']/node['cpu_capacity'],4)
+                cpu_info_before[node['name']] = np.round(node['total_cpu_used']/node['cpu_capacity'],4)
                 node2 = node_info_after[index]
-                cpu_info_after[node2['name']]= 1 - np.round(node2['total_cpu_used']/node2['cpu_capacity'],4)
-                mem_info_before[node['name']] = 1 - np.round(node['total_memory_used'] / node['memory_capacity'],4)
-                mem_info_after[node2['name']] = 1- np.round(node2['total_memory_used'] / node2['memory_capacity'],4)
+                cpu_info_after[node2['name']]= np.round(node2['total_cpu_used']/node2['cpu_capacity'],4)
+                mem_info_before[node['name']] = np.round(node['total_memory_used'] / node['memory_capacity'],4)
+                mem_info_after[node2['name']] = np.round(node2['total_memory_used'] / node2['memory_capacity'],4)
 
-                pod_info_before[node['name']] = 1 - np.round(node['pod_count'] / node['pod_limit'],4)
-                pod_info_after[node2['name']] = 1- np.round(node2['pod_count'] / node2['pod_limit'],4)
+                pod_info_before[node['name']] = np.round(node['pod_count'] / node['pod_limit'],4)
+                pod_info_after[node2['name']] = np.round(node2['pod_count'] / node2['pod_limit'],4)
         # 3. Calculate balance score for CPU and Memory
         #cpu_balance_score = np.round(self.calculate_balance_reward_avg(cpu_info),3)
         #memory_balance_score = np.round(self.calculate_balance_reward(memory_info),3)

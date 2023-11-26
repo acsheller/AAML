@@ -97,7 +97,7 @@ def objective(trial):
     agent_thread.start()
 
     # 4. Simulator Run
-    simulator = WorkloadDeploymentSimulator(cpu_load=0.30, mem_load=0.50, pod_load=0.50, scheduler='custom-scheduler',progress_indication=False)
+    simulator = WorkloadDeploymentSimulator(cpu_load=0.10, mem_load=0.50, pod_load=0.50, scheduler='custom-scheduler',progress_indication=False)
     simulator_thread = Thread(target=run_simulator, args=(simulator,))
     simulator_thread.start()
 
@@ -109,13 +109,13 @@ def objective(trial):
     os.remove('./shutdown_signal.txt')
 
     # 7. Calculate the reward 
-    state = self.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
+    state = k_inf.get_nodes_data(sort_by_cpu=False,include_controller=False)
     cpu_info = []
     for node in state:
         cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
 
     # Calculate the variance of the cpu usage
-    variance = np.var(cpu_usage)
+    variance = np.var(cpu_info)
 
     # 8. Clear cluster
     delete_all_deployments_and_pods('default')

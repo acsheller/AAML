@@ -19,7 +19,7 @@ RUN apt-get update
 RUN apt-get install -y curl vim
 
 # Install Jupyter Lab and kubernetes
-RUN pip3 install jupyterlab kubernetes networkx torch-geometric tensorboard supervisor streamlit redis randomname
+RUN pip3 install jupyterlab kubernetes networkx torch-geometric tensorboard supervisor streamlit redis randomname optuna
 
 # Get kubectl 
 RUN curl -L -o /usr/local/bin/kubectl "https://dl.k8s.io/release/$(curl -L -s https://dl.k8s.io/release/stable.txt)/bin/linux/amd64/kubectl"
@@ -47,9 +47,9 @@ RUN mkdir /home/appuser/tlogs
 RUN mkdir /home/appuser/logs
 
 # Copy the contents of /app/build into /desired/directory within the container
-COPY kwok_cluster /home/appuser/kwok_cluster
-COPY kwok_workloads /home/appuser/kwok_workloads
-COPY scheduler /home/appuser/scheduler
+COPY scripts /home/appuser/scripts
+#COPY kwok_workloads /home/appuser/kwok_workloads
+#COPY scheduler /home/appuser/scheduler
 COPY docker/entrypoint.sh /home/appuser/entrypoint.sh
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY ProjectNotebook.ipynb /home/appuser/ProjectNotebook.ipynb
@@ -70,12 +70,12 @@ RUN echo "alias k='kubectl'" >> .bashrc && \
     echo "alias kge='kubectl get events --sort-by=.metadata.creationTimestamp'" >> .bashrc && \
     echo "alias kg='kubectl get'" >> .bashrc && \
     echo "alias kl='kubectl logs'" >> .bashrc && \
-    echo "alias runredis='docker run --name redis-container -p 6379:6379 redis'" >> .bashrc && \
-    echo "alias gnnsched='python scheduler/scheduler_gnn.py'" >> .bashrc && \
-    echo "alias dqnsched='python scheduler/scheduler_dqn.py'" >> .bashrc && \
-    echo "alias depsim='python kwok_workloads/workload_deployment_simulator.py '" >> .bashrc && \ 
-    echo "alias ktop='watch python scheduler/kinfo.py'" >> .bashrc && \
-    echo "alias cleancluster='python3 /home/appuser/kwok_workloads/cleanup_cluster.py'" >> .bashrc && \
+    echo "alias gnnsched='python /home/appuser/scripts/scheduler_gnn.py'" >> .bashrc && \
+    echo "alias dqnsched='python /home/appuser/scripts/scheduler_dqn.py'" >> .bashrc && \
+    echo "alias runsim='python /home/appuser/scripts/workload_deployment_simulator.py '" >> .bashrc && \ 
+    echo "alias ktop='watch python /home/appuser/scripts/kinfo.py'" >> .bashrc && \
+    echo "alias cleancluster='python3 /home/appuser/scripts/cleanup_cluster.py'" >> .bashrc && \
+    echo "alias runacdqn='python3 /home/appuser/scripts/actorcritic_dqn.py'" >> .bashrc && \
     echo ""
 
 # Create or modify .bash_profile to source .bashrc

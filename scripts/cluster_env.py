@@ -290,6 +290,28 @@ class ClusterEnvironment:
         return -1  # You might want to handle this case based on your specific requirements
 
 
+    def calc_scaled_reward4(self,State, action):
+        # Extract CPU usages
+        cpu_usages = [np.round(node['total_cpu_used']/node['cpu_capacity'], 4) for node in State]
+
+        # Calculate variance and scale it non-linearly to increase sensitivity
+        variance = np.var(cpu_usages)
+        scaled_variance = np.sqrt(variance)  # Example of non-linear scaling
+
+        # Define maximum and minimum rewards
+        max_reward = 1.0
+        min_reward = -1.0
+
+        # Normalize the scaled variance to be between 0 and 1
+        normalized_variance = scaled_variance / (scaled_variance + 1)
+
+        # Calculate reward (higher reward for lower variance)
+        reward = max_reward - normalized_variance * (max_reward - min_reward)
+
+        return np.round(reward, 4)
+
+
+
     def calc_reward(self,beforeState,afterState,action):
         '''
 

@@ -57,7 +57,7 @@ logger.addHandler(fh)
 # Prevent the log messages from being propagated to the Jupyter notebook 
 # Set to true for logging to appear in log file as well as on screen.
 # Set to False to only appear in file.
-logger.propagate = True
+logger.propagate = False
 
 ### ---- End of Logging Prep ---- ###
 
@@ -69,14 +69,14 @@ class ActorCriticDQN:
     '''
 
 
-    def __init__(self,scheduler_name ="custom-scheduler",hidden_layers=64,actor_learning_rate=1e-4,critic_learning_rate=1e-4,gamma=0.99,progress_indication=True,tensorboard_name=None):
+    def __init__(self,namespace='default',scheduler_name ="custom-scheduler",hidden_layers=64,actor_learning_rate=1e-4,critic_learning_rate=1e-4,gamma=0.99,progress_indication=True,tensorboard_name=None,optimizer=0):
         '''
         Constructor 
         '''
         
         self.scheduler_name = scheduler_name
         self.progress_indication = progress_indication
-
+        self.namespace = namespace
         self.tboard_name = tensorboard_name
 
 
@@ -122,14 +122,24 @@ class ActorCriticDQN:
         self.critic.to(self.device)
         
         # Set up separate optimizers for Actor and Critic with different learning rates
-        self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=actor_learning_rate)
-        self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=critic_learning_rate)
+        if optimizer == 1:
+            self.actor_optimizer = optim.RMSprop(self.actor.parameters(), lr=actor_learning_rate)
+            self.critic_optimizer = optim.RMSprop(self.critic.parameters(), lr=critic_learning_rate)
+        elif optimizer == 2:
+            self.actor_optimizer = optim.AdamW(self.actor.parameters(), lr=actor_learning_rate)
+            self.critic_optimizer = optim.AdamW(self.critic.parameters(), lr=critic_learning_rate)
+        elif optimizer == 3:
+            self.actor_optimizer = optim.SGD(self.actor.parameters(), lr=actor_learning_rate, momentum=0.9)
+            self.critic_optimizer = optim.SGD(self.critic.parameters(), lr=critic_learning_rate, momentum=0.9)
+        else:
+            self.actor_optimizer = optim.Adam(self.actor.parameters(), lr=actor_learning_rate)
+            self.critic_optimizer = optim.Adam(self.critic.parameters(), lr=critic_learning_rate)
 
         # Set hyperparameters
         self.gamma = gamma  # Discount factor for future rewards
         self.action_list = []
         self.step_count = 0
-        logger.info("AGENT :: scheduling Agent constructed.")
+        logger.info("AGENT :: Actor Critic DQN Agent constructed.")
 
 
     def select_action(self, state,pod):
@@ -139,16 +149,22 @@ class ActorCriticDQN:
         '''
         agent_type = None
         while True:
-            available_nodes = [nd['name'] for nd in self.kube_info.get_valid_nodes()]
+            
+            #available_nodes = [nd['name'] for nd in self.kube_info.get_valid_nodes()]
             state_tensor = torch.tensor([state], dtype=torch.float32).to(self.device)
             #state_tensor.requires_grad = True  
 
             action_probs = self.actor(state_tensor)
             action_index = torch.multinomial(action_probs, 1).item()
             node_name = self.env.kube_info.node_index_to_name_mapping[action_index]
-
-            if node_name in available_nodes:
-                return action_index, action_probs, "Actor"
+            #logger.info(f"AGENT :: {list(action_probs[0].cpu().detach().numpy())}")
+            #if node_name in available_nodes:
+            return action_index, action_probs, "Actor"
+            #else:
+            #    choices = list(range(0,10))
+            #    choices.remove(action_index)
+            #    return random.choice(choices), action_probs, "Actor"
+                
 
     def needs_scheduling(self, pod):
         '''
@@ -157,7 +173,8 @@ class ActorCriticDQN:
         return (
             pod.status.phase == "Pending" and
             not pod.spec.node_name and
-            pod.spec.scheduler_name == self.scheduler_name
+            pod.spec.scheduler_name == self.scheduler_name and 
+            self.env.pod_exists(pod.metadata.name)
         )
 
 
@@ -168,13 +185,11 @@ class ActorCriticDQN:
         logger.info("AGENT :: checking shutdown status")
         return os.path.exists("shutdown_signal.txt")
 
-    def should_reset(self):
+    def new_epoch(self):
         '''
         Checking for epoch reset of parameters
         '''
         if os.path.exists('epoch_complete.txt'):
-            logger.info("AGENT :: Epoch Complete")
-            os.remove('epoch_complete.txt')
             return True
         return False
 
@@ -199,7 +214,7 @@ class ActorCriticDQN:
                 return name
 
 
-    def run(self,epochs=1):
+    def run(self):
         '''
         
         runs until the shutdown signal is recieved.  This is just a file written to disk by the 
@@ -213,17 +228,20 @@ class ActorCriticDQN:
         if self.progress_indication:
             print(f"\rAC Model Ready",end='', flush=True)
         while not self.should_shutdown():
-
+            
             try:
                 # Listen for pods to be deployed to the cluster
-                for event in self.watcher.stream(self.api.list_pod_for_all_namespaces,timeout_seconds=120):
+                for event in self.watcher.stream(self.api.list_pod_for_all_namespaces,timeout_seconds=60):
+                    
                     pod = event['object']
                     if self.needs_scheduling(pod):
 
+                        # Current state will be returned as a graph
                         current_state= self.env.get_state(dqn=True)
+
                         # The actor selects the action in the select_action method
                         # Action probs are needed to calculate loss
-                        action,action_probs, agent_type = self.select_action(current_state,pod,)
+                        action,action_probs, agent_type = self.select_action(current_state,pod,) 
                         new_state, reward, done = self.env.step(pod,action,dqn=True)
                         c_sum_reward += reward
                         self.action_list.append(action)
@@ -235,8 +253,6 @@ class ActorCriticDQN:
                         # Calculate advantage
                         td_error = reward + self.gamma * next_value * (1 - int(done)) - value
                         advantage = td_error.detach()
-                        #print("action_probs requires_grad:", action_probs.requires_grad)
-                        #print("advantage requires_grad:", advantage.requires_grad)
 
                         # Update Critic
                         critic_loss = td_error.pow(2)
@@ -250,17 +266,28 @@ class ActorCriticDQN:
                         self.actor_optimizer.zero_grad()
                         actor_loss.backward()
                         self.actor_optimizer.step()
-
+                        if self.progress_indication:
+                            print(f"\rReward is {np.round(reward,3)}  Cumulative sum of rewareds is {np.round(c_sum_reward,3)}",end='', flush=True)
                         logger.info(f"AGENT :: Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ")
 
                         # Save off some metrics for analysis
                         self.step_count += 1
-                        self.writer.add_scalar('Actor Loss',actor_loss.item(),self.step_count)
-                        self.writer.add_scalar('Critic Loss',critic_loss.item(),self.step_count)
-                        self.writer.add_scalar('CSR',c_sum_reward,self.step_count)
-                        self.writer.add_scalar('Advantage', advantage.item(),self.step_count)
+                        self.writer.add_scalar('1. Actor Loss',actor_loss.item(),self.step_count)
+                        self.writer.add_scalar('2. Critic Loss',critic_loss.item(),self.step_count)
+                        self.writer.add_scalar('4. CSR',c_sum_reward,self.step_count)
+                        self.writer.add_scalar('3. Advantage', advantage.item(),self.step_count)
                         if not self.step_count %10:
-                            self.writer.add_histogram('actions',torch.tensor(self.action_list),self.step_count)
+                            self.writer.add_histogram('6. actions',torch.tensor(self.action_list),self.step_count)
+                            temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
+                            cpu_info = []
+                            for node in temp_state:
+                                cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
+                            self.writer.add_scalar('5. Cluster Variance',np.var(cpu_info),self.step_count)
+
+                        if sum(1 for pod in self.api.list_namespaced_pod(namespace = self.namespace).items if pod.status.phase == 'Pending') == 0:
+                            if self.new_epoch():
+                                logger.info("AGENT :: Acknowledge Epoch Complete")
+                                os.remove('epoch_complete.txt')
             # Catch exceptions as things can happen. 
             except client.exceptions.ApiException as e:
                 if e.status == 410:
@@ -282,6 +309,8 @@ class ActorCriticDQN:
         filename2 = f"AC_ModelCritic_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
         torch.save(self.actor.state_dict(),filename)
         torch.save(self.critic.state_dict(),filename2)
+        os.remove('shutdown_signal.txt')
+        print("")
 
 
 if __name__ == "__main__":

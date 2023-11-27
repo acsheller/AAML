@@ -15,7 +15,7 @@ import datetime
 from datetime import datetime, timezone
 import time
 from cluster_env import ClusterEnvironment
-from gnn_sched import ReplayBuffer,DQN
+from drl_models import ReplayBuffer,DQN
 import numpy as np
 from torch_geometric.data import Data
 from torch.utils.tensorboard import SummaryWriter
@@ -55,7 +55,8 @@ class CustomSchedulerDQN:
 
         if tensorboard_name != None:
             self.tboard_name = tensorboard_name
-
+        else:
+            self.tboard_name = self.generate_funny_name()
 
         # Do K8s stuff
         config.load_kube_config()
@@ -119,6 +120,26 @@ class CustomSchedulerDQN:
         self.step_count = 0
         logger.info("AGENT :: scheduling Agent constructed.")
 
+
+    def contains_non_alpha_or_dash(self,s):
+        '''
+        This is necessary because some of the names have funny characters in them. 
+        '''
+        for char in s:
+            if not char.isalpha() and char != '-':
+                return True
+        return False
+
+
+    def generate_funny_name(self):
+        '''
+        I cannot recall where I saw this done but I like it so crafted this version of it.
+        '''
+        import randomname
+        while True:
+            name = randomname.get_name().lower()
+            if not self.contains_non_alpha_or_dash(name):
+                return name
 
     def needs_scheduling(self, pod):
         '''
@@ -321,27 +342,48 @@ class CustomSchedulerDQN:
                 for event in self.watcher.stream(self.api.list_pod_for_all_namespaces,timeout_seconds=120):
                     pod = event['object']
                     if self.needs_scheduling(pod):
-                        current_state= self.env.get_state(dqn=True)
-                        action,agent_type = self.select_action(current_state,pod,)
-                        #logger.info(f"AGENT :: Action selected: assign pod to  {node_name}")
-                        new_state, reward, done = self.env.step(pod,action,dqn=True)
-                        c_sum_reward += reward
-                        logger.info(f"AGENT :: Reward for binding {pod.metadata.name} is {np.round(reward,6)}")
-                        # Store the experience in the replay buffer
-                        self.add_to_buffer(current_state, action, reward, new_state,done)
-                        if self.progress_indication:
-                            print(f"\rDecay Rate at {np.round(self.epsilon,4)}. {agent_type} Agent Receieved Reward {np.round(reward,3)}",end='', flush=True)
-                        # Deay the epsilon value
-                        self.decay_epsilon()
-                        logger.info(f"AGENT :: Decay Rate at {np.round(self.epsilon,3)}")
-                        # Periodically update the policy network
+                        try:
+                            current_state= self.env.get_state(dqn=True)
+                            action,agent_type = self.select_action(current_state,pod)
+                            new_state, reward, done = self.env.step(pod,action,dqn=True)
+                            c_sum_reward += reward
+                            self.action_list.append(action)
+                            logger.info("AGENT :: Reward {np.round(reward,3)}")
+                        except Exception as e:
+                            logger.error(f"AGENT :: Unexpected error: {e}")
+                        
+                        try:
+                            # Store the experience in the replay buffer
+                            self.add_to_buffer(current_state, action, reward, new_state,done)
+                            
+                            if self.progress_indication:
+                                print(f"\rDecay Rate at {np.round(self.epsilon,4)}. {agent_type} Agent Receieved Reward {np.round(reward,3)}",end='', flush=True)
+                            # Deay the epsilon value
+                            self.decay_epsilon()
+                            logger.info(f"AGENT :: Decay Rate at {np.round(self.epsilon,3)}")
+                            # Periodically update the policy network
+                            
+                            if len(self.replay_buffer) >= self.BATCH_SIZE and not self.step_count % (self.BATCH_SIZE // 2):
+                                experiences = self.replay_buffer.sample(self.BATCH_SIZE)
+                                self.train_policy_network(experiences,epochs=epochs)
+                        except Exception as e:
+                            logger.error(f"AGENT :: Unexpected error: {e}")
 
-                        if len(self.replay_buffer) >= self.BATCH_SIZE and not self.step_count % (self.BATCH_SIZE // 2):
-                            experiences = self.replay_buffer.sample(self.BATCH_SIZE)
-                            self.train_policy_network(experiences,epochs=epochs)
+                        try:
+                            self.step_count += 1
+                            self.writer.add_scalar('CSR',c_sum_reward,self.step_count)
 
-                        self.step_count += 1
-                        self.writer.add_scalar('CSR',c_sum_reward,self.step_count)
+                            
+                            if not self.step_count %10:
+                                self.writer.add_histogram('actions',torch.tensor(self.action_list),self.step_count)
+                                temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
+                                cpu_info = []
+                                for node in temp_state:
+                                    cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
+                                self.writer.add_scalar('Cluster Variance',np.var(cpu_info),self.step_count)
+                        except Exception as e:
+                            logger.error(f"AGENT :: Unexpected error: {e}")
+
             except client.exceptions.ApiException as e:
                 if e.status == 410:
                     logger.warning("AGENT :: Watch timed out")
@@ -375,5 +417,5 @@ if __name__ == "__main__":
     # Possible Values for the CustomerScheduler Constructor
     # scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16
     #scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.9995,replay_buffer_size=500,batch_size=50,target_update_frequency=50)
-    scheduler = CustomSchedulerDQN(hidden_layer_size=64,init_epsi=1.0,gamma=0.9,learning_rate=1e-4,epsi_decay=0.995,replay_buffer_size=100,batch_size=25,target_update_frequency=50)
+    scheduler = CustomSchedulerDQN(hidden_layers=64,init_epsi=1.0,gamma=0.9,learning_rate=1e-4,epsi_decay=0.995,replay_buffer_size=100,batch_size=25,target_update_frequency=50)
     scheduler.run()

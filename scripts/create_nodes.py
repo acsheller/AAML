@@ -1,11 +1,12 @@
 import subprocess
-
+import argparse
+import time
 
 def create_kwok_node(node_count=10,cpu_count = 64,memory="256Gi",pod_limit=110,type='agent'):
     base_name = 'kwok-std-node'
     if type =='control-plane':
       base_name = 'kwok-ctl-node'
-    for i in range(1, node_count + 1):
+    for i in range(0, node_count):
 
         node_yaml = f"""
 apiVersion: v1
@@ -50,6 +51,15 @@ status:
         subprocess.run(["kubectl", "apply", "-f", "-"], input=node_yaml, text=True)
 
 if __name__ == "__main__":
-    node_count = int(input("Enter the total number of standard nodes to create: "))
+    #node_count = int(input("Enter the total number of standard nodes to create: "))
+     # Create the parser
+    parser = argparse.ArgumentParser(description='Create Kwok nodes')
+
+    # Add arguments
+    parser.add_argument('--node_count', type=int, default=10, help='Number of nodes to create')
+ 
+    args = parser.parse_args()
+
+    time.sleep(4)
     create_kwok_node(node_count=1,type='control-plane')
-    create_kwok_node(node_count=node_count)
+    create_kwok_node(node_count=args.node_count)

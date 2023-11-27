@@ -19,7 +19,7 @@ import datetime
 from datetime import datetime, timezone
 import time
 from cluster_env import ClusterEnvironment
-from gnn_sched import GNNPolicyNetwork,GNNPolicyNetwork2, ReplayBuffer
+from drl_models import GNNPolicyNetwork,GNNPolicyNetwork2, ReplayBuffer
 import numpy as np
 
 from torch.utils.tensorboard import SummaryWriter
@@ -56,8 +56,13 @@ class CustomSchedulerGNN:
 
 #    def __init__(self,scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16):
 
-    def __init__(self,scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=25,target_update_frequency=50,progress_indication=True):
-        
+    def __init__(self,scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=25,target_update_frequency=50,progress_indication=True,tensorboard_name=None):
+
+        if tensorboard_name != None:
+            self.tboard_name = tensorboard_name
+        else:
+            self.tboard_name = self.generate_funny_name()
+
         
         self.scheduler_name = scheduler_name
         self.progress_indication = progress_indication
@@ -72,7 +77,11 @@ class CustomSchedulerGNN:
         self.env = ClusterEnvironment()
 
         # These are used for Tensorboard
-        self.writer = SummaryWriter('tlogs')
+        if self.tboard_name:
+            self.writer = SummaryWriter(f'tlogs/{self.tboard_name}')
+            logger.info(f"AGENT: Created TensorBoard writer {self.tboard_name}")
+        else:
+            self.writer = SummaryWriter(f'tlogs/')
         self.train_iter =0
 
         # Should we use a target network
@@ -121,6 +130,26 @@ class CustomSchedulerGNN:
         self.step_count = 1
         logger.info("AGENT :: scheduling Agent constructed.")
 
+
+    def contains_non_alpha_or_dash(self,s):
+        '''
+        This is necessary because some of the names have funny characters in them. 
+        '''
+        for char in s:
+            if not char.isalpha() and char != '-':
+                return True
+        return False
+
+
+    def generate_funny_name(self):
+        '''
+        I cannot recall where I saw this done but I like it so crafted this version of it.
+        '''
+        import randomname
+        while True:
+            name = randomname.get_name().lower()
+            if not self.contains_non_alpha_or_dash(name):
+                return name
 
     def needs_scheduling(self, pod):
         '''
@@ -246,7 +275,6 @@ class CustomSchedulerGNN:
             # Update step count and potentially update target network
 
             # Update target Network
-            logger.info(f"step_count {self.step_count}")
             if self.step_count % self.BATCH_SIZE == 0:
                 logger.info("AGENT :: *** Updating the target Network")
                 self.target_network.load_state_dict(self.gnn.state_dict())
@@ -316,7 +344,7 @@ class CustomSchedulerGNN:
         itercount = 0
         while not self.should_shutdown():
             if self.progress_indication:
-                print("\rReady",end='',flush=True)
+                print("\rGNN Ready",end='',flush=True)
             try:
                 for event in self.watcher.stream(self.api.list_pod_for_all_namespaces,timeout_seconds=120):
                     pod = event['object']
@@ -325,6 +353,7 @@ class CustomSchedulerGNN:
                         action,node_name = self.select_action(current_state,pod)
                         new_state, reward, done = self.env.step(pod,action)
                         c_sum_reward += reward
+                        self.action_list.append(action)
                         logger.info(f"AGENT :: Pod {pod.metadata.name} to {node_name} Reward {np.round(reward,6)} {self.step_count}")
                         # Store the experience in the replay buffer
                         self.add_to_buffer(current_state, action, reward, new_state,done)
@@ -335,14 +364,25 @@ class CustomSchedulerGNN:
                         logger.info(f"AGENT :: Decay Rate at {np.round(self.epsilon,3)}")
                         # Periodically update the policy network
 
-                        logger.info(f"step_count {self.step_count}")
+                        #logger.info(f"step_count {self.step_count}")
                         
                         if len(self.replay_buffer) >= self.BATCH_SIZE and not self.step_count % self.BATCH_SIZE // 2:
                             experiences = self.replay_buffer.sample(self.BATCH_SIZE)
                             self.train_policy_network(experiences,epochs=epochs)
+                        try:                             
+                            self.step_count += 1
+                            self.writer.add_scalar('CSR',c_sum_reward,self.step_count)
                             
-                        self.step_count += 1
-                        self.writer.add_scalar('CSR',c_sum_reward,self.step_count)
+                            if not self.step_count %10:
+                                self.writer.add_histogram('actions',torch.tensor(self.action_list),self.step_count)
+                                temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
+                                cpu_info = []
+                                for node in temp_state:
+                                    cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
+                                self.writer.add_scalar('Cluster Variance',np.var(cpu_info),self.step_count)
+                        except Exception as e:
+                            logger.error(f"AGENT :: Unexpected error: {e}")
+
                             
             except client.exceptions.ApiException as e:
                 if e.status == 410:
@@ -362,7 +402,7 @@ class CustomSchedulerGNN:
         logger.info("AGENT :: Saving GNN Model for Reuse")
 
         
-        filename = f"GNN_Model_{self.scheduler_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
+        filename = f"GNN_Model_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
         torch.save(self.gnn.state_dict(),filename)
 
     def load_model(self,f_name):

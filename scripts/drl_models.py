@@ -168,6 +168,102 @@ class Critic(nn.Module):
         x = self.fc7(x)
         return x
 
+
+
+import torch
+import torch.nn.functional as F
+from torch_geometric.nn import GCNConv, global_mean_pool
+from torch_geometric.data import Batch
+
+# Actor Network
+class ActorGNN(torch.nn.Module):
+    def __init__(self, num_inputs, num_outputs,num_hidden):
+        super(ActorGNN, self).__init__()
+        # Network architecture remains similar
+        self.conv1 = GCNConv(num_inputs, num_hidden)
+        self.bn1 = torch.nn.BatchNorm1d(num_hidden)
+        self.conv2 = GCNConv(num_hidden, num_hidden)
+        self.bn2 = torch.nn.BatchNorm1d(num_hidden)
+        self.fc1 = torch.nn.Linear(num_hidden, num_hidden)
+        self.fc2 = torch.nn.Linear(num_hidden, num_outputs)
+
+        self._initialize_weights()
+
+
+    def _initialize_weights(self):
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.kaiming_normal_(module.weight, mode='fan_in', nonlinearity='relu')
+                if module.bias is not None:
+                    module.bias.data.fill_(0.001)
+
+
+    def forward(self, data):
+        # Forward pass remains largely unchanged
+
+        if not isinstance(data, Batch):
+            data = Batch.from_data_list([data])
+
+        if hasattr(data, 'batch'):
+            x, edge_index, batch = data.x, data.edge_index, data.batch
+        else:
+            x, edge_index = data.x, data.edge_index
+            batch = torch.zeros(x.size(0), dtype=torch.long, device=x.device)
+
+
+        #x, edge_index, batch = self.process_input(data)
+        x = F.relu(self.bn1(self.conv1(x, edge_index)))
+        x = F.relu(self.bn2(self.conv2(x, edge_index)))
+        x = global_mean_pool(x, batch)
+        x = F.relu(self.fc1(x))
+        x = F.softmax(self.fc2(x), dim=1)  # Output as a probability distribution
+        return x
+
+
+# Critic Network
+class CriticGNN(torch.nn.Module):
+    def __init__(self, num_inputs, num_hidden):
+        super(CriticGNN, self).__init__()
+        # Similar architecture but the output is scalar
+        self.conv1 = GCNConv(num_inputs, num_hidden)
+        self.bn1 = torch.nn.BatchNorm1d(num_hidden)
+        self.conv2 = GCNConv(num_hidden, num_hidden)
+        self.bn2 = torch.nn.BatchNorm1d(num_hidden)
+        self.fc1 = torch.nn.Linear(num_hidden, num_hidden)
+        self.fc2 = torch.nn.Linear(num_hidden, 1)  # Scalar output
+
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.kaiming_normal_(module.weight, mode='fan_in', nonlinearity='relu')
+                if module.bias is not None:
+                    module.bias.data.fill_(0.001)
+
+
+    def forward(self, data):
+        # Forward pass similar to the actor network but with a scalar output
+        if not isinstance(data, Batch):
+            data = Batch.from_data_list([data])
+
+        if hasattr(data, 'batch'):
+            x, edge_index, batch = data.x, data.edge_index, data.batch
+        else:
+            x, edge_index = data.x, data.edge_index
+            batch = torch.zeros(x.size(0), dtype=torch.long, device=x.device)
+
+        #x, edge_index, batch = self.process_input(data)
+        x = F.relu(self.bn1(self.conv1(x, edge_index)))
+        x = F.relu(self.bn2(self.conv2(x, edge_index)))
+        x = global_mean_pool(x, batch)
+        x = F.relu(self.fc1(x))
+        x = self.fc2(x)  # <-- Scalar value
+        return x
+
+
+
+
 class ReplayBuffer:
     '''
     the purpose of the replay buffer is to break the 
@@ -193,6 +289,3 @@ class ReplayBuffer:
     def __len__(self):
         return len(self.buffer)
 
-
-# Example usage:
-#model = GNNPolicyNetwork(input_dim=your_input_dim, hidden_dim=64, output_dim=10)

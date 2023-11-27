@@ -5,6 +5,7 @@ import time
 from datetime import datetime, timezone
 import pandas as pd
 import logging
+import os
 
 # For progress display
 start_time = time.time()
@@ -35,7 +36,7 @@ logger.propagate = False
 class WorkloadDeploymentSimulator:
 
 
-    def __init__(self,cpu_load=0.5,mem_load=0.5,pod_load=0.5,pod_limit=110,namespace='default',scheduler='default-scheduler',progress_indication=True):
+    def __init__(self,cpu_load=0.5,mem_load=0.5,pod_load=0.5,pod_limit=110,namespace='default',scheduler='default-scheduler',progress_indication=True,epochs=2):
         '''
         Constructor
         '''
@@ -52,7 +53,8 @@ class WorkloadDeploymentSimulator:
         self.batch_api_instance = client.BatchV1Api()
         self.my_deployments = self.get_all_deployments()
         self.total_pods_deployed = 0
-     
+
+        self.epochs = epochs     
 
         self.pod_load = pod_load
         self.pod_limit = pod_limit
@@ -343,7 +345,7 @@ class WorkloadDeploymentSimulator:
         self.current_load['mem_pct'] = np.round(total_mem_used/total_mem,2)
         return self.current_load
 
-    def initial_deployments(self,interval=10):
+    def initial_deployments(self,epoch,interval=10):
         '''
         Creates a set of initial deployments that will simulate a load
         '''
@@ -351,7 +353,7 @@ class WorkloadDeploymentSimulator:
         while self.current_load['cpu_pct'] < self.max_load['cpu_pct'] and self.current_load['mem_pct'] < self.max_load['mem_pct'] and self.current_load['pod_pct'] < self.max_load['pod_pct']:
             minutes,seconds = divmod(time.time()-start_time,60)
             if self.progress_indication:
-                print(f"\r{np.round(self.current_load['cpu_pct']/self.max_load['cpu_pct'],2)*100}% Complete. Notebook Elapsed time so far: {int(minutes)} minutes and {int(seconds)} seconds",end='', flush=True)
+                print(f"\rEpoch {epoch+1}/{self.epochs} {np.round(self.current_load['cpu_pct']/self.max_load['cpu_pct']*100,2)}% Complete. Notebook Elapsed time so far: {int(minutes)} minutes and {int(seconds)} seconds",end='', flush=True)
             pods = self.v1.list_namespaced_pod(namespace = self.namespace)
             if sum(1 for pod in pods.items if pod.status.phase == 'Pending') < 1:
                 self.create_fully_random_deployment()
@@ -433,34 +435,44 @@ class WorkloadDeploymentSimulator:
         with open("shutdown_signal.txt","w") as file:
             file.write("shutdown")
   
-    def run(self,interval=10,duration=1,epochs=1):
+    def run(self):
         """
         Run method to start the simulator.
         """
-        for epoch in range(epochs):
-            logger.info(f"WDS :: Iteration {epoch+1}/{epochs} Running")
-            self.initial_deployments(interval =interval)
+        for epoch in range(self.epochs):
+            logger.info(f"WDS :: Epoch {epoch+1}/{self.epochs} Running")
+            self.initial_deployments(epoch, interval =10)
             self.my_deployments = self.get_all_deployments()
+            while sum(1 for pod in self.v1.list_namespaced_pod(namespace = self.namespace).items if pod.status.phase == 'Pending') >0:
+                if not os.path.exists('epoch_complete.txt'):
+                    with open(f"epoch_complete.txt","w") as file:
+                        file.write(f"{epoch}")
+                while  os.path.exists('epoch_complete.txt'):
+                    logger.info("WDS :: Waiting on scheduler to stop scheduling")
+                    time.sleep(10)
 
-#            for d_name in self.my_deployments:
-#                try:
-#                    self.api_instance.delete_namespaced_deployment(name=d_name, namespace=self.namespace)
-#                    self.my_deployments.remove(d_name)
-#                    #logger.info(f'WDS :: Removed deployment  {d_name}. Length of Deployment is {len(self.my_deployments)}')
-#                except client.rest.ApiException as e:
-#                    logger.error(f"WDS :: Error removing deployment {d_name}: {e.reason}")
-#                except Exception as e:
-#                    logger.error(f"WDS :: Unexpected error while removing deployment {d_name}: {str(e)}")
+            try:
+                #self.api_instance.delete_namespaced_deployment(name=d_name, namespace=self.namespace)
+                self.api_instance.delete_collection_namespaced_deployment(namespace=self.namespace)
+                time.sleep(2)
+                self.v1.delete_collection_namespaced_pod(namespace = self.namespace)
+                self.my_deployments = []
+                logger.info(f'WDS :: {self.namespace} Namespace cleared')
+            except client.rest.ApiException as e:
+                logger.error(f"WDS :: Error removing deployments: {e.reason}")
+            except Exception as e:
+                logger.error(f"WDS :: Unexpected error while removing deployment: {str(e)}")
 
-            with open(f"epoch_complete.txt","w") as file:
-                file.write(f"{epoch}")
+            #with open(f"epoch_complete.txt","w") as file:
+            #    file.write(f"{epoch}")
             time.sleep(10)
         unique_filename = f"deployment_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         self.df.to_csv(unique_filename,index=False)
         logger.info(f"Data saved to {unique_filename}")
         with open("shutdown_signal.txt","w") as file:
             file.write("shutdown")
-        #self.poll_deployments(interval=interval,duration = duration)
+        print("\n")
+        return
 
 
     def playback(self,df,sleep_interval=5):
@@ -497,59 +509,13 @@ class WorkloadDeploymentSimulator:
             time.sleep(sleep_interval)
 
 
-import optuna
-from threading import Thread
-import time
-
-def objective(trial):
-    # 1. Select Hyperparameters
-    init_epsi = trial.suggest_uniform('init_epsi', 0.8, 1.0)
-    gamma = trial.suggest_uniform('gamma', 0.8, 0.99)
-    learning_rate = trial.suggest_loguniform('learning_rate', 1e-4, 1e-2)
-    epsi_decay = trial.suggest_uniform('epsi_decay', 0.99, 0.9999)
-    replay_buffer_size = trial.suggest_categorical('replay_buffer_size', [50, 100, 200])
-    batch_size = trial.suggest_categorical('batch_size', [20, 32, 64])
-    target_update_frequency = trial.suggest_int('target_update_frequency', 10, 100)
-
-    # 2. Create Agent
-    dqn = CustomSchedulerDQN(init_epsi=init_epsi, gamma=gamma, learning_rate=learning_rate,
-                             epsi_decay=epsi_decay, replay_buffer_size=replay_buffer_size,
-                             batch_size=batch_size, target_update_frequency=target_update_frequency)
-
-    # 3. Agent Run
-    agent_thread = Thread(target=run_agent, args=(dqn,))
-    agent_thread.start()
-
-    # 4. Simulator Run
-    simulator = WorkloadDeploymentSimulator(cpu_load=0.30, mem_load=0.50, pod_load=0.50, scheduler='custom-scheduler')
-    simulator_thread = Thread(target=run_simulator, args=(simulator,))
-    simulator_thread.start()
-
-    # Wait for threads to complete
-    agent_thread.join()
-    simulator_thread.join()
-
-    # 5. Simulator Finish & 6. Save results to tensorboard
-    # Collect results and log them to TensorBoard
-    # ... (TensorBoard logging code)
-
-    # 7. Clear cluster
-    # Perform any cleanup or resource deallocation
-    # ... (Cleanup code)
-
-    # Return the optimization metric (e.g., total reward, loss)
-    return metric
-
-
-
-
 
 if __name__ == "__main__":
     # Add this to the constructor to use custom scheduler: scheduler='custom-scheduler'
-    simulator = WorkloadDeploymentSimulator(cpu_load=0.30,mem_load=0.50,pod_load=0.50,scheduler='custom-scheduler')
+    simulator = WorkloadDeploymentSimulator(cpu_load=0.30,mem_load=0.50,pod_load=0.50,scheduler='custom-scheduler',epochs=2)
 
     # Duration is in hours so 1 is 1 hour worth of data collected and then r
-    simulator.run(interval =10, duration = 1, epochs =1)
+    simulator.run()
     
     ## Uncomment this for playback.
     #playback_df = pd.read_csv("deployment_data_20231107_094336.csv")

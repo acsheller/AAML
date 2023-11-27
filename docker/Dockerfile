@@ -53,6 +53,7 @@ COPY scripts /home/appuser/scripts
 COPY docker/entrypoint.sh /home/appuser/entrypoint.sh
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY ProjectNotebook.ipynb /home/appuser/ProjectNotebook.ipynb
+COPY ModelOptimization_acdqn.py /home/appuser/ModelOptimization_acdqn.py
 
 
 
@@ -70,12 +71,13 @@ RUN echo "alias k='kubectl'" >> .bashrc && \
     echo "alias kge='kubectl get events --sort-by=.metadata.creationTimestamp'" >> .bashrc && \
     echo "alias kg='kubectl get'" >> .bashrc && \
     echo "alias kl='kubectl logs'" >> .bashrc && \
-    echo "alias gnnsched='python /home/appuser/scripts/scheduler_gnn.py'" >> .bashrc && \
-    echo "alias dqnsched='python /home/appuser/scripts/scheduler_dqn.py'" >> .bashrc && \
-    echo "alias runsim='python /home/appuser/scripts/workload_deployment_simulator.py '" >> .bashrc && \ 
-    echo "alias ktop='watch python /home/appuser/scripts/kinfo.py'" >> .bashrc && \
+    echo "alias rungnn='python3 /home/appuser/scripts/scheduler_gnn.py'" >> .bashrc && \
+    echo "alias rundqn='python3 /home/appuser/scripts/scheduler_dqn.py'" >> .bashrc && \
+    echo "alias runsim='python3 /home/appuser/scripts/workload_deployment_simulator.py '" >> .bashrc && \ 
+    echo "alias ktop='watch python3 /home/appuser/scripts/kinfo.py'" >> .bashrc && \
     echo "alias cleancluster='python3 /home/appuser/scripts/cleanup_cluster.py'" >> .bashrc && \
     echo "alias runacdqn='python3 /home/appuser/scripts/actorcritic_dqn.py'" >> .bashrc && \
+    echo "alias runacgnn='python3 /home/appuser/scripts/actorcritic_gnn.py'" >> .bashrc && \
     echo ""
 
 # Create or modify .bash_profile to source .bashrc

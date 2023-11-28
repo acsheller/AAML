@@ -348,7 +348,7 @@ class CustomSchedulerDQN:
                             new_state, reward, done = self.env.step(pod,action,dqn=True)
                             c_sum_reward += reward
                             self.action_list.append(action)
-                            logger.info("AGENT :: Reward {np.round(reward,3)}")
+                            logger.info(f"AGENT :: Reward {np.round(reward,3)}")
                         except Exception as e:
                             logger.error(f"AGENT :: Unexpected error: {e}")
                         
@@ -417,5 +417,5 @@ if __name__ == "__main__":
     # Possible Values for the CustomerScheduler Constructor
     # scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16
     #scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.9995,replay_buffer_size=500,batch_size=50,target_update_frequency=50)
-    scheduler = CustomSchedulerDQN(hidden_layers=64,init_epsi=1.0,gamma=0.9,learning_rate=1e-4,epsi_decay=0.995,replay_buffer_size=100,batch_size=25,target_update_frequency=50)
+    scheduler = CustomSchedulerDQN(hidden_layers=64,init_epsi=1.0,gamma=0.9,learning_rate=1e-4,epsi_decay=0.9985,replay_buffer_size=100,batch_size=20,target_update_frequency=40)
     scheduler.run()

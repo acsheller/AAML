@@ -80,31 +80,31 @@ def run_simulator(model):
 def objective(trial):
     global names_used
     # 1. Select Hyperparameters
-    hidden_layers = trial.suggest_categorical('hidden_layers',[64, 128, 256])
+    hidden_layers = trial.suggest_categorical('hidden_layers',[64, 128])
     gamma = trial.suggest_float('gamma', 0.9, 0.99)
-    actor_learning_rate = trial.suggest_float('actor_learning_rate', 1e-4, 1e-2,log=True)
+    actor_learning_rate = trial.suggest_float('actor_learning_rate', 1e-4, 1e-3,log=True)
     
-    critic_learning_rate = trial.suggest_float('critic_learning_rate', 1e-4, 1e-2,log=True)
+    critic_learning_rate = trial.suggest_float('critic_learning_rate', 1e-4, 1e-3,log=True)
     
     epochs = trial.suggest_categorical('epochs', [2, 3])
 
     # 2. Create Agent
     dqn = ActorCriticDQN(hidden_layers=hidden_layers, gamma=gamma, actor_learning_rate=actor_learning_rate,
                              critic_learning_rate=critic_learning_rate,
-                             progress_indication=False,tensorboard_name=generate_funny_name()+'+dqn')
+                             progress_indication=False,tensorboard_name=generate_funny_name()+'_dqn')
 
     # 3. Agent Run
     agent_thread = Thread(target=run_agent, args=(dqn,))
     agent_thread.start()
 
     # 4. Simulator Run
-    simulator = WorkloadDeploymentSimulator(cpu_load=0.10, mem_load=0.50, pod_load=0.50, scheduler='custom-scheduler',progress_indication=False,epochs=epochs)
+    simulator = WorkloadDeploymentSimulator(cpu_load=0.30, mem_load=0.50, pod_load=0.50, scheduler='custom-scheduler',progress_indication=False,epochs=epochs)
     simulator_thread = Thread(target=run_simulator, args=(simulator,))
     simulator_thread.start()
 
     # 5.  Wait for threads to complete
-    agent_thread.join(timeout=120)
-    simulator_thread.join(timeout=120)
+    agent_thread.join()
+    simulator_thread.join()
 
     # 6. Remove the shutdown signal so everyone can start back up.
     #os.remove('./shutdown_signal.txt')
@@ -138,6 +138,4 @@ if __name__ == "__main__":
     name = generate_funny_name()
     name = name + '_dqn'
     study = optuna.create_study(direction='minimize',study_name=name,storage=storage_url)
-    study.optimize(objective, n_trials=10,timeout=300)
-
-    purne
+    study.optimize(objective, n_trials=5,timeout=300)

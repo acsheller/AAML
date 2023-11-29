@@ -13,12 +13,11 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 import torch.optim as optim
-import torch.nn.functional as F
 from torch_geometric.data import Batch
 
 from torch.utils.tensorboard import SummaryWriter
 
-from drl_models import Actor, Critic
+from drl_models import Actor2, Critic2, Actor, Critic,Actor1, Critic1
 
 from kubernetes import client, config, watch
 from kinfo import KubeInfo
@@ -57,7 +56,7 @@ logger.addHandler(fh)
 # Prevent the log messages from being propagated to the Jupyter notebook 
 # Set to true for logging to appear in log file as well as on screen.
 # Set to False to only appear in file.
-logger.propagate = False
+logger.propagate = True
 
 ### ---- End of Logging Prep ---- ###
 
@@ -104,13 +103,13 @@ class ActorCriticDQN:
         # Hardcoding num_inputs to 30 as that's the valeus being returned for a 10 node cluster or 10*3 which is 
         # cpu, memory, pod count
         # Create the Actor
-        self.actor = Actor(num_inputs=30, num_outputs=self.action_size,num_hidden=hidden_layers)
+        self.actor = Actor(num_inputs=10, num_outputs=self.action_size,num_hidden=hidden_layers)
 
         # Set in train mode
         self.actor.train()
 
         # Create the Critic
-        self.critic = Critic(num_inputs=30, num_outputs=self.action_size,num_hidden=hidden_layers)
+        self.critic = Critic(num_inputs=10, num_outputs=self.action_size,num_hidden=hidden_layers)
 
         # If cuda is available then use it.
         if torch.cuda.is_available():
@@ -155,7 +154,9 @@ class ActorCriticDQN:
             #state_tensor.requires_grad = True  
 
             action_probs = self.actor(state_tensor)
-            action_index = torch.multinomial(action_probs, 1).item()
+
+            #action_index = torch.multinomial(action_probs, 1).item()
+            action_index = np.argmax(list(action_probs[0].cpu().detach().numpy()))
             node_name = self.env.kube_info.node_index_to_name_mapping[action_index]
             #logger.info(f"AGENT :: {list(action_probs[0].cpu().detach().numpy())}")
             #if node_name in available_nodes:
@@ -242,6 +243,7 @@ class ActorCriticDQN:
                         # The actor selects the action in the select_action method
                         # Action probs are needed to calculate loss
                         action,action_probs, agent_type = self.select_action(current_state,pod,) 
+                        logger.info(f'AGENT :: {action} selected based on {[np.round(i,3) for i in action_probs[0].cpu().detach().numpy().tolist()]}')
                         new_state, reward, done = self.env.step(pod,action,dqn=True)
                         c_sum_reward += reward
                         self.action_list.append(action)
@@ -253,7 +255,6 @@ class ActorCriticDQN:
                         # Calculate advantage
                         td_error = reward + self.gamma * next_value * (1 - int(done)) - value
                         advantage = td_error.detach()
-
                         # Update Critic
                         critic_loss = td_error.pow(2)
                         self.critic_optimizer.zero_grad()
@@ -266,8 +267,8 @@ class ActorCriticDQN:
                         self.actor_optimizer.zero_grad()
                         actor_loss.backward()
                         self.actor_optimizer.step()
-                        if self.progress_indication:
-                            print(f"\rReward is {np.round(reward,3)}  Cumulative sum of rewareds is {np.round(c_sum_reward,3)}",end='', flush=True)
+                        #if self.progress_indication:
+                        #    print(f"\rReward is {np.round(reward,3)}  Cumulative sum of rewards is {np.round(c_sum_reward,3)}",end='', flush=True)
                         logger.info(f"AGENT :: Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ")
 
                         # Save off some metrics for analysis
@@ -316,5 +317,5 @@ class ActorCriticDQN:
 if __name__ == "__main__":
     # This is how it can be run if a cluster is up and running.  this can be run external of the cluster as the docker compose
     # provides a cluster to work with.  
-    scheduler = ActorCriticDQN(hidden_layers=64,gamma=0.9,actor_learning_rate=1e-4,critic_learning_rate=1e-4,progress_indication=True,tensorboard_name=None)    
+    scheduler = ActorCriticDQN(hidden_layers=64,gamma=0.95,actor_learning_rate=1e-4,critic_learning_rate=1e-4,progress_indication=True,tensorboard_name=None)    
     scheduler.run()

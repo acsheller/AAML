@@ -31,7 +31,7 @@ class ClusterEnvironment:
         self.kube_info = KubeInfo()
         self.nodes = self.api.list_node().items
         self.watcher = watch.Watch()
-
+        self.last_node_assigned = None
     def reset(self):
         # Reset the environment to an initial state
         # and return the initial observation
@@ -68,6 +68,8 @@ class ClusterEnvironment:
             beforeStateReward = self.kube_info.get_node_data_single_input(sort_by_cpu=True,include_controller=False)
             beforeState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=True)            
             node_name = self.apply_action(pod,action)
+
+
             # For a GNN
             afterState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=True)
             afterState2 = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
@@ -80,7 +82,7 @@ class ClusterEnvironment:
             beforeState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=True)
             node_name = self.apply_action(pod,action)
             
-            new_state = self.kube_info.get_node_data_single_input(include_controller=False)
+            new_state = self.kube_info.get_node_data_single_inputCPU(include_controller=False)
             afterState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
             reward = self.calc_reward(beforeState,afterState,action)
 
@@ -98,7 +100,7 @@ class ClusterEnvironment:
             data = self.graph_to_torch_data(G)
             return data
         else:
-            return self.kube_info.get_node_data_single_input()
+            return self.kube_info.get_node_data_single_inputCPU()
 
     def apply_action(self, pod,action):
         node_name = self.kube_info.node_index_to_name_mapping[action]
@@ -321,7 +323,13 @@ class ClusterEnvironment:
 
         node_info_before = beforeState
         node_info_after = afterState
-
+        # Deter assigning to same node back to back.
+        if self.last_node_assigned == None:
+            self.last_node_assigned = self.kube_info.node_index_to_name_mapping[action]
+        elif self.last_node_assigned == self.kube_info.node_index_to_name_mapping[action]:
+            return -2
+        else:
+            self.last_node_assigned == self.kube_info.node_index_to_name_mapping[action]
         reward = self.calc_scaled_reward3(beforeState,action)
         return reward
         #2. Get the CpuInfo for each node
@@ -363,4 +371,7 @@ class ClusterEnvironment:
             TODO Need to sort out the done method.  
             Determines if the eposide is done or not
         '''
+        import os
+        if os.path.exists('epoch_complete.txt'):
+            return True
         return False

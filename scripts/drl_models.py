@@ -104,8 +104,48 @@ class DQN(nn.Module):
         x = self.fc7(x)  # No activation function on output layer
         return x
 
+import torch.nn as nn
+import torch.nn.functional as F
 
 class Actor(nn.Module):
+    def __init__(self, num_inputs, num_outputs, num_hidden):
+        super().__init__()
+        # Increased depth and width: Adding more layers and neurons
+        self.fc1 = nn.Linear(num_inputs, num_hidden * 4)   # First layer, increased width
+        self.fc2 = nn.Linear(num_hidden * 4, num_hidden * 4) # Second layer
+        self.fc3 = nn.Linear(num_hidden * 4, num_hidden * 2) # Third layer
+        self.fc4 = nn.Linear(num_hidden * 2, num_hidden * 2) # Fourth layer
+        self.fc5 = nn.Linear(num_hidden * 2, num_hidden * 2) # Fifth layer
+        self.fc6 = nn.Linear(num_hidden * 2, num_hidden)     # Sixth layer
+        self.fc7 = nn.Linear(num_hidden, num_hidden)         # Seventh layer
+        self.fc8 = nn.Linear(num_hidden, num_hidden // 2)    # Eighth layer
+        self.fc9 = nn.Linear(num_hidden // 2, num_hidden // 2) # Ninth layer
+        self.fc10 = nn.Linear(num_hidden // 2, num_outputs)  # Tenth layer, output layer
+
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.kaiming_normal_(module.weight, mode='fan_in', nonlinearity='relu')
+                if module.bias is not None:
+                    module.bias.data.fill_(0.001)  # Initialize biases
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = F.relu(self.fc4(x))
+        x = F.relu(self.fc5(x))
+        x = F.relu(self.fc6(x))
+        x = F.relu(self.fc7(x))
+        x = F.relu(self.fc8(x))
+        x = F.relu(self.fc9(x))
+        x = F.softmax(self.fc10(x), dim=-1)  # Apply softmax on output layer
+        return x
+
+
+class Actor1(nn.Module):
     def __init__(self, num_inputs, num_outputs,num_hidden):
         super().__init__()
         # Increased depth: Adding additional layers
@@ -137,7 +177,70 @@ class Actor(nn.Module):
         return x
 
 
+
+class Actor2(nn.Module):
+    def __init__(self, num_inputs, num_outputs, num_hidden):
+        super().__init__()
+        # Reduced depth: Only two hidden layers
+        self.fc1 = nn.Linear(num_inputs, num_hidden)  # First hidden layer
+        self.fc2 = nn.Linear(num_hidden, num_hidden)  # Second hidden layer
+        self.fc3 = nn.Linear(num_hidden, num_outputs) # Output layer
+
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.kaiming_normal_(module.weight, mode='fan_in', nonlinearity='relu')
+                if module.bias is not None:
+                    module.bias.data.fill_(0.001)  # Initialize biases
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.softmax(self.fc3(x),dim=-1)
+        return x
+
+
 class Critic(nn.Module):
+    def __init__(self, num_inputs, num_outputs, num_hidden):
+        super().__init__()
+        # Increased depth and width: Adding more layers and neurons
+        self.fc1 = nn.Linear(num_inputs, num_hidden * 4)   # First layer, increased width
+        self.fc2 = nn.Linear(num_hidden * 4, num_hidden * 4) # Second layer
+        self.fc3 = nn.Linear(num_hidden * 4, num_hidden * 2) # Third layer
+        self.fc4 = nn.Linear(num_hidden * 2, num_hidden * 2) # Fourth layer
+        self.fc5 = nn.Linear(num_hidden * 2, num_hidden * 2) # Fifth layer
+        self.fc6 = nn.Linear(num_hidden * 2, num_hidden)     # Sixth layer
+        self.fc7 = nn.Linear(num_hidden, num_hidden)         # Seventh layer
+        self.fc8 = nn.Linear(num_hidden, num_hidden // 2)    # Eighth layer
+        self.fc9 = nn.Linear(num_hidden // 2, num_hidden // 2) # Ninth layer
+        self.fc10 = nn.Linear(num_hidden // 2, 1)  # Tenth layer, output layer
+
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.kaiming_normal_(module.weight, mode='fan_in', nonlinearity='relu')
+                if module.bias is not None:
+                    module.bias.data.fill_(0.001)  # Initialize biases
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = F.relu(self.fc4(x))
+        x = F.relu(self.fc5(x))
+        x = F.relu(self.fc6(x))
+        x = F.relu(self.fc7(x))
+        x = F.relu(self.fc8(x))
+        x = F.relu(self.fc9(x))
+        x = self.fc10(x)  # Apply softmax on output layer
+        return x
+
+
+class Critic1(nn.Module):
     def __init__(self, num_inputs, num_outputs,num_hidden):
         super().__init__()
         # Increased depth: Adding additional layers
@@ -168,7 +271,29 @@ class Critic(nn.Module):
         x = self.fc7(x)
         return x
 
+class Critic2(nn.Module):
+    def __init__(self, num_inputs, num_outputs, num_hidden):
+        super().__init__()
+        # Reduced depth: Only two hidden layers
+        self.fc1 = nn.Linear(num_inputs, num_hidden)  # First hidden layer
+        self.fc2 = nn.Linear(num_hidden, num_hidden)  # Second hidden layer
+        self.fc3 = nn.Linear(num_hidden, 1) # Output layer
 
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.kaiming_normal_(module.weight, mode='fan_in', nonlinearity='relu')
+                if module.bias is not None:
+                    module.bias.data.fill_(0.001)  # Initialize biases
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)
+        return x
+    
 
 import torch
 import torch.nn.functional as F

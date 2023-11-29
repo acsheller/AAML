@@ -200,6 +200,20 @@ class KubeInfo:
 
         return single_row_of_data
 
+    def get_node_data_single_inputCPU(self,sort_by_cpu=False,include_controller=False):
+        '''
+        To use as input to ordinary NN.  One single row of data as input.  
+        '''
+        single_row_of_data = []
+        data = self.get_nodes_data(sort_by_cpu=False,include_controller=include_controller)
+        for node in data:
+            #node_index = self.node_name_to_index_mapping(node['name'])
+            single_row_of_data.append(np.round(np.round(node['total_cpu_used']/node['cpu_capacity'],4),4))
+            #single_row_of_data.append(np.round(1- np.round(node['total_memory_used']/node['memory_capacity'],4),4))
+            #single_row_of_data.append(np.round(1- np.round(node['pod_count']/node['pod_limit'],4)))
+
+        return single_row_of_data
+
 if __name__ == "__main__":
     kube_info = KubeInfo()
     kube_info.display_nodes_info()

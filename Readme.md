@@ -1,22 +1,30 @@
-# Deep Reinforcement Learning using Attention Graph Neural Networks for Kubernetes Scheduling.
+# Deep Reinforcement Learning using Graph Neural Networks for Kubernetes Scheduling.
 
-## Overview
 
-Resource Management in Kubernetes clusters can be challenging. The default scheduler, kube-scheduler, may not meet all requirements for some applications. Fortunately, one can extend the functionality of the default scheduler to meet specific demands [1].  
 
-This project uses [KWOK](https://kwok.sigs.k8s.io/) to establish a cluster of potentially thousands of nodes.  For this project a thousand will not be used but a mix of resource types will be provided.  
 
-Applications or workflows that run in Kubernetes specify resources they need. during launch Kubernetes will check to see if a node (a physcial server) has the resource types the application needs.  Resource types include: CPU, memory, and storage. Additional resource that could be evaluated include GPU and networking resources.
 
+## Overview 
+
+Instead of rehashing it all here please [Review the paper](link to paper). This repository supports. To summarize, the project use Docker compose to launch two containers. One container is a [Kwok](https://kwok.sigs.k8s.io/) simulated cluster, the other is the scheduler.  
+ 
 ## Getting Started
+the  primary container called `aaml_kwok` needs to be built and stored localy. The container extends the latest PyTorch container which is already 3GB+ in size. Once built with PyTorch Geometric and all dependencies. The local container is 8GB. After cloning the repository, perform a docker compose build, this may take 15 minutes but is much quicker on future efforts as images are cached locally. 
 
-### System Setup
+```
+git clone git@github.com:acsheller/AAML.git
 
-The system can be of any type. The particular system developed on is specified in the [setup instructions](docs/Setup_dev_env.md). what's needed is a Linux-based system running K8s.  The enviroment used in this work is WSL2 running Docker Desktop with Kubernetes enabled.
+docker compose build   # Remember to build if changes are made
 
-### Setup Python Virtual Environment
+docker compose up      # To bring them up
 
-Access to the cluster can be obtained external to the cluster using a Python module called `kubernetes`. This way the Python script can be developed externally and then built into a Docker container to run as a deployment in Kubernetes. Anaconda is a good choice. Visit the Anaconda website for [instructions on installing, setting up, and using virtual environments](https://docs.anaconda.com/free/anaconda/install/index.html). More on thi after the cluster is setup.
+docker compose down    # To take the docker containers down
+
+```
+
+Jupyter lab will be served on port 8888. It can be accessed with `http://127.0.0.1:8888/lab?token=AAML`  Note the token is `AAML`.
+
+Tensorboard will be served on port 6006. It can be reached at `http://127.0.0.1:6006/`.
 
 ### Is your cluster setup?
 Be sure to complete the steps in the [setup instructions]([setup instructions](docs/Setup_dev_env.md)).

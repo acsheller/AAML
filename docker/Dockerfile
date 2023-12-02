@@ -48,6 +48,7 @@ RUN mkdir /home/appuser/logs
 
 # Copy the contents of /app/build into /desired/directory within the container
 COPY scripts /home/appuser/scripts
+COPY data /home/appuser/data
 #COPY kwok_workloads /home/appuser/kwok_workloads
 #COPY scheduler /home/appuser/scheduler
 COPY docker/entrypoint.sh /home/appuser/entrypoint.sh

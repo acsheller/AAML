@@ -4,11 +4,84 @@ import torch.nn.functional as F
 from torch_geometric.nn import GCNConv,GINConv, global_mean_pool
 from torch_geometric.data import Batch
 import random
-
+import numpy as np
 from collections import deque
 
 import logging
-logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
+# Create a named logger
+logger = logging.getLogger('MyModelsLogger')
+logger.setLevel(logging.INFO)
+
+# Prevent the log messages from being propagated to the Jupyter notebook
+logger.propagate = True
+
+class DQN(nn.Module):
+    def __init__(self, num_inputs, num_outputs,num_hidden):
+        super().__init__()
+        # Increased depth: Adding additional layers
+        self.fc1 = nn.Linear(num_inputs, int(num_hidden*2))  # First layer
+        self.fc2 = nn.Linear(int(num_hidden*2), int(num_hidden*2))         # Second layer
+        self.fc3 = nn.Linear(int(num_hidden*2), num_hidden)          # Third layer
+        self.fc4 = nn.Linear(num_hidden, num_hidden)           # Fourth layer
+        self.fc5 = nn.Linear(num_hidden, int(num_hidden//2))           # Fifth layer
+        self.fc6 = nn.Linear(int(num_hidden//2), int(num_hidden//2))           # Sixth layer
+        self.fc7 = nn.Linear(int(num_hidden//2), num_outputs)  # Output layer
+
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.kaiming_normal_(module.weight, mode='fan_in', nonlinearity='relu')
+                if module.bias is not None:
+                    module.bias.data.fill_(0.001)  # Initialize biases
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = F.relu(self.fc4(x))
+        x = F.relu(self.fc5(x))
+        x = F.relu(self.fc6(x))
+        x = self.fc7(x)  # No activation function on output layer
+        return F.softmax(x)
+
+
+class DQN2(nn.Module):
+    def __init__(self, num_inputs, num_outputs,num_hidden):
+        super().__init__()
+        # Increased depth: Adding additional layers
+        self.fc1 = nn.Linear(num_inputs, int(num_hidden*2))  # First layer
+        self.fc2 = nn.Linear(int(num_hidden*2), int(num_hidden*2))         # Second layer
+        self.fc3 = nn.Linear(int(num_hidden*2), num_hidden)          # Third layer
+        self.fc4 = nn.Linear(num_hidden, num_hidden)           # Fourth layer
+        self.fc5 = nn.Linear(int(num_hidden), num_outputs)  # Output layer
+        self.apply(self.custom_weight_init)
+        #self._initialize_weights()
+
+    def custom_weight_init(self,m):
+        if isinstance(m, nn.Linear) or isinstance(m, nn.Conv2d):
+            m.weight.data.uniform_(0, 0.1)
+            if m.bias is not None:
+                m.bias.data.fill_(0)
+
+    def _initialize_weights(self):
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                #nn.init.kaiming_normal_(module.weight, mode='fan_in', nonlinearity='relu')
+                nn.init.xavier_uniform_(module.weight, gain=nn.init.calculate_gain('relu'))
+                if module.bias is not None:
+                    module.bias.data.fill_(0.001)  # Initialize biases
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = F.relu(self.fc2(x))
+        x = F.relu(self.fc3(x))
+        x = F.relu(self.fc4(x))
+        x = self.fc5(x)  # No activation function on output layer
+        logger.info(f" Max Pos {np.argmax(x.cpu().detach().numpy())}, {x.cpu().detach().numpy()}")
+        return x
+
 
 class GNNPolicyNetwork(torch.nn.Module):
     def __init__(self, input_dim, hidden_dim, output_dim):
@@ -73,39 +146,8 @@ class GNNPolicyNetwork2(torch.nn.Module):
         x = self.fc2(x)  # Output raw scores (logits)
         return x
     
-class DQN(nn.Module):
-    def __init__(self, num_inputs, num_outputs,num_hidden):
-        super().__init__()
-        # Increased depth: Adding additional layers
-        self.fc1 = nn.Linear(num_inputs, int(num_hidden*2))  # First layer
-        self.fc2 = nn.Linear(int(num_hidden*2), int(num_hidden*2))         # Second layer
-        self.fc3 = nn.Linear(int(num_hidden*2), num_hidden)          # Third layer
-        self.fc4 = nn.Linear(num_hidden, num_hidden)           # Fourth layer
-        self.fc5 = nn.Linear(num_hidden, int(num_hidden//2))           # Fifth layer
-        self.fc6 = nn.Linear(int(num_hidden//2), int(num_hidden//2))           # Sixth layer
-        self.fc7 = nn.Linear(int(num_hidden//2), num_outputs)  # Output layer
 
-        self._initialize_weights()
 
-    def _initialize_weights(self):
-        for module in self.modules():
-            if isinstance(module, nn.Linear):
-                nn.init.kaiming_normal_(module.weight, mode='fan_in', nonlinearity='relu')
-                if module.bias is not None:
-                    module.bias.data.fill_(0.001)  # Initialize biases
-
-    def forward(self, x):
-        x = F.relu(self.fc1(x))
-        x = F.relu(self.fc2(x))
-        x = F.relu(self.fc3(x))
-        x = F.relu(self.fc4(x))
-        x = F.relu(self.fc5(x))
-        x = F.relu(self.fc6(x))
-        x = self.fc7(x)  # No activation function on output layer
-        return x
-
-import torch.nn as nn
-import torch.nn.functional as F
 
 class Actor(nn.Module):
     def __init__(self, num_inputs, num_outputs, num_hidden):

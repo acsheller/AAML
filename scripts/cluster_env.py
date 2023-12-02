@@ -32,6 +32,8 @@ class ClusterEnvironment:
         self.nodes = self.api.list_node().items
         self.watcher = watch.Watch()
         self.last_node_assigned = None
+        self.assignment_count = {}
+
     def reset(self):
         # Reset the environment to an initial state
         # and return the initial observation
@@ -292,7 +294,7 @@ class ClusterEnvironment:
         return -1  # You might want to handle this case based on your specific requirements
 
 
-    def calc_scaled_reward4(self,State, action):
+    def calc_scaled_reward4(self,State, action,neg_value=False):
         # Extract CPU usages
         cpu_usages = [np.round(node['total_cpu_used']/node['cpu_capacity'], 4) for node in State]
 
@@ -307,10 +309,18 @@ class ClusterEnvironment:
         # Normalize the scaled variance to be between 0 and 1
         normalized_variance = scaled_variance / (scaled_variance + 1)
 
+
+        scale_on_freq = 1/self.assignment_count[action]
         # Calculate reward (higher reward for lower variance)
         reward = max_reward - normalized_variance * (max_reward - min_reward)
+        if neg_value:
+           reward = -reward
+           reward = np.round(reward * 1/scale_on_freq,4)
+        else:
+            reward = np.round(reward*scale_on_freq, 4)
 
-        return np.round(reward, 4)
+
+        return reward
 
 
 
@@ -320,17 +330,20 @@ class ClusterEnvironment:
         '''
         # 1. Get the state of the cluster
         #node_info = self.kube_info.get_nodes_data()
-
+        if action not in self.assignment_count:
+            self.assignment_count[action] =0
+        self.assignment_count[action] +=1
         node_info_before = beforeState
         node_info_after = afterState
         # Deter assigning to same node back to back.
         if self.last_node_assigned == None:
             self.last_node_assigned = self.kube_info.node_index_to_name_mapping[action]
         elif self.last_node_assigned == self.kube_info.node_index_to_name_mapping[action]:
-            return -2
+            return self.calc_scaled_reward4(beforeState,action,neg_value=True)
+            #return -1.5
         else:
-            self.last_node_assigned == self.kube_info.node_index_to_name_mapping[action]
-        reward = self.calc_scaled_reward3(beforeState,action)
+            self.last_node_assigned = self.kube_info.node_index_to_name_mapping[action]
+        reward = self.calc_scaled_reward4(beforeState,action)
         return reward
         #2. Get the CpuInfo for each node
         cpu_info_before = {}

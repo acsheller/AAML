@@ -5,7 +5,7 @@ import json
 import random
 import networkx as nx
 import os
-
+import pandas as pd
 import torch
 
 import torch.optim as optim
@@ -15,7 +15,7 @@ import datetime
 from datetime import datetime, timezone
 import time
 from cluster_env import ClusterEnvironment
-from drl_models import ReplayBuffer,DQN
+from drl_models import ReplayBuffer,DQN2 as DQN
 import numpy as np
 from torch_geometric.data import Data
 from torch.utils.tensorboard import SummaryWriter
@@ -41,7 +41,7 @@ fh.setFormatter(formatter)
 logger.addHandler(fh)
 
 # Prevent the log messages from being propagated to the Jupyter notebook
-logger.propagate = False
+logger.propagate = True
 
 class CustomSchedulerDQN:
     '''
@@ -89,9 +89,9 @@ class CustomSchedulerDQN:
         self.output_size = len(self.api.list_node().items) -1 # -1 because of 1 controller TODO Consider making this dynamic or an argument
         #self.gnn_model = GNNPolicyNetwork2(input_dim=self.input_size,hidden_dim=64,output_dim=self.output_size)
         # Hardcoding num_inputs to 33 as that's the valeus being returned for a 10 node cluster or 11*3 which is 
-        self.dqn = DQN(num_inputs=30, num_outputs=self.output_size,num_hidden=hidden_layers)
+        self.dqn = DQN(num_inputs=10, num_outputs=self.output_size,num_hidden=hidden_layers)
 
-        self.target_network = DQN(num_inputs=30,num_outputs=self.output_size,num_hidden=hidden_layers)
+        self.target_network = DQN(num_inputs=10,num_outputs=self.output_size,num_hidden=hidden_layers)
         self.target_network.load_state_dict(self.dqn.state_dict())
         self.target_network.eval()
         self.increase_decay = True
@@ -228,7 +228,7 @@ class CustomSchedulerDQN:
         self.replay_buffer.push(state, action, reward, next_state,done)
 
 
-    def train_policy_network(self, experiences, epochs=3):
+    def train_policy_network(self, experiences, epochs=1):
         for epoch in range(epochs):
             #logger.info(f"Starting epoch {epoch + 1}/{epochs}")
 
@@ -412,10 +412,45 @@ class CustomSchedulerDQN:
         model.load_state_dict(torch.load(f_name))
         model.eval()
 
+
+    def populate_replay(self,df,epochs = 100,batch_size=50):
+        '''
+        Train Off Policy
+        '''
+
+        len_data = len(df)
+        for i in range(len_data):
+            
+            state = [float(item) for item in df.iloc[i][['cpu_request', 'memory_request'] + [f'cpu_usage_node_{j}' for j in range(10)]].to_list()]
+            action = np.float32(df.iloc[i]['action'])
+            reward = np.float32(df.iloc[i]['reward'])
+            
+            # Check if it's the last row
+            if i == len_data - 1:
+                # For the last row, there is no 'next state'
+                next_state = state  # or a terminal state representation if you have one
+                done = True
+            else:
+                next_state = [float(item) for item in df.iloc[i+1][['cpu_request', 'memory_request'] + [f'cpu_usage_node_{j}' for j in range(10)]].to_list()]
+                done = False
+            
+            self.add_to_buffer(state, action, reward, next_state, done)
+
+
+
 if __name__ == "__main__":
 
     # Possible Values for the CustomerScheduler Constructor
     # scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16
     #scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.9995,replay_buffer_size=500,batch_size=50,target_update_frequency=50)
-    scheduler = CustomSchedulerDQN(hidden_layers=64,init_epsi=1.0,gamma=0.9,learning_rate=1e-4,epsi_decay=0.9985,replay_buffer_size=100,batch_size=20,target_update_frequency=40)
+    #scheduler = CustomSchedulerDQN(hidden_layers=64,init_epsi=1.0,gamma=0.9,learning_rate=1e-4,epsi_decay=0.9985,replay_buffer_size=100,batch_size=20,target_update_frequency=40)
+    
+    file_names = ["data/sched_20231201_164422.csv","data/sched_20231202_083449.csv"]
+    dfs = []
+    for data_file in file_names:
+        dfs.append(pd.read_csv(data_file))
+    main_df = pd.concat(dfs,ignore_index=True)
+    scheduler = CustomSchedulerDQN(hidden_layers=10,init_epsi=0.5,gamma=0.9,learning_rate=1e-2,epsi_decay=0.9975, \
+        replay_buffer_size=1000,batch_size=15,target_update_frequency=50,progress_indication=False)
+
     scheduler.run()

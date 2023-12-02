@@ -15,7 +15,7 @@ current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 filename = f"logs/WDS_log_{current_time}.log"
 
 # Create a named logger
-logger = logging.getLogger('MyGNNLogger')
+logger = logging.getLogger('MyWDSLogger')
 logger.setLevel(logging.INFO)
 
 # Create file handler which logs even debug messages
@@ -170,6 +170,38 @@ class WorkloadDeploymentSimulator:
                 if name not in self.my_deployments:    
                     return name
 
+
+
+
+    def create_fully_random_deployment_element(self):
+        '''
+        Creates a random deployment element set that can be saved to a dataframe
+        '''
+        # Generate a random deployment name
+        deployment_name = self.generate_funny_name()
+        
+        # Generate random values for other parameters
+        replicas = random.randint(5, 15)  # Random number of replicas between 5 and 15
+        
+        # Select a random CPU request and then choose a CPU limit that's greater than or equal to the request
+        cpu_request_key = random.choice(list(self.cpu_request_values.keys()))
+        cpu_request = self.cpu_request_values[cpu_request_key]
+        valid_cpu_limits = {k: v for k, v in self.cpu_limit_values.items() if k >= cpu_request_key}
+        cpu_limit = valid_cpu_limits[random.choice(list(valid_cpu_limits.keys()))]
+
+        # Select a random Memory request that is larger than or equal to the CPU request
+        valid_memory_request_keys = [k for k in self.memory_request_values.keys() if k >= cpu_request_key]
+        if not valid_memory_request_keys:
+            raise ValueError("No memory request values larger than or equal to the CPU request are available.")
+        
+        memory_request_key = random.choice(valid_memory_request_keys)
+        memory_request = self.memory_request_values[memory_request_key]
+        
+        # Choose a Memory limit that's greater than or equal to the memory request
+        valid_memory_limits = {k: v for k, v in self.memory_limit_values.items() if k >= memory_request_key}
+        memory_limit = valid_memory_limits[random.choice(list(valid_memory_limits.keys()))]
+
+        return [deployment_name, replicas, cpu_request, memory_request, cpu_limit, memory_limit]
 
     def create_fully_random_deployment(self):
         '''
@@ -441,7 +473,7 @@ class WorkloadDeploymentSimulator:
         """
         for epoch in range(self.epochs):
             logger.info(f"WDS :: Epoch {epoch+1}/{self.epochs} Running")
-            self.initial_deployments(epoch, interval =10)
+            self.initial_deployments(epoch, interval =40)
             self.my_deployments = self.get_all_deployments()
             while sum(1 for pod in self.v1.list_namespaced_pod(namespace = self.namespace).items if pod.status.phase == 'Pending') >0:
                 if not os.path.exists('epoch_complete.txt'):
@@ -452,12 +484,13 @@ class WorkloadDeploymentSimulator:
                     time.sleep(10)
 
             try:
-                #self.api_instance.delete_namespaced_deployment(name=d_name, namespace=self.namespace)
-                self.api_instance.delete_collection_namespaced_deployment(namespace=self.namespace)
-                time.sleep(2)
-                self.v1.delete_collection_namespaced_pod(namespace = self.namespace)
-                self.my_deployments = []
-                logger.info(f'WDS :: {self.namespace} Namespace cleared')
+                if 1 == 2:
+                    #self.api_instance.delete_namespaced_deployment(name=d_name, namespace=self.namespace)
+                    self.api_instance.delete_collection_namespaced_deployment(namespace=self.namespace)
+                    time.sleep(2)
+                    self.v1.delete_collection_namespaced_pod(namespace = self.namespace)
+                    self.my_deployments = []
+                    logger.info(f'WDS :: {self.namespace} Namespace cleared')
             except client.rest.ApiException as e:
                 logger.error(f"WDS :: Error removing deployments: {e.reason}")
             except Exception as e:
@@ -475,44 +508,9 @@ class WorkloadDeploymentSimulator:
         return
 
 
-    def playback(self,df,sleep_interval=5):
-        '''
-        A playback function that will playback the simulation saved off
-        '''
-        # Iterate over the rows in the DataFrame
-        for index, row in df.iterrows():
-            # Call create_kwok_deployment
-            if row['action'] == 'add':
-                self.create_kwok_deployment(
-                    deployment_name=row['name'],
-                    replicas=row['pod_count'],
-                    cpu_request=row['cpu_request'],
-                    memory_request=row['mem_request'],
-                    cpu_limit=row['cpu_limit'],
-                    memory_limit=row['mem_limit']
-                )
-                self.my_deployments.append(row['name'])
-                logger.info(f"WDS :: added a deployment {row['name']}")
-            
-            elif row['action'] == 'delete':
-                try: 
-                    self.api_instance.delete_namespaced_deployment(name=row['name'], namespace='default')
-                    row['action'] = 'delete'
-                    logger.info(f"WDS :: deleted deployment {row['name']}" )
-                except client.rest.ApiException as e:
-                    logger.error(f"WDS :: Error removing deployment {row['name']}: {e.reason}")
-                except Exception as e:
-                    logger.error(f"WDS :: Unexpected error while removing deployment {row['name']}: {str(e)}")
-
-                self.my_deployments.remove(row['name'])
-                logger.info('WDS :: Removed deployment  {}. Length of Deployment is {}'.format(row['name'],len(self.my_deployments)))
-            time.sleep(sleep_interval)
-
-
-
 if __name__ == "__main__":
     # Add this to the constructor to use custom scheduler: scheduler='custom-scheduler'
-    simulator = WorkloadDeploymentSimulator(cpu_load=0.30,mem_load=0.50,pod_load=0.50,scheduler='custom-scheduler',epochs=2)
+    simulator = WorkloadDeploymentSimulator(cpu_load=0.30,mem_load=0.50,pod_load=0.50,scheduler='default-scheduler',epochs=1)
 
     # Duration is in hours so 1 is 1 hour worth of data collected and then r
     simulator.run()

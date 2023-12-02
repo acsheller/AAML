@@ -155,8 +155,9 @@ class ActorCriticDQN:
 
             action_probs = self.actor(state_tensor)
 
-            #action_index = torch.multinomial(action_probs, 1).item()
-            action_index = np.argmax(list(action_probs[0].cpu().detach().numpy()))
+            # This is the randomness
+            action_index = torch.multinomial(action_probs, 1).item()
+            #action_index = np.argmax(list(action_probs[0].cpu().detach().numpy()))
             node_name = self.env.kube_info.node_index_to_name_mapping[action_index]
             #logger.info(f"AGENT :: {list(action_probs[0].cpu().detach().numpy())}")
             #if node_name in available_nodes:

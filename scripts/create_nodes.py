@@ -2,12 +2,12 @@ import subprocess
 import argparse
 import time
 
-def create_kwok_node(node_count=10,cpu_count = 64,memory="256Gi",pod_limit=110,type='agent'):
+def create_kwok_node(node_count=10,cpu_count = 64,memory="256Gi",pod_limit=110,node_type='agent'):
     base_name = 'kwok-std-node'
-    if type =='control-plane':
+    if node_type =='control-plane':
       base_name = 'kwok-ctl-node'
     for i in range(0, node_count):
-
+        node_name = f"{base_name}-0"
         node_yaml = f"""
 apiVersion: v1
 
@@ -20,9 +20,9 @@ metadata:
     beta.kubernetes.io/arch: amd64
     beta.kubernetes.io/os: linux
     kubernetes.io/arch: amd64
-    kubernetes.io/hostname: {base_name}-{i}
+    kubernetes.io/hostname: {node_name}
     kubernetes.io/os: linux
-    kubernetes.io/role: {type}
+    kubernetes.io/role: {node_type}
     #node-role.kubernetes.io/{base_name}: ""
     type: kwok
   name: {base_name}-{i}
@@ -50,6 +50,16 @@ status:
 """
         subprocess.run(["kubectl", "apply", "-f", "-"], input=node_yaml, text=True)
 
+        if node_type == "control-plane":
+          taint_node(node_name)
+
+
+def taint_node(node_name):
+    taint = "donotschedule=true:NoSchedule"
+    print("Running taint node")
+    subprocess.run(["kubectl", "taint", "nodes", node_name, taint])
+
+
 if __name__ == "__main__":
     #node_count = int(input("Enter the total number of standard nodes to create: "))
      # Create the parser
@@ -61,5 +71,6 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     time.sleep(4)
-    create_kwok_node(node_count=1,type='control-plane')
+    create_kwok_node(node_count=1,node_type='control-plane')
     create_kwok_node(node_count=args.node_count)
+

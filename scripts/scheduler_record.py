@@ -55,6 +55,7 @@ class SchedulerRecord:
         # Do K8s stuff
         config.load_kube_config()
         self.api = client.CoreV1Api()
+        self.v1 = client.AppsV1Api()
         self.watcher = watch.Watch()
         self.kube_info = KubeInfo()
 
@@ -110,9 +111,36 @@ class SchedulerRecord:
         return new_row
 
 
+    def get_num_pods_for_deployment(self,deployment_name):
+        try:
+            deployment = self.v1.read_namespaced_deployment(name=deployment_name,namespace = 'default')
+            desired_replicas = deployment.spec.replicas
+        except client.ApiException as e:
+            logger.info("Exception when calling AppsV1Api-read_namespace_deployment from get_num_pods_for_deployment %s\n" % e)
+            return False
+        return desired_replicas
+
+        # Compare the current count with the desired replica count
+        current_count = deployment_count.get(deployment_name, 0)
+        return current_count >= desired_replicas
+
+    def get_deployment_name(self,pod):
+        if pod.metadata.labels:
+            label_key = 'app'
+            deployment_name = pod.metadata.labels.get(label_key)
+            if deployment_name:
+                return deployment_name
+        return None
+
+
+
+
     def run(self):
         import pandas as pd
         deployed_pods = []
+        deployment_counts = {}
+        deployments_pods = {}
+
         columns = ['pod_name','action','reward', 'done', 'cpu_request', 'memory_request'] + [f'cpu_usage_node_{i}' for i in range(10)]
         c_sum_reward = 0
         df = pd.DataFrame(columns=columns)
@@ -123,19 +151,30 @@ class SchedulerRecord:
                     pod = event['object']
                     #logger.info(f"pod {pod.metadata.name}")
                     if pod.status.phase == "Running" and pod.spec.node_name and pod.metadata.name not in deployed_pods:
-                        deployed_pods.append(pod.metadata.name)
-                        data = self.record_scheduling_action(pod)
-                        c_sum_reward += data['reward']
-                        row_data = [data['pod_name'], data['action'], data['reward'], data['done'], data['cpu_request'], data['memory_request']] + data['cpu_usages']
+                        deployment_name = self.get_deployment_name(pod)
+                        if deployment_name not in deployment_counts.keys():
+                            deployment_counts[deployment_name] = self.get_num_pods_for_deployment(deployment_name)
+                            deployments_pods[deployment_name] = []
+                            logger.info(f"Processing Deployment {deployment_name} with {deployment_counts[deployment_name]}")
 
-                        df.loc[len(df)] = row_data
+                        if pod.metadata.name not in deployed_pods:
+                            deployed_pods.append(pod.metadata.name)
+                            deployments_pods[deployment_name].append(pod.metadata.name)
+                            data = self.record_scheduling_action(pod)
+                            c_sum_reward += data['reward']
+                            if len(deployments_pods[deployment_name]) == deployment_counts[deployment_name]:
+                                data['done'] = 1
+                            row_data = [data['pod_name'], data['action'], data['reward'], data['done'], data['cpu_request'], data['memory_request']] + data['cpu_usages']
+                            
+                            df.loc[len(df)] = row_data
                     
-                        logger.info(f'{data["pod_name"]}, {np.round(c_sum_reward,4)} cumulative sum of rewards df_size {len(df)}')
+                            logger.info(f'{data["pod_name"]}, {np.round(c_sum_reward,4)} cumulative sum of rewards df_size {len(df)}')
             except Exception as e:
                 print(e)
         if not df.empty:
             df.iloc[-1, df.columns.get_loc('done')]= 1
         os.remove('shutdown_signal.txt')
+        logger.info("Logger :: Saving data to csv file")
         file_path = f"data/sched_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv" 
         df.to_csv(file_path, index=False)
         return

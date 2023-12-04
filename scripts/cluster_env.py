@@ -88,7 +88,7 @@ class ClusterEnvironment:
             afterState = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
             reward = self.calc_reward(beforeState,afterState,action)
 
-            done = self.done()
+            done = 0
 
         return new_state, reward, done
 

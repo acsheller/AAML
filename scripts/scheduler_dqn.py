@@ -48,7 +48,9 @@ class CustomSchedulerDQN:
     Implementation of RL agent using a NN as the Deep protion of Deep Reinforcement Learning.
     '''
 
-    def __init__(self,scheduler_name ="custom-scheduler",hidden_layers=64,replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=25,target_update_frequency=50,progress_indication=True,tensorboard_name=None):
+    def __init__(self,scheduler_name ="custom-scheduler",hidden_layers=64,replay_buffer_size=100,learning_rate=1e-4,gamma=0.9, \
+        init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=25,update_frequency = 25,target_update_frequency=50,progress_indication=True, \
+        tensorboard_name=None):
         
         self.scheduler_name = scheduler_name
         self.progress_indication = progress_indication
@@ -61,6 +63,7 @@ class CustomSchedulerDQN:
         # Do K8s stuff
         config.load_kube_config()
         self.api = client.CoreV1Api()
+        self.v1 = client.AppsV1Api()
         self.watcher = watch.Watch()
         self.kube_info = KubeInfo()
 
@@ -74,7 +77,7 @@ class CustomSchedulerDQN:
         else:
             self.writer = SummaryWriter(f'tlogs/')
         self.train_iter =0
-
+        self.update_frequency = update_frequency
         # use a target network
         self.use_target_network = True
         self.target_update_frequency = target_update_frequency
@@ -89,9 +92,9 @@ class CustomSchedulerDQN:
         self.output_size = len(self.api.list_node().items) -1 # -1 because of 1 controller TODO Consider making this dynamic or an argument
         #self.gnn_model = GNNPolicyNetwork2(input_dim=self.input_size,hidden_dim=64,output_dim=self.output_size)
         # Hardcoding num_inputs to 33 as that's the valeus being returned for a 10 node cluster or 11*3 which is 
-        self.dqn = DQN(num_inputs=10, num_outputs=self.output_size,num_hidden=hidden_layers)
+        self.dqn = DQN(num_inputs=12, num_outputs=self.output_size,num_hidden=hidden_layers)
 
-        self.target_network = DQN(num_inputs=10,num_outputs=self.output_size,num_hidden=hidden_layers)
+        self.target_network = DQN(num_inputs=12,num_outputs=self.output_size,num_hidden=hidden_layers)
         self.target_network.load_state_dict(self.dqn.state_dict())
         self.target_network.eval()
         self.increase_decay = True
@@ -235,7 +238,7 @@ class CustomSchedulerDQN:
             # Unpack experiences
             # Use the appropriate format for states and next_states (graph or list)
             states_batch = torch.tensor([e[0] for e in experiences], dtype=torch.float32).to(self.device)
-            actions = torch.tensor([e[1] for e in experiences], dtype=torch.int64).to(self.device)
+            actions = torch.tensor([int(e[1]) for e in experiences], dtype=torch.int64).to(self.device)
             rewards = torch.tensor([e[2] for e in experiences], dtype=torch.float).to(self.device)
             next_states_batch = torch.tensor([e[3] for e in experiences], dtype=torch.float32).to(self.device)
             dones = torch.tensor([e[4] for e in experiences], dtype=torch.float).to(self.device)
@@ -244,10 +247,11 @@ class CustomSchedulerDQN:
             Q_expected = self.dqn(states_batch).gather(1, actions.unsqueeze(-1))
 
             # Compute target Q-values (Q_targets) from next states using a target Network
-            Q_targets_next = self.target_network(next_states_batch).detach().max(1)[0].unsqueeze(-1)
-            Q_targets_next = Q_targets_next * (1 - dones.unsqueeze(-1))
+            with torch.no_grad():
+                Q_targets_next = self.target_network(next_states_batch).detach().max(1)[0].unsqueeze(-1)
+                Q_targets_next = Q_targets_next * (1 - dones.unsqueeze(-1))
 
-            Q_targets = rewards.unsqueeze(-1) + (self.gamma * Q_targets_next)
+                Q_targets = rewards.unsqueeze(-1) + (self.gamma * Q_targets_next)
 
             # Compute loss
             loss = F.mse_loss(Q_expected, Q_targets)
@@ -256,10 +260,7 @@ class CustomSchedulerDQN:
             self.optimizer.zero_grad()
             loss.backward()
             self.optimizer.step()
-            #logger.info(f"Epoch {epoch + 1}/{epochs} - Loss: {np.round(loss.cpu().detach().numpy().item(), 5)}")
-            #logger.info(f"1 AGENT :: Updated the Policy Network. Loss: {np.round(loss.cpu().detach().numpy().item(),5)}")
-            # Update step count and potentially update target network
-            #self.step_count += 1
+
             if self.use_target_network and self.step_count % self.target_update_frequency == 0:
                 logger.info("AGENT :: *** Updating the target Network")
                 self.target_network.load_state_dict(self.dqn.state_dict())
@@ -268,45 +269,6 @@ class CustomSchedulerDQN:
         self.writer.add_scalar('Loss/Train',np.round(loss.cpu().detach().numpy().item()),self.train_iter)
 
 
-    def update_policy_network(self, experiences):
-        # Unpack experiences
-        ### This one for a graph
-        #states_batch = Batch.from_data_list([e[0] for e in experiences])
-        ### This one for a list  -- for NN
-        states_batch = torch.tensor([e[0] for e in experiences],dtype =torch.float32).to(self.device)
-        actions = torch.tensor([e[1] for e in experiences], dtype=torch.int64).to(self.device)  # Assuming actions are indices
-        rewards = torch.tensor([e[2] for e in experiences], dtype=torch.float).to(self.device)
-        # for GRaph
-        # next_states_batch = Batch.from_data_list([e[3] for e in experiences])
-        ## For NN
-        next_states_batch = torch.tensor([e[3] for e in experiences],dtype =torch.float32).to(self.device)
-        dones = torch.tensor([e[4] for e in experiences], dtype=torch.float).to(self.device)
-        
-        # Compute predicted Q-values (Q_expected) from policy network
-        Q_expected = self.dqn(states_batch).gather(1, actions.unsqueeze(-1))
-        # Compute target Q-values (Q_targets) from next states
-        # Using a target Network
-        Q_targets_next = self.target_network(next_states_batch).detach().max(1)[0].unsqueeze(-1)
-        
-        Q_targets_next = Q_targets_next * (1-dones.unsqueeze(-1)) # Zero out the QValues for ones that are done
-        
-        
-        Q_targets = rewards.unsqueeze(-1) + (self.gamma * Q_targets_next)
-        
-        # Compute loss
-        loss = F.mse_loss(Q_expected, Q_targets)
-        
-        # Zero gradients, perform a backward pass, and update the weights.
-        self.optimizer.zero_grad()
-        loss.backward()
-        self.optimizer.step()
-        logger.info(f"AGENT :: Updated the Policy Network. Loss: {np.round(loss.cpu().detach().numpy().item(),5)}")
-        
-        #self.step_count += 1
-        # Update target network, if necessary
-        if self.use_target_network and self.step_count % self.target_update_frequency == 0:
-            logger.info("*** AGENT :: Updating the target Network")
-            self.target_network.load_state_dict(self.dqn.state_dict())
 
 
     def should_shutdown(self):
@@ -326,6 +288,24 @@ class CustomSchedulerDQN:
             return True
         return False
 
+    def get_num_pods_for_deployment(self,deployment_name):
+        try:
+            deployment = self.v1.read_namespaced_deployment(name=deployment_name,namespace = 'default')
+            desired_replicas = deployment.spec.replicas
+        except client.ApiException as e:
+            logger.info("AGENT :: Exception when calling AppsV1Api-read_namespace_deployment from get_num_pods_for_deployment %s\n" % e)
+            return False
+        return desired_replicas
+
+    def get_deployment_name(self,pod):
+        if pod.metadata.labels:
+            label_key = 'app'
+            deployment_name = pod.metadata.labels.get(label_key)
+            if deployment_name:
+                return deployment_name
+        return None
+
+
     def run(self,epochs=1):
         '''
         
@@ -333,9 +313,15 @@ class CustomSchedulerDQN:
         It then takes the action and calulates the reward based on that action.
         
         '''
+        deployed_pods = []
+        deployment_counts = {}
+        deployments_pods = {}
+
         c_sum_reward = 0
         if self.progress_indication:
             print(f"\rDQN Model Ready",end='', flush=True)
+        current_state = None
+        first_two = [0.0,0.0]
         while not self.should_shutdown():
 
             try:
@@ -343,37 +329,58 @@ class CustomSchedulerDQN:
                     pod = event['object']
                     if self.needs_scheduling(pod):
                         try:
-                            current_state= self.env.get_state(dqn=True)
+                            
+                            # Get the deployment Information
+                            deployment_name = self.get_deployment_name(pod)
+                            if deployment_name not in deployment_counts.keys():
+                                deployment_counts[deployment_name] = self.get_num_pods_for_deployment(deployment_name)
+                                deployments_pods[deployment_name] = []
+                                logger.info(f"AGENT :: Processing Deployment {deployment_name} with {deployment_counts[deployment_name]}")
+                            # Process the pod so we can can count and add done = True later
+                            if pod.metadata.name not in deployed_pods:
+                                    deployed_pods.append(pod.metadata.name)
+                                    deployments_pods[deployment_name].append(pod.metadata.name)
+                            # Get the current State and we are using a dq network
+                            
+                            if current_state == None:
+                                current_state = first_two + self.env.get_state(dqn=True)
+                            else:
+                                current_state = new_state[0:2] + self.env.get_state(dqn=True)
+    
+                            # now get the action
                             action,agent_type = self.select_action(current_state,pod)
+                            # Now take a step and get back new_state and reward
                             new_state, reward, done = self.env.step(pod,action,dqn=True)
+                            new_state = [np.float32(action),np.float32(reward)] + new_state
+                            # keep adding up the cumulative sum of rewards
                             c_sum_reward += reward
+                            # used to display a histrogram in tensorboard
                             self.action_list.append(action)
                             logger.info(f"AGENT :: Reward {np.round(reward,3)}")
-                        except Exception as e:
-                            logger.error(f"AGENT :: Unexpected error: {e}")
-                        
-                        try:
                             # Store the experience in the replay buffer
+                            if len(deployments_pods[deployment_name]) == deployment_counts[deployment_name]:
+                                done = 1
+                            # Evertything needed for a replay buffer
                             self.add_to_buffer(current_state, action, reward, new_state,done)
-                            
                             if self.progress_indication:
                                 print(f"\rDecay Rate at {np.round(self.epsilon,4)}. {agent_type} Agent Receieved Reward {np.round(reward,3)}",end='', flush=True)
+
+                            # At the end of scheduling each group of pods
                             # Deay the epsilon value
+                        except Exception as e:
+                            logger.error(f"1. AGENT :: Unexpected error: {e}")
+                        try:    
                             self.decay_epsilon()
                             logger.info(f"AGENT :: Decay Rate at {np.round(self.epsilon,3)}")
-                            # Periodically update the policy network
-                            
-                            if len(self.replay_buffer) >= self.BATCH_SIZE and not self.step_count % (self.BATCH_SIZE // 2):
+                        
+                            if self.step_count != 0 and not self.step_count % self.update_frequency:
                                 experiences = self.replay_buffer.sample(self.BATCH_SIZE)
                                 self.train_policy_network(experiences,epochs=epochs)
-                        except Exception as e:
-                            logger.error(f"AGENT :: Unexpected error: {e}")
-
-                        try:
                             self.step_count += 1
                             self.writer.add_scalar('CSR',c_sum_reward,self.step_count)
+                        except Exception as e:
+                            logger.error(f"2. AGENT :: Unexpected error: {e}")
 
-                            
                             if not self.step_count %10:
                                 self.writer.add_histogram('actions',torch.tensor(self.action_list),self.step_count)
                                 temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
@@ -381,20 +388,28 @@ class CustomSchedulerDQN:
                                 for node in temp_state:
                                     cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
                                 self.writer.add_scalar('Cluster Variance',np.var(cpu_info),self.step_count)
-                        except Exception as e:
-                            logger.error(f"AGENT :: Unexpected error: {e}")
 
-            except client.exceptions.ApiException as e:
-                if e.status == 410:
-                    logger.warning("AGENT :: Watch timed out")
-                    if self.should_shutdown():
-                        logger.info("AGENT :: Received shutdown signal")
-                        break
-                    else:
-                        logger.info("AGENT :: Restarting Watch")
-                        self.watcher = watch.Watch()
-                else:
-                    logger.error(f"AGENT :: Unexpected API exception: {e}")
+                            if sum(1 for pod in self.api.list_namespaced_pod(namespace = self.namespace).items if pod.status.phase == 'Pending') == 0:
+                                if self.new_epoch():
+                                    logger.info("AGENT :: Acknowledge Epoch Complete")
+                                    os.remove('epoch_complete.txt')
+                                    deployed_pods = []
+                                    deployment_counts = {}
+                                    deployments_pods = {}
+                                    time.sleep(10)
+
+
+                        except client.exceptions.ApiException as e:
+                            if e.status == 410:
+                                logger.warning("AGENT :: Watch timed out")
+                                if self.should_shutdown():
+                                    logger.info("AGENT :: Received shutdown signal")
+                                    break
+                                else:
+                                    logger.info("AGENT :: Restarting Watch")
+                                    self.watcher = watch.Watch()
+                            else:
+                                logger.error(f"AGENT :: Unexpected API exception: {e}")
             except Exception as e:
                 logger.error(f"AGENT :: Unexpected error: {e}")
 
@@ -413,7 +428,9 @@ class CustomSchedulerDQN:
         model.eval()
 
 
-    def populate_replay(self,df,epochs = 100,batch_size=50):
+
+
+    def populate_replay(self,df,epochs = 10):
         '''
         Train Off Policy
         '''
@@ -424,17 +441,27 @@ class CustomSchedulerDQN:
             state = [float(item) for item in df.iloc[i][['cpu_request', 'memory_request'] + [f'cpu_usage_node_{j}' for j in range(10)]].to_list()]
             action = np.float32(df.iloc[i]['action'])
             reward = np.float32(df.iloc[i]['reward'])
+            done = df.iloc[i]['done']
             
             # Check if it's the last row
             if i == len_data - 1:
                 # For the last row, there is no 'next state'
                 next_state = state  # or a terminal state representation if you have one
-                done = True
+
             else:
                 next_state = [float(item) for item in df.iloc[i+1][['cpu_request', 'memory_request'] + [f'cpu_usage_node_{j}' for j in range(10)]].to_list()]
-                done = False
+
             
             self.add_to_buffer(state, action, reward, next_state, done)
+
+
+        for epoch in range(epochs):
+            #logger.info(f"AGENT :: Epoch {epoch}")
+            # Sample a batch of experiences from the replay buffer
+            experiences = self.replay_buffer.sample(100)
+            # Update the policy network with these experiences
+            #self.update_policy_network(experiences)
+            self.train_policy_network(experiences)
 
 
 
@@ -445,12 +472,12 @@ if __name__ == "__main__":
     #scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.9995,replay_buffer_size=500,batch_size=50,target_update_frequency=50)
     #scheduler = CustomSchedulerDQN(hidden_layers=64,init_epsi=1.0,gamma=0.9,learning_rate=1e-4,epsi_decay=0.9985,replay_buffer_size=100,batch_size=20,target_update_frequency=40)
     
-    file_names = ["data/sched_20231201_164422.csv","data/sched_20231202_083449.csv"]
+    file_names = ["data/sched_20231204_084827.csv","data/sched_20231204_095136.csv",'data/sched_20231204_105201.csv']
     dfs = []
     for data_file in file_names:
         dfs.append(pd.read_csv(data_file))
     main_df = pd.concat(dfs,ignore_index=True)
-    scheduler = CustomSchedulerDQN(hidden_layers=10,init_epsi=0.5,gamma=0.9,learning_rate=1e-2,epsi_decay=0.9975, \
-        replay_buffer_size=1000,batch_size=15,target_update_frequency=50,progress_indication=False)
-
-    scheduler.run()
+    agent = CustomSchedulerDQN(hidden_layers=10,init_epsi=1.0,gamma=0.9,learning_rate=0.0001,epsi_decay=0.995, \
+        replay_buffer_size=2000,update_frequency=20, batch_size=200,target_update_frequency=50,progress_indication=False)
+    agent.populate_replay(main_df)
+    agent.run()

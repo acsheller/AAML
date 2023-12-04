@@ -16,7 +16,7 @@ logger.setLevel(logging.INFO)
 logger.propagate = True
 
 class DQN(nn.Module):
-    def __init__(self, num_inputs, num_outputs,num_hidden):
+    def __init__(self, num_inputs, num_outputs,num_hidden=32):
         super().__init__()
         # Increased depth: Adding additional layers
         self.fc1 = nn.Linear(num_inputs, int(num_hidden*2))  # First layer

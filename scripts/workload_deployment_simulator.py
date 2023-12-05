@@ -448,9 +448,7 @@ class WorkloadDeploymentSimulator:
 
 if __name__ == "__main__":
     # Add this to the constructor to use custom scheduler: scheduler='custom-scheduler'
-    simulator = WorkloadDeploymentSimulator(cpu_load=0.10,mem_load=0.50,pod_load=0.50,scheduler='custom-scheduler',epochs=2)
-
-    # Duration is in hours so 1 is 1 hour worth of data collected and then r
+    simulator = WorkloadDeploymentSimulator(cpu_load=0.1,mem_load=0.50,pod_load=0.50,scheduler='custom-scheduler',epochs=3)
     simulator.run()
     
     ## Uncomment this for playback.

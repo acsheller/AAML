@@ -15,7 +15,7 @@ import datetime
 from datetime import datetime, timezone
 import time
 from cluster_env import ClusterEnvironment
-from drl_models import ReplayBuffer,DQN2 as DQN
+from drl_models import ReplayBuffer, DQN3 as DQN
 import numpy as np
 from torch_geometric.data import Data
 from torch.utils.tensorboard import SummaryWriter
@@ -43,12 +43,14 @@ logger.addHandler(fh)
 # Prevent the log messages from being propagated to the Jupyter notebook
 logger.propagate = True
 
+INPUTS = 10
+
 class CustomSchedulerDQN:
     '''
     Implementation of RL agent using a NN as the Deep protion of Deep Reinforcement Learning.
     '''
 
-    def __init__(self,scheduler_name ="custom-scheduler",hidden_layers=64,replay_buffer_size=100,learning_rate=1e-4,gamma=0.9, \
+    def __init__(self,scheduler_name ="custom-scheduler",hidden_layers=64,replay_buffer_size=100,learning_rate=1e-4,gamma=0.95, \
         init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=25,update_frequency = 25,target_update_frequency=50,progress_indication=True, \
         tensorboard_name=None):
         
@@ -92,9 +94,9 @@ class CustomSchedulerDQN:
         self.output_size = len(self.api.list_node().items) -1 # -1 because of 1 controller TODO Consider making this dynamic or an argument
         #self.gnn_model = GNNPolicyNetwork2(input_dim=self.input_size,hidden_dim=64,output_dim=self.output_size)
         # Hardcoding num_inputs to 33 as that's the valeus being returned for a 10 node cluster or 11*3 which is 
-        self.dqn = DQN(num_inputs=12, num_outputs=self.output_size,num_hidden=hidden_layers)
+        self.dqn = DQN(num_inputs=INPUTS, num_outputs=self.output_size,num_hidden=hidden_layers)
 
-        self.target_network = DQN(num_inputs=12,num_outputs=self.output_size,num_hidden=hidden_layers)
+        self.target_network = DQN(num_inputs=INPUTS,num_outputs=self.output_size,num_hidden=hidden_layers)
         self.target_network.load_state_dict(self.dqn.state_dict())
         self.target_network.eval()
         self.increase_decay = True
@@ -193,7 +195,7 @@ class CustomSchedulerDQN:
                     logger.info(f"  DQN :: DQN-Selected {np.round(randval,3)} ACTION: Assign {pod.metadata.name} to {node_name}")
                     agent_type='DQN'
             else:
-                if random.randrange(1,2):
+                if random.randrange(0,2):
                     # Choose a random action
                     nodes = self.kube_info.get_nodes_data(include_controller=False)
                     selected_node = random.choice(nodes)
@@ -266,7 +268,7 @@ class CustomSchedulerDQN:
                 self.target_network.load_state_dict(self.dqn.state_dict())
         logger.info(f"AGENT :: Updated the Policy Network. Loss: {np.round(loss.cpu().detach().numpy().item(),5)}")
         self.train_iter += 1
-        self.writer.add_scalar('Loss/Train',np.round(loss.cpu().detach().numpy().item()),self.train_iter)
+        self.writer.add_scalar('Loss/Train',np.round(loss.cpu().detach().numpy().item(),7),self.train_iter)
 
 
 
@@ -297,6 +299,15 @@ class CustomSchedulerDQN:
             return False
         return desired_replicas
 
+    def new_epoch(self):
+        '''
+        Checking for epoch reset of parameters
+        '''
+        if os.path.exists('epoch_complete.txt'):
+            return True
+        return False
+
+
     def get_deployment_name(self,pod):
         if pod.metadata.labels:
             label_key = 'app'
@@ -323,6 +334,15 @@ class CustomSchedulerDQN:
         current_state = None
         first_two = [0.0,0.0]
         while not self.should_shutdown():
+            if sum(1 for pod in self.api.list_namespaced_pod(namespace = 'default').items if pod.status.phase == 'Pending') == 0:
+                if self.new_epoch():
+                    logger.info("AGENT :: Acknowledge Epoch Complete")
+                    os.remove('epoch_complete.txt')
+                    deployed_pods = []
+                    deployment_counts = {}
+                    deployments_pods = {}
+                    time.sleep(10)
+
 
             try:
                 for event in self.watcher.stream(self.api.list_pod_for_all_namespaces,timeout_seconds=120):
@@ -342,16 +362,17 @@ class CustomSchedulerDQN:
                                     deployments_pods[deployment_name].append(pod.metadata.name)
                             # Get the current State and we are using a dq network
                             
-                            if current_state == None:
-                                current_state = first_two + self.env.get_state(dqn=True)
-                            else:
-                                current_state = new_state[0:2] + self.env.get_state(dqn=True)
+                            #if current_state == None:
+                            #    current_state = first_two + self.env.get_state(dqn=True)
+                            #else:
+                            #    current_state = new_state[0:2] + self.env.get_state(dqn=True)
+                            current_state = self.env.get_state(dqn=True)
     
                             # now get the action
                             action,agent_type = self.select_action(current_state,pod)
                             # Now take a step and get back new_state and reward
                             new_state, reward, done = self.env.step(pod,action,dqn=True)
-                            new_state = [np.float32(action),np.float32(reward)] + new_state
+                            #new_state = [np.float32(action),np.float32(reward)] + new_state
                             # keep adding up the cumulative sum of rewards
                             c_sum_reward += reward
                             # used to display a histrogram in tensorboard
@@ -380,7 +401,7 @@ class CustomSchedulerDQN:
                             self.writer.add_scalar('CSR',c_sum_reward,self.step_count)
                         except Exception as e:
                             logger.error(f"2. AGENT :: Unexpected error: {e}")
-
+                        try:
                             if not self.step_count %10:
                                 self.writer.add_histogram('actions',torch.tensor(self.action_list),self.step_count)
                                 temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
@@ -388,16 +409,6 @@ class CustomSchedulerDQN:
                                 for node in temp_state:
                                     cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
                                 self.writer.add_scalar('Cluster Variance',np.var(cpu_info),self.step_count)
-
-                            if sum(1 for pod in self.api.list_namespaced_pod(namespace = self.namespace).items if pod.status.phase == 'Pending') == 0:
-                                if self.new_epoch():
-                                    logger.info("AGENT :: Acknowledge Epoch Complete")
-                                    os.remove('epoch_complete.txt')
-                                    deployed_pods = []
-                                    deployment_counts = {}
-                                    deployments_pods = {}
-                                    time.sleep(10)
-
 
                         except client.exceptions.ApiException as e:
                             if e.status == 410:
@@ -410,6 +421,22 @@ class CustomSchedulerDQN:
                                     self.watcher = watch.Watch()
                             else:
                                 logger.error(f"AGENT :: Unexpected API exception: {e}")
+                        except Exception as e:
+                            logger.error(f"2. AGENT :: Unexpected error: {e}")
+
+                ## Will wrap back around resetting a few things but it will not exit.
+                if sum(1 for pod in self.api.list_namespaced_pod(namespace = 'default').items if pod.status.phase == 'Pending') == 0:
+                    if self.new_epoch():
+                        logger.info("AGENT :: Acknowledge Epoch Complete")
+                        os.remove('epoch_complete.txt')
+                        deployed_pods = []
+                        deployment_counts = {}
+                        deployments_pods = {}
+                        time.sleep(10)
+
+
+
+
             except Exception as e:
                 logger.error(f"AGENT :: Unexpected error: {e}")
 
@@ -417,6 +444,7 @@ class CustomSchedulerDQN:
 
         filename = f"DQN_Model_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
         torch.save(self.dqn.state_dict(),filename)
+        os.remove("shutdown_signal.txt")
 
     def load_model(self,f_name):
         '''
@@ -432,13 +460,14 @@ class CustomSchedulerDQN:
 
     def populate_replay(self,df,epochs = 10):
         '''
-        Train Off Policy
+        Populate the replay buffer
         '''
 
         len_data = len(df)
         for i in range(len_data):
             
-            state = [float(item) for item in df.iloc[i][['cpu_request', 'memory_request'] + [f'cpu_usage_node_{j}' for j in range(10)]].to_list()]
+            #state = [float(item) for item in df.iloc[i][['cpu_request', 'memory_request'] + [f'cpu_usage_node_{j}' for j in range(10)]].to_list()]
+            state = [float(item) for item in df.iloc[i][[f'cpu_usage_node_{j}' for j in range(10)]].to_list()]
             action = np.float32(df.iloc[i]['action'])
             reward = np.float32(df.iloc[i]['reward'])
             done = df.iloc[i]['done']
@@ -449,20 +478,10 @@ class CustomSchedulerDQN:
                 next_state = state  # or a terminal state representation if you have one
 
             else:
-                next_state = [float(item) for item in df.iloc[i+1][['cpu_request', 'memory_request'] + [f'cpu_usage_node_{j}' for j in range(10)]].to_list()]
+                next_state = [float(item) for item in df.iloc[i+1][[f'cpu_usage_node_{j}' for j in range(10)]].to_list()]
 
             
             self.add_to_buffer(state, action, reward, next_state, done)
-
-
-        for epoch in range(epochs):
-            #logger.info(f"AGENT :: Epoch {epoch}")
-            # Sample a batch of experiences from the replay buffer
-            experiences = self.replay_buffer.sample(100)
-            # Update the policy network with these experiences
-            #self.update_policy_network(experiences)
-            self.train_policy_network(experiences)
-
 
 
 if __name__ == "__main__":
@@ -477,7 +496,7 @@ if __name__ == "__main__":
     for data_file in file_names:
         dfs.append(pd.read_csv(data_file))
     main_df = pd.concat(dfs,ignore_index=True)
-    agent = CustomSchedulerDQN(hidden_layers=10,init_epsi=1.0,gamma=0.9,learning_rate=0.0001,epsi_decay=0.995, \
-        replay_buffer_size=2000,update_frequency=20, batch_size=200,target_update_frequency=50,progress_indication=False)
+    agent = CustomSchedulerDQN(hidden_layers=32,init_epsi=1.0,gamma=0.99,learning_rate=0.001,epsi_decay=0.995, \
+        replay_buffer_size=2000,update_frequency=25, batch_size=200,target_update_frequency=50,progress_indication=False)
     agent.populate_replay(main_df)
     agent.run()

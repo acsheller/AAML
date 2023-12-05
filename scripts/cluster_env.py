@@ -310,18 +310,17 @@ class ClusterEnvironment:
         normalized_variance = scaled_variance / (scaled_variance + 1)
 
 
-        scale_on_freq = 1/self.assignment_count[action]
+        scale_on_freq = 1/np.sqrt(self.assignment_count[action])
         # Calculate reward (higher reward for lower variance)
         reward = max_reward - normalized_variance * (max_reward - min_reward)
         if neg_value:
-           reward = -reward
-           reward = np.round(reward * 1/scale_on_freq,4)
+            reward = -reward
+            reward = max(reward, -1.0)  # Cap the negative reward
         else:
-            reward = np.round(reward*scale_on_freq, 4)
+            reward *= scale_on_freq
 
-
+        reward = np.round(reward, 4)
         return reward
-
 
 
     def calc_reward(self,beforeState,afterState,action):

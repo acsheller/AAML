@@ -47,6 +47,49 @@ class DQN(nn.Module):
         return F.softmax(x)
 
 
+
+class DQN3(nn.Module):
+    def __init__(self, num_inputs, num_outputs, num_hidden=32, dropout_rate=0.5):
+        super().__init__()
+        # Define layers
+        self.fc1 = nn.Linear(num_inputs, int(num_hidden*2))
+        self.fc2 = nn.Linear(int(num_hidden*2), int(num_hidden*2))
+        self.fc3 = nn.Linear(int(num_hidden*2), num_hidden)
+        self.fc4 = nn.Linear(num_hidden, num_hidden)
+        self.fc5 = nn.Linear(num_hidden, int(num_hidden//2))
+        self.fc6 = nn.Linear(int(num_hidden//2), int(num_hidden//2))
+        self.fc7 = nn.Linear(int(num_hidden//2), num_outputs)
+
+        # Define dropout layers
+        self.dropout = nn.Dropout(dropout_rate)
+
+        self._initialize_weights()
+
+    def _initialize_weights(self):
+        for module in self.modules():
+            if isinstance(module, nn.Linear):
+                nn.init.kaiming_normal_(module.weight, mode='fan_in', nonlinearity='relu')
+                if module.bias is not None:
+                    module.bias.data.fill_(0.001)  # Initialize biases
+
+
+    def forward(self, x):
+        x = F.relu(self.fc1(x))
+        x = self.dropout(x)  # Apply dropout after first layer
+        x = F.relu(self.fc2(x))
+        x = self.dropout(x)  # Apply dropout after second layer
+        x = F.relu(self.fc3(x))
+        x = self.dropout(x)  # Apply dropout after third layer
+        x = F.relu(self.fc4(x))
+        x = self.dropout(x)  # Apply dropout after fourth layer
+        x = F.relu(self.fc5(x))
+        x = self.dropout(x)  # Apply dropout after fifth layer
+        x = F.relu(self.fc6(x))
+        x = self.dropout(x)  # Apply dropout after sixth layer
+        x = self.fc7(x)  # No activation function on output layer
+        return F.softmax(x, dim=1)
+
+
 class DQN2(nn.Module):
     def __init__(self, num_inputs, num_outputs,num_hidden):
         super().__init__()

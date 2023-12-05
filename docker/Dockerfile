@@ -54,8 +54,6 @@ COPY data /home/appuser/data
 COPY docker/entrypoint.sh /home/appuser/entrypoint.sh
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
 COPY ProjectNotebook.ipynb /home/appuser/ProjectNotebook.ipynb
-COPY ModelOptimization_acdqn.py /home/appuser/ModelOptimization_acdqn.py
-
 
 
 #set a working directory

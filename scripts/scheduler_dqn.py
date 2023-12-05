@@ -10,7 +10,6 @@ import torch
 
 import torch.optim as optim
 import torch.nn.functional as F
-from torch_geometric.data import Batch
 import datetime
 from datetime import datetime, timezone
 import time
@@ -99,7 +98,7 @@ class CustomSchedulerDQN:
         self.target_network = DQN(num_inputs=INPUTS,num_outputs=self.output_size,num_hidden=hidden_layers)
         self.target_network.load_state_dict(self.dqn.state_dict())
         self.target_network.eval()
-        self.increase_decay = True
+        self.increase_decay = False
         logger.info("AGENT :: DQN Models Created")
 
         if torch.cuda.is_available():
@@ -109,7 +108,6 @@ class CustomSchedulerDQN:
         self.target_network.to(self.device)
         
         # Set up the optimizer
-        #elf.optimizer = optim.Adam(self.gnn_model.parameters(), lr=learning_rate)
         self.optimizer = optim.Adam(self.dqn.parameters(), lr=learning_rate)
         
         self.replay_buffer = ReplayBuffer(replay_buffer_size)
@@ -171,7 +169,6 @@ class CustomSchedulerDQN:
         """
         if self.increase_decay and self.epsilon < 0.9:
             self.increase_decay = False
-            logger.info("AGENT :: Setting epsilon decay rate to 0.995")
             self.epsi_decay=0.995
         if self.epsilon > self.min_epsi:
             self.epsilon *= self.epsi_decay
@@ -201,9 +198,10 @@ class CustomSchedulerDQN:
                     selected_node = random.choice(nodes)
                     action_index = self.env.kube_info.node_name_to_index_mapping[selected_node['name']]
                     node_name = selected_node['name']
-                    logger.info(f"AGENT :: Random {np.round(randval,3)} Selection: Assign {pod.metadata.name} to {node_name}")
+                    logger.info(f" RAND :: Random {np.round(randval,3)} Selection: Assign {pod.metadata.name} to {node_name}")
                     agent_type='Random'
                 else:
+                    # Heuristic Selection
                     sorted_nodes = self.kube_info.get_nodes_data(sort_by_cpu=True,include_controller=False)
                     lowest_cpu = np.round(sorted_nodes[0]['total_cpu_used'] / sorted_nodes[0]['cpu_capacity'],4)
                     lowest_nodes = [node for node in sorted_nodes if np.round(node['total_cpu_used'] / node['cpu_capacity'],4) == lowest_cpu]
@@ -334,14 +332,14 @@ class CustomSchedulerDQN:
         current_state = None
         first_two = [0.0,0.0]
         while not self.should_shutdown():
-            if sum(1 for pod in self.api.list_namespaced_pod(namespace = 'default').items if pod.status.phase == 'Pending') == 0:
-                if self.new_epoch():
-                    logger.info("AGENT :: Acknowledge Epoch Complete")
-                    os.remove('epoch_complete.txt')
-                    deployed_pods = []
-                    deployment_counts = {}
-                    deployments_pods = {}
-                    time.sleep(10)
+            # if sum(1 for pod in self.api.list_namespaced_pod(namespace = 'default').items if pod.status.phase == 'Pending') == 0:
+            #     if self.new_epoch():
+            #         logger.info("AGENT :: Acknowledge Epoch Complete")
+            #         os.remove('epoch_complete.txt')
+            #         deployed_pods = []
+            #         deployment_counts = {}
+            #         deployments_pods = {}
+            #         time.sleep(10)
 
 
             try:
@@ -486,11 +484,6 @@ class CustomSchedulerDQN:
 
 if __name__ == "__main__":
 
-    # Possible Values for the CustomerScheduler Constructor
-    # scheduler_name ="custom-scheduler",replay_buffer_size=100,learning_rate=1e-4,gamma=0.99,init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=16
-    #scheduler = CustomSchedulerDQN(init_epsi=1.0,gamma=0.9,learning_rate=1e-3,epsi_decay=0.9995,replay_buffer_size=500,batch_size=50,target_update_frequency=50)
-    #scheduler = CustomSchedulerDQN(hidden_layers=64,init_epsi=1.0,gamma=0.9,learning_rate=1e-4,epsi_decay=0.9985,replay_buffer_size=100,batch_size=20,target_update_frequency=40)
-    
     file_names = ["data/sched_20231204_084827.csv","data/sched_20231204_095136.csv",'data/sched_20231204_105201.csv']
     dfs = []
     for data_file in file_names:

@@ -37,6 +37,8 @@ EXPOSE 8888 6006
 
 # Set default shell for the user to bash
 ENV SHELL=/bin/bash
+
+# For Jupyter Lab -- A simpler Token
 ENV JUPYTER_TOKEN='AAML'
 
 # Make .kube folder and copy config to it

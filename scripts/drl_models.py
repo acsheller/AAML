@@ -49,7 +49,7 @@ class DQN(nn.Module):
 
 
 class DQN3(nn.Module):
-    def __init__(self, num_inputs, num_outputs, num_hidden=32, dropout_rate=0.5):
+    def __init__(self, num_inputs=10, num_outputs=10, num_hidden=32, dropout_rate=0.5):
         super().__init__()
         # Define layers
         self.fc1 = nn.Linear(num_inputs, int(num_hidden*2))
@@ -188,9 +188,36 @@ class GNNPolicyNetwork2(torch.nn.Module):
         x = F.relu(self.fc1(x))
         x = self.fc2(x)  # Output raw scores (logits)
         return x
-    
 
+class GNNPolicyNetwork3(torch.nn.Module):
+    def __init__(self, input_dim, hidden_dim, output_dim, dropout_rate=0.5):
+        super().__init__()
+        self.conv1 = GCNConv(input_dim, hidden_dim)
+        self.bn1 = torch.nn.BatchNorm1d(hidden_dim)
+        self.conv2 = GCNConv(hidden_dim, hidden_dim)
+        self.bn2 = torch.nn.BatchNorm1d(hidden_dim)
+        self.conv3 = GCNConv(hidden_dim, hidden_dim) 
+        self.bn3 = torch.nn.BatchNorm1d(hidden_dim)
+        self.dropout = torch.nn.Dropout(dropout_rate)
+        self.fc1 = torch.nn.Linear(hidden_dim, hidden_dim)
+        self.fc2 = torch.nn.Linear(hidden_dim, output_dim)
 
+    def forward(self, data):
+        if not isinstance(data, Batch):
+            data = Batch.from_data_list([data])
+
+        x, edge_index, batch = data.x, data.edge_index, data.batch
+
+        x = F.relu(self.bn1(self.conv1(x, edge_index)))
+        x = self.dropout(x)  # Apply dropout
+        x = F.relu(self.bn2(self.conv2(x, edge_index)))
+        x = self.dropout(x)  # Apply dropout
+        x = F.relu(self.bn3(self.conv3(x, edge_index)))
+        x = global_mean_pool(x, batch)
+        x = F.relu(self.fc1(x))
+        x = self.dropout(x)  # Apply dropout
+        x = self.fc2(x)  # Output raw scores (logits)
+        return x
 
 class Actor(nn.Module):
     def __init__(self, num_inputs, num_outputs, num_hidden):

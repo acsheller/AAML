@@ -89,7 +89,6 @@ class ClusterEnvironment:
             reward = self.calc_reward(beforeState,afterState,action)
 
             done = 0
-
         return new_state, reward, done
 
 
@@ -150,7 +149,19 @@ class ClusterEnvironment:
                 logging.info("  ENV :: Pod did not exists so not creating it.")
         except Exception as e:
             logging.error(f"  ENV :: Exception when calling CoreV1Api->create_namespaced_binding: {e}")
-            
+
+    def convert_replay_to_graph(self,replay_data):
+        node_data = self.kube_info.get_nodes_data()
+        for index,replay in enumerate(replay_data):
+            for node in node_data:
+                if node['roles'] != 'control-plane':
+                    if node['name'].endswith(str(index)):
+                        node['total_cpu_used'] = int(np.round(replay,2)*node['cpu_capacity'])
+                        break
+
+        return self.create_graph(node_data)
+
+
 
     def create_graph(self,nodeData,cpu_limit=0.8,mem_limit=0.8,pod_limit=0.8):
         '''
@@ -170,7 +181,8 @@ class ClusterEnvironment:
             G.add_node(node_name)
             # Add or update node attributes
             for key, value in node_data.items():
-                if key in ['roles','cpu_capacity','memory_capacity','total_cpu_used','total_memory_used','pod_count','pod_limit']:
+                #if key in ['roles','cpu_capacity','memory_capacity','total_cpu_used','total_memory_used','pod_count','pod_limit']:
+                if key in ['roles','cpu_capacity']:
                     G.nodes[node_name][key] = value
         control_node = None
         for node in G.nodes:

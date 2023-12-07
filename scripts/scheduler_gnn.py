@@ -49,7 +49,7 @@ def def_logging(log_propogate=False):
     logger.addHandler(fh)
 
     # Prevent the log messages from being propagated to the Jupyter notebook
-    logger.propagate = True
+    logger.propagate = log_propogate
     return logger
 
 INPUTS = 10
@@ -445,7 +445,7 @@ class CustomSchedulerGNN:
                         deployed_pods = []
                         deployment_counts = {}
                         deployments_pods = {}
-                        time.sleep(10)
+                        time.sleep(15)
 
 
             except Exception as e:
@@ -477,7 +477,7 @@ class CustomSchedulerGNN:
         len_data = len(df)
         for i in range(len_data):
             if not i % int(0.1*len_data):
-                self.logger.info(f"AGENT :: {np.round(i/len_data,2)*100}% Complete ")
+                self.logger.info(f"AGENT :: {np.round(np.round(i/len_data,2)*100,2)}% Complete ")
             #state = [float(item) for item in df.iloc[i][['cpu_request', 'memory_request'] + [f'cpu_usage_node_{j}' for j in range(10)]].to_list()]
             state = [float(item) for item in df.iloc[i][[f'cpu_usage_node_{j}' for j in range(10)]].to_list()]
             action = np.float32(df.iloc[i]['action'])
@@ -541,7 +541,7 @@ class CustomSchedulerGNN:
 
 if __name__ == "__main__":
 
-    file_names = ['data/sched_20231204_084827-2.csv']
+    file_names = ['data/sched_20231204_084827.csv','data/sched_20231204_095136.csv','data/sched_20231204_105201.csv']
     dfs = []
     for data_file in file_names:
         dfs.append(pd.read_csv(data_file))
@@ -555,9 +555,9 @@ if __name__ == "__main__":
     parser.add_argument('--gamma',type=float, default=0.99,help='Discount Factor  (default: %(default)s)')
     parser.add_argument('--learning_rate',type=float, default=0.001,help='Learning Rate  (default: %(default)s)')
     parser.add_argument('--replay_buffer_size',type=int, default=1000,help='Length of the Replay Buffer  (default: %(default)s)')
-    parser.add_argument('--update_frequency',type=int, default=10,help='Network Update Frequency  (default: %(default)s)')
-    parser.add_argument('--target_update_frequency',type=int, default=50,help='Target Network Update Frequency  (default: %(default)s)')
-    parser.add_argument('--batch_size',type=int, default=100,help='Batch Size of replay Buffer sample to pass during training  (default: %(default)s)')
+    parser.add_argument('--update_frequency',type=int, default=20,help='Network Update Frequency  (default: %(default)s)')
+    parser.add_argument('--target_update_frequency',type=int, default=40,help='Target Network Update Frequency  (default: %(default)s)')
+    parser.add_argument('--batch_size',type=int, default=200,help='Batch Size of replay Buffer sample to pass during training  (default: %(default)s)')
     parser.add_argument('--progress', action='store_true', help='Enable progress indication. Only when logs are not scrolling  (default: %(default)s)')
     parser.add_argument('--log_scrolling', action='store_true', help='Enable Log Scrolling to Screen. Disables progress Indication  (default: %(default)s)')
     args = parser.parse_args()

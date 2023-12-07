@@ -422,7 +422,7 @@ class WorkloadDeploymentSimulator:
                 while  os.path.exists('epoch_complete.txt'):
                     logger.info("WDS :: Waiting on scheduler to stop scheduling")
                     # Give the scheduling agent time to catch up.
-                    time.sleep(10)
+                    time.sleep(5)
 
             try:
                 if 1 == 1:  # Did it this way so I could turn it on and off as needed.
@@ -448,7 +448,7 @@ class WorkloadDeploymentSimulator:
 
 if __name__ == "__main__":
     # Add this to the constructor to use custom scheduler: scheduler='custom-scheduler'
-    simulator = WorkloadDeploymentSimulator(cpu_load=0.05,mem_load=0.50,pod_load=0.50,scheduler='custom-scheduler',epochs=3)
+    simulator = WorkloadDeploymentSimulator(cpu_load=0.15,mem_load=0.50,pod_load=0.50,scheduler='custom-scheduler',epochs=3)
     simulator.run()
     
     ## Uncomment this for playback.

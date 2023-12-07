@@ -91,8 +91,8 @@ class ActorCriticGNN:
 
         # These are used for Tensorboard
         if self.tboard_name != None:
-            self.writer = SummaryWriter(f'tlogs/{self.tboard_name}')
-            logger.info(f"AGENT: Created TensorBoard writer {self.tboard_name}")
+            self.writer = SummaryWriter(f'tlogs/acgnn_{self.tboard_name}')
+            logger.info(f"AGENT: ACGNN Created TensorBoard writer {self.tboard_name}")
         else:
             # Generate a name if one is not provided. 
             self.writer = SummaryWriter(f'tlogs/{self.generate_funny_name()}')
@@ -310,5 +310,5 @@ class ActorCriticGNN:
 if __name__ == "__main__":
     # This is how it can be run if a cluster is up and running.  this can be run external of the cluster as the docker compose
     # provides a cluster to work with.  
-    scheduler = ActorCriticGNN(hidden_layers=64,gamma=0.9,actor_learning_rate=1e-3,critic_learning_rate=1e-3,progress_indication=False,tensorboard_name=None)    
+    scheduler = ActorCriticGNN(hidden_layers=32,gamma=0.9,actor_learning_rate=1e-3,critic_learning_rate=1e-3,progress_indication=False,tensorboard_name=None)    
     scheduler.run()

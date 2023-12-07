@@ -5,6 +5,7 @@ import time
 from datetime import datetime, timezone
 import pandas as pd
 import logging
+import argparse
 import os
 
 # For progress display
@@ -36,7 +37,8 @@ logger.propagate = False
 class WorkloadDeploymentSimulator:
 
 
-    def __init__(self,cpu_load=0.5,mem_load=0.5,pod_load=0.5,pod_limit=110,namespace='default',scheduler='default-scheduler',progress_indication=True,epochs=2):
+    def __init__(self,cpu_load=0.5,mem_load=0.5,pod_load=0.5,pod_limit=110,namespace='default', \
+                 scheduler='default-scheduler',progress_indication=True,cluster_resets=2):
         '''
         Constructor
         '''
@@ -54,7 +56,7 @@ class WorkloadDeploymentSimulator:
         self.my_deployments = self.get_all_deployments()
         self.total_pods_deployed = 0
 
-        self.epochs = epochs     
+        self.cluster_resets = cluster_resets  
 
         self.pod_load = pod_load
         self.pod_limit = pod_limit
@@ -377,7 +379,7 @@ class WorkloadDeploymentSimulator:
         self.current_load['mem_pct'] = np.round(total_mem_used/total_mem,2)
         return self.current_load
 
-    def initial_deployments(self,epoch,interval=10):
+    def initial_deployments(self,cr,interval=10):
         '''
         Creates a set of initial deployments that will simulate a load
         '''
@@ -385,7 +387,7 @@ class WorkloadDeploymentSimulator:
         while self.current_load['cpu_pct'] < self.max_load['cpu_pct'] and self.current_load['mem_pct'] < self.max_load['mem_pct'] and self.current_load['pod_pct'] < self.max_load['pod_pct']:
             minutes,seconds = divmod(time.time()-start_time,60)
             if self.progress_indication:
-                print(f"\rEpoch {epoch+1}/{self.epochs} {np.round(self.current_load['cpu_pct']/self.max_load['cpu_pct']*100,2)}% Complete. Notebook Elapsed time so far: {int(minutes)} minutes and {int(seconds)} seconds",end='', flush=True)
+                print(f"\rCluster Reset {cr+1}/{self.cluster_resets} {np.round(self.current_load['cpu_pct']/self.max_load['cpu_pct']*100,2)}% Complete. Notebook Elapsed time so far: {int(minutes)} minutes and {int(seconds)} seconds",end='', flush=True)
             pods = self.v1.list_namespaced_pod(namespace = self.namespace)
             if sum(1 for pod in pods.items if pod.status.phase == 'Pending') < 1:
                 self.create_fully_random_deployment()
@@ -411,14 +413,14 @@ class WorkloadDeploymentSimulator:
         """
         Run method to start the simulator.
         """
-        for epoch in range(self.epochs):
-            logger.info(f"WDS :: Epoch {epoch+1}/{self.epochs} Running")
-            self.initial_deployments(epoch, interval =40)
+        for cr in range(self.cluster_resets):
+            logger.info(f"WDS :: Cluster Reset {cr+1}/{self.cluster_resets} Running")
+            self.initial_deployments(cr, interval =40)
             self.my_deployments = self.get_all_deployments()
             while sum(1 for pod in self.v1.list_namespaced_pod(namespace = self.namespace).items if pod.status.phase == 'Pending') >0:
                 if not os.path.exists('epoch_complete.txt'):
                     with open(f"epoch_complete.txt","w") as file:
-                        file.write(f"{epoch}")
+                        file.write(f"{cr}")
                 while  os.path.exists('epoch_complete.txt'):
                     logger.info("WDS :: Waiting on scheduler to stop scheduling")
                     # Give the scheduling agent time to catch up.
@@ -447,10 +449,23 @@ class WorkloadDeploymentSimulator:
 
 
 if __name__ == "__main__":
+
+
+
+   # parse arguments if passed in. use --help for help on this
+    parser = argparse.ArgumentParser(description="runsim is an alias to workload_deployment_simulator.py. It is used for simulating the deployment of Kubernetes deployments.")
+    parser.add_argument('--cpu_load',type=float, default=0.15,help='The CPU Load percentage (default: %(default)s)')
+    parser.add_argument('--mem_load',type=float, default=0.15,help='The Memory load percentage  (default: %(default)s)')
+    parser.add_argument('--pod_load',type=float, default=0.15,help='The Pod load percentage  (default: %(default)s)')
+    parser.add_argument('--cluster_resets',type=int, default=3,help='How many times to reset the cluster after load is achieved; like an epoch  (default: %(default)s)')
+    parser.add_argument('--scheduler_name', type=str, default='custom-scheduler', help='Name of the scheduler (default: %(default)s)')
+    args = parser.parse_args()
+
     # Add this to the constructor to use custom scheduler: scheduler='custom-scheduler'
-    simulator = WorkloadDeploymentSimulator(cpu_load=0.15,mem_load=0.50,pod_load=0.50,scheduler='custom-scheduler',epochs=3)
+    simulator = WorkloadDeploymentSimulator(cpu_load=args.cpu_load,mem_load=args.mem_load,pod_load=args.pod_load,scheduler=args.scheduler_name, \
+                cluster_resets=args.cluster_resets)
     simulator.run()
     
-    ## Uncomment this for playback.
+    ## For playback if desired
     #playback_df = pd.read_csv("deployment_data_20231107_094336.csv")
     #simulator.playback(playback_df,sleep_interval=15)

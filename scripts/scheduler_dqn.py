@@ -377,7 +377,7 @@ class CustomSchedulerDQN:
                         
                             if self.step_count != 0 and not self.step_count % self.update_frequency:
                                 experiences = self.replay_buffer.sample(self.BATCH_SIZE)
-                                logger.info("AGENT :: Updating the policy")
+                                self.logger.info("AGENT :: Updating the policy")
                                 self.train_policy_network(experiences,epochs=epochs)
                             self.step_count += 1
                             self.writer.add_scalar('CSR',c_sum_reward,self.step_count)
@@ -409,17 +409,14 @@ class CustomSchedulerDQN:
 
                 ## Will wrap back around resetting a few things but it will not exit.
                 if sum(1 for pod in self.api.list_namespaced_pod(namespace = 'default').items if pod.status.phase == 'Pending') == 0:
-                    if self.new_epoch():
+                    if  os.path.exists('epoch_complete.txt'):
                         self.logger.info("AGENT :: Acknowledge Epoch Complete")
                         os.remove('epoch_complete.txt')
                         deployed_pods = []
                         deployment_counts = {}
                         deployments_pods = {}
                         time.sleep(10)
-
-
-
-
+                        
             except Exception as e:
                 self.logger.error(f"AGENT :: Unexpected error: {e}")
 
@@ -523,3 +520,6 @@ if __name__ == "__main__":
     # run the agent
     agent.run()
     
+    # Place Model in eval
+    agent.dqn.eval()
+    print("Please restart the simulator for evaluation with `runsim --cluster_resets=1`")

@@ -17,7 +17,7 @@ from torch_geometric.data import Batch
 
 from torch.utils.tensorboard import SummaryWriter
 
-from drl_models import Actor2, Critic2, Actor, Critic,Actor1, Critic1
+from drl_models import ActorUse as Actor, CriticUse as  Critic
 
 from kubernetes import client, config, watch
 from kinfo import KubeInfo
@@ -36,10 +36,10 @@ from cluster_env import ClusterEnvironment
 import logging
 # Create a unique filename based on the current date and time
 current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-filename = f"logs/ac_log_{current_time}.log"
+filename = f"logs/acdqn_log_{current_time}.log"
 
 # Create a named logger
-logger = logging.getLogger('MyACLogger')
+logger = logging.getLogger('MyACDQNLogger')
 logger.setLevel(logging.INFO)
 
 # Create file handler which logs even debug messages
@@ -83,6 +83,7 @@ class ActorCriticDQN:
         config.load_kube_config()
         self.api = client.CoreV1Api()
         self.watcher = watch.Watch()
+        self.v1 = client.AppsV1Api()
         self.kube_info = KubeInfo()
 
         # Create the environment
@@ -90,7 +91,7 @@ class ActorCriticDQN:
 
         # These are used for Tensorboard
         if self.tboard_name != None:
-            self.writer = SummaryWriter(f'tlogs/{self.tboard_name}')
+            self.writer = SummaryWriter(f'tlogs/acdqn_{self.tboard_name}')
             logger.info(f"AGENT: Created TensorBoard writer {self.tboard_name}")
         else:
             # Generate a name if one is not provided. 
@@ -105,7 +106,7 @@ class ActorCriticDQN:
         # Create the Actor
         self.actor = Actor(num_inputs=10, num_outputs=self.action_size,num_hidden=hidden_layers)
 
-        # Set in train mode
+        # put it in train mode
         self.actor.train()
 
         # Create the Critic
@@ -160,13 +161,9 @@ class ActorCriticDQN:
             #action_index = np.argmax(list(action_probs[0].cpu().detach().numpy()))
             node_name = self.env.kube_info.node_index_to_name_mapping[action_index]
             #logger.info(f"AGENT :: {list(action_probs[0].cpu().detach().numpy())}")
-            #if node_name in available_nodes:
+
             return action_index, action_probs, "Actor"
-            #else:
-            #    choices = list(range(0,10))
-            #    choices.remove(action_index)
-            #    return random.choice(choices), action_probs, "Actor"
-                
+
 
     def needs_scheduling(self, pod):
         '''
@@ -228,7 +225,7 @@ class ActorCriticDQN:
         c_sum_reward = 0
         
         if self.progress_indication:
-            print(f"\rAC Model Ready",end='', flush=True)
+            print(f"\rAC DQN Model Ready",end='', flush=True)
         while not self.should_shutdown():
             
             try:
@@ -318,5 +315,5 @@ class ActorCriticDQN:
 if __name__ == "__main__":
     # This is how it can be run if a cluster is up and running.  this can be run external of the cluster as the docker compose
     # provides a cluster to work with.  
-    scheduler = ActorCriticDQN(hidden_layers=64,gamma=0.95,actor_learning_rate=1e-4,critic_learning_rate=1e-4,progress_indication=True,tensorboard_name=None)    
+    scheduler = ActorCriticDQN(hidden_layers=32,gamma=0.95,actor_learning_rate=1e-4,critic_learning_rate=1e-4,progress_indication=False,tensorboard_name=None)    
     scheduler.run()

@@ -526,18 +526,18 @@ if __name__ == "__main__":
     # run the agent
     agent.run()
 
-    agent_eval = CustomSchedulerDQN(hidden_layers=args.hidden_layers,init_epsi=args.init_epsi,gamma=args.gamma, \
-                            learning_rate=args.learning_rate,epsi_decay=args.epsi_decay, \
-                            replay_buffer_size=args.replay_buffer_size,update_frequency=args.update_frequency, \
-                            target_update_frequency=args.target_update_frequency,batch_size=args.batch_size, \
-                            progress_indication=args.progress,log_propogate=args.log_scrolling)
+    # agent_eval = CustomSchedulerDQN(hidden_layers=args.hidden_layers,init_epsi=args.init_epsi,gamma=args.gamma, \
+    #                         learning_rate=args.learning_rate,epsi_decay=args.epsi_decay, \
+    #                         replay_buffer_size=args.replay_buffer_size,update_frequency=args.update_frequency, \
+    #                         target_update_frequency=args.target_update_frequency,batch_size=args.batch_size, \
+    #                         progress_indication=args.progress,log_propogate=args.log_scrolling)
 
     # Place Model in eval
-    agent_state_dict = agent.dqn.state_dict()
+    #agent_state_dict = agent.dqn.state_dict()
     
-    agent_eval.dqn.load_state_dict(agent_state_dict)
-    agent_eval.agent_mode = 'eval'
-    agent_eval.dqn.eval()
-    print("Please restart the simulator for evaluation with `runsim --cluster_resets=1`")
-    agent_eval.run()
+    #agent_eval.dqn.load_state_dict(agent_state_dict)
+    #agent_eval.agent_mode = 'eval'
+    #agent_eval.dqn.eval()
+    #print("Please restart the simulator for evaluation with `runsim --cluster_resets=1`")
+    #agent_eval.run()
     

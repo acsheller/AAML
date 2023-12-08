@@ -454,10 +454,10 @@ if __name__ == "__main__":
 
    # parse arguments if passed in. use --help for help on this
     parser = argparse.ArgumentParser(description="runsim is an alias to workload_deployment_simulator.py. It is used for simulating the deployment of Kubernetes deployments.")
-    parser.add_argument('--cpu_load',type=float, default=0.05,help='The CPU Load percentage (default: %(default)s)')
-    parser.add_argument('--mem_load',type=float, default=0.15,help='The Memory load percentage  (default: %(default)s)')
-    parser.add_argument('--pod_load',type=float, default=0.15,help='The Pod load percentage  (default: %(default)s)')
-    parser.add_argument('--cluster_resets',type=int, default=3,help='How many times to reset the cluster after load is achieved; like an epoch  (default: %(default)s)')
+    parser.add_argument('--cpu_load',type=float, default=0.20,help='The CPU Load percentage (default: %(default)s)')
+    parser.add_argument('--mem_load',type=float, default=0.20,help='The Memory load percentage  (default: %(default)s)')
+    parser.add_argument('--pod_load',type=float, default=0.20,help='The Pod load percentage  (default: %(default)s)')
+    parser.add_argument('--cluster_resets',type=int, default=2,help='How many times to reset the cluster after load is achieved; like an epoch  (default: %(default)s)')
     parser.add_argument('--scheduler_name', type=str, default='custom-scheduler', help='Name of the scheduler (default: %(default)s)')
     args = parser.parse_args()
 

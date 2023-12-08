@@ -287,7 +287,7 @@ class CustomSchedulerGNN:
                     self.target_network.load_state_dict(self.gnn.state_dict())
                 self.logger.info(f"AGENT :: Updated the Policy Network. Loss: {np.round(loss.cpu().detach().numpy().item(),5)}")
                 self.train_iter += 1
-                self.writer.add_scalar('Loss/Train',np.round(loss.cpu().detach().numpy().item(),7),self.train_iter)
+                self.writer.add_scalar('GNN Loss/Train',np.round(loss.cpu().detach().numpy().item(),7),self.train_iter)
             except Exception as e:
                 self.logger.error("3 AGENT :: ERROR in section 3 of train_policy_network".format(e))
 
@@ -410,18 +410,18 @@ class CustomSchedulerGNN:
                                 experiences = self.replay_buffer.sample(self.BATCH_SIZE)
                                 self.train_policy_network(experiences,epochs=epochs)                     
                             self.step_count += 1
-                            self.writer.add_scalar('CSR',c_sum_reward,self.step_count)
+                            self.writer.add_scalar('GNN CSR',c_sum_reward,self.step_count)
                         except Exception as e:
                             self.logger.error(f"2. AGENT :: Unexpected error in section 2: {e}")
 
                         try:
                             if not self.step_count %5:
-                                self.writer.add_histogram('actions',torch.tensor(self.action_list),self.step_count)
+                                self.writer.add_histogram('GNN actions',torch.tensor(self.action_list),self.step_count)
                                 temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
                                 cpu_info = []
                                 for node in temp_state:
                                     cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
-                                self.writer.add_scalar('Cluster Variance',np.var(cpu_info),self.step_count)
+                                self.writer.add_scalar('GNN Cluster Variance',np.var(cpu_info),self.step_count)
                             
                         except client.exceptions.ApiException as e:
                             if e.status == 410:

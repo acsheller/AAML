@@ -31,34 +31,36 @@ import datetime
 from datetime import datetime, timezone
 import time
 from cluster_env import ClusterEnvironment
-
+import argparse
 ### ---- Preparing the logging ---- ###
 import logging
-# Create a unique filename based on the current date and time
-current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-filename = f"logs/acdqn_log_{current_time}.log"
 
-# Create a named logger
-logger = logging.getLogger('MyACDQNLogger')
-logger.setLevel(logging.INFO)
+def def_logging(log_propogate=False):
+    # Create a unique filename based on the current date and time
+    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"logs/acdqn_log_{current_time}.log"
 
-# Create file handler which logs even debug messages
-fh = logging.FileHandler(filename)
-fh.setLevel(logging.INFO)
+    # Create a named logger
+    logger = logging.getLogger('MyACDQNLogger')
+    logger.setLevel(logging.INFO)
 
-# Create formatter and add it to the handlers
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
+    # Create file handler which logs even debug messages
+    fh = logging.FileHandler(filename)
+    fh.setLevel(logging.INFO)
 
-# Add the handlers to the logger
-logger.addHandler(fh)
+    # Create formatter and add it to the handlers
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
 
-# Prevent the log messages from being propagated to the Jupyter notebook 
-# Set to true for logging to appear in log file as well as on screen.
-# Set to False to only appear in file.
-logger.propagate = True
+    # Add the handlers to the logger
+    logger.addHandler(fh)
 
-### ---- End of Logging Prep ---- ###
+    # Prevent the log messages from being propagated to the Jupyter notebook 
+    # Set to true for logging to appear in log file as well as on screen.
+    # Set to False to only appear in file.
+    logger.propagate = log_propogate
+    return logger
+    ### ---- End of Logging Prep ---- ###
 
 
 class ActorCriticDQN:
@@ -68,11 +70,15 @@ class ActorCriticDQN:
     '''
 
 
-    def __init__(self,namespace='default',scheduler_name ="custom-scheduler",hidden_layers=64,actor_learning_rate=1e-4,critic_learning_rate=1e-4,gamma=0.99,progress_indication=True,tensorboard_name=None,optimizer=0):
+    def __init__(self,namespace='default',scheduler_name ="custom-scheduler",hidden_layers=64,actor_learning_rate=1e-4, \
+                critic_learning_rate=1e-4,gamma=0.99,progress_indication=True,tensorboard_name=None,optimizer=0, \
+                log_propogate=False):
         '''
         Constructor 
         '''
         
+        self.log_propogate = log_propogate
+        self.logger = def_logging(log_propogate=log_propogate)
         self.scheduler_name = scheduler_name
         self.progress_indication = progress_indication
         self.namespace = namespace
@@ -92,14 +98,14 @@ class ActorCriticDQN:
         # These are used for Tensorboard
         if self.tboard_name != None:
             self.writer = SummaryWriter(f'tlogs/acdqn_{self.tboard_name}')
-            logger.info(f"AGENT: Created TensorBoard writer {self.tboard_name}")
+            self.logger.info(f"AGENT: Created TensorBoard writer {self.tboard_name}")
         else:
             # Generate a name if one is not provided. 
             self.writer = SummaryWriter(f'tlogs/{self.generate_funny_name()}')
         self.train_iter = 0
 
         # How many actions is the number of nodes in teh list.
-        self.action_size = len(self.api.list_node().items) -1 # -1 because of 1 controller TODO Consider making this dynamic or an argument
+        self.action_size = len(self.api.list_node().items) -1 # -1 because of 1 controller
 
         # Hardcoding num_inputs to 30 as that's the valeus being returned for a 10 node cluster or 10*3 which is 
         # cpu, memory, pod count
@@ -114,7 +120,7 @@ class ActorCriticDQN:
 
         # If cuda is available then use it.
         if torch.cuda.is_available():
-            logger.info("AGENT :: GPU Available")
+            self.logger.info("AGENT :: GPU Available")
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         # Put the models to the device either gpu or cpu
@@ -139,7 +145,7 @@ class ActorCriticDQN:
         self.gamma = gamma  # Discount factor for future rewards
         self.action_list = []
         self.step_count = 0
-        logger.info("AGENT :: Actor Critic DQN Agent constructed.")
+        self.logger.info("AGENT :: Actor Critic DQN Agent constructed.")
 
 
     def select_action(self, state,pod):
@@ -160,7 +166,7 @@ class ActorCriticDQN:
             action_index = torch.multinomial(action_probs, 1).item()
             #action_index = np.argmax(list(action_probs[0].cpu().detach().numpy()))
             node_name = self.env.kube_info.node_index_to_name_mapping[action_index]
-            #logger.info(f"AGENT :: {list(action_probs[0].cpu().detach().numpy())}")
+            #self.logger.info(f"AGENT :: {list(action_probs[0].cpu().detach().numpy())}")
 
             return action_index, action_probs, "Actor"
 
@@ -181,7 +187,7 @@ class ActorCriticDQN:
         '''
         So everything can shutdown about the same time
         '''
-        logger.info("AGENT :: checking shutdown status")
+        self.logger.info("AGENT :: checking shutdown status")
         return os.path.exists("shutdown_signal.txt")
 
     def new_epoch(self):
@@ -224,7 +230,7 @@ class ActorCriticDQN:
         '''
         c_sum_reward = 0
         
-        if self.progress_indication:
+        if self.progress_indication and not self.log_propogate:
             print(f"\rAC DQN Model Ready",end='', flush=True)
         while not self.should_shutdown():
             
@@ -241,8 +247,10 @@ class ActorCriticDQN:
                         # The actor selects the action in the select_action method
                         # Action probs are needed to calculate loss
                         action,action_probs, agent_type = self.select_action(current_state,pod,) 
-                        logger.info(f'AGENT :: {action} selected based on {[np.round(i,3) for i in action_probs[0].cpu().detach().numpy().tolist()]}')
+                        #self.logger.info(f'AGENT :: {action} selected based on {[np.round(i,3) for i in action_probs[0].cpu().detach().numpy().tolist()]}')
+
                         new_state, reward, done = self.env.step(pod,action,dqn=True)
+                        
                         c_sum_reward += reward
                         self.action_list.append(action)
                         
@@ -267,42 +275,42 @@ class ActorCriticDQN:
                         self.actor_optimizer.step()
                         #if self.progress_indication:
                         #    print(f"\rReward is {np.round(reward,3)}  Cumulative sum of rewards is {np.round(c_sum_reward,3)}",end='', flush=True)
-                        logger.info(f"AGENT :: Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ")
+                        self.logger.info(f"AGENT :: Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ")
 
                         # Save off some metrics for analysis
                         self.step_count += 1
-                        self.writer.add_scalar('1. Actor Loss',actor_loss.item(),self.step_count)
-                        self.writer.add_scalar('2. Critic Loss',critic_loss.item(),self.step_count)
-                        self.writer.add_scalar('4. CSR',c_sum_reward,self.step_count)
-                        self.writer.add_scalar('3. Advantage', advantage.item(),self.step_count)
+                        self.writer.add_scalar('1. AC DQN Actor Loss',actor_loss.item(),self.step_count)
+                        self.writer.add_scalar('2. AC DQN Critic Loss',critic_loss.item(),self.step_count)
+                        self.writer.add_scalar('4. AC DQN CSR',c_sum_reward,self.step_count)
+                        self.writer.add_scalar('3. AC DQN Advantage', advantage.item(),self.step_count)
                         if not self.step_count %10:
-                            self.writer.add_histogram('6. actions',torch.tensor(self.action_list),self.step_count)
+                            self.writer.add_histogram('6. AC DQN actions',torch.tensor(self.action_list),self.step_count)
                             temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
                             cpu_info = []
                             for node in temp_state:
                                 cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
-                            self.writer.add_scalar('5. Cluster Variance',np.var(cpu_info),self.step_count)
+                            self.writer.add_scalar('5. AC DQN Cluster Variance',np.var(cpu_info),self.step_count)
 
                         if sum(1 for pod in self.api.list_namespaced_pod(namespace = self.namespace).items if pod.status.phase == 'Pending') == 0:
                             if self.new_epoch():
-                                logger.info("AGENT :: Acknowledge Epoch Complete")
+                                self.logger.info("AGENT :: Acknowledge Epoch Complete")
                                 os.remove('epoch_complete.txt')
             # Catch exceptions as things can happen. 
             except client.exceptions.ApiException as e:
                 if e.status == 410:
-                    logger.warning("AGENT :: Watch timed out")
+                    self.logger.warning("AGENT :: Watch timed out")
                     if self.should_shutdown():
-                        logger.info("AGENT :: Received shutdown signal")
+                        self.logger.info("AGENT :: Received shutdown signal")
                         break
                     else:
-                        logger.info("AGENT :: Restarting Watch")
+                        self.logger.info("AGENT :: Restarting Watch")
                         self.watcher = watch.Watch()
                 else:
-                    logger.error(f"AGENT :: Unexpected API exception: {e}")
+                    self.logger.error(f"AGENT :: Unexpected API exception: {e}")
             except Exception as e:
-                logger.error(f"AGENT :: Unexpected error: {e}")
+                self.logger.error(f"AGENT :: Unexpected error: {e}")
 
-        logger.info("AGENT :: Saving AC Model for Reuse")
+        self.logger.info("AGENT :: Saving AC Model for Reuse")
         # Save off actor critic models in case they want to be deployed.
         filename = f"AC_ModelActor_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
         filename2 = f"AC_ModelCritic_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
@@ -314,6 +322,19 @@ class ActorCriticDQN:
 
 if __name__ == "__main__":
     # This is how it can be run if a cluster is up and running.  this can be run external of the cluster as the docker compose
-    # provides a cluster to work with.  
-    scheduler = ActorCriticDQN(hidden_layers=32,gamma=0.95,actor_learning_rate=1e-4,critic_learning_rate=1e-4,progress_indication=False,tensorboard_name=None)    
+    # provides a cluster to work with.
+    # parse arguments if passed in. use --help for help on this
+    parser = argparse.ArgumentParser(description="runacdqn is an alias to actorcritic_dqn.py. It is used for running the Actor Critic DQN (MLP) Scheduler with various configurations.")
+    parser.add_argument('--hidden_layers',type=int, default=32,help='Number of Hidden Layers  (default: %(default)s)')
+    parser.add_argument('--gamma',type=float, default=0.95,help='Discount Factor  (default: %(default)s)')
+    parser.add_argument('--actor_learning_rate',type=float, default=0.001,help='Actor Learning Rate  (default: %(default)s)')
+    parser.add_argument('--critic_learning_rate',type=float, default=0.001,help='Critic Learning Rate  (default: %(default)s)')
+    parser.add_argument('--progress', action='store_true', help='Enable progress indication. Only when logs are not scrolling  (default: %(default)s)')
+    parser.add_argument('--log_scrolling', action='store_true', help='Enable Log Scrolling to Screen. Disables progress Indication  (default: %(default)s)')
+    args = parser.parse_args()
+
+    scheduler = ActorCriticDQN(hidden_layers=args.hidden_layers,gamma=args.gamma,actor_learning_rate=args.actor_learning_rate, \
+                              critic_learning_rate=args.critic_learning_rate, progress_indication=args.progress,log_propogate=args.log_scrolling)
     scheduler.run()
+
+    

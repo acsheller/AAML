@@ -43,6 +43,7 @@ def def_logging(log_propogate=False):
 
     # Prevent the log messages from being propagated to the Jupyter notebook
     logger.propagate = log_propogate
+    logger.propagate = True
 
     return logger
 
@@ -57,6 +58,8 @@ class CustomSchedulerDQN:
                 init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=25,update_frequency = 25,target_update_frequency=50, \
                 progress_indication=False, tensorboard_name=None,log_propogate=False,num_inputs=10):
         
+
+        self.agent_mode = 'train'
         self.log_propogate = log_propogate
         self.logger = def_logging(log_propogate=log_propogate)
         self.num_inputs = num_inputs
@@ -188,6 +191,8 @@ class CustomSchedulerDQN:
         while True:
             available_nodes = [nd['name'] for nd in self.kube_info.get_valid_nodes()]
             randval = random.random()
+            if self.agent_mode != 'train':
+                self.epsilon = -1
             if randval > self.epsilon:
                 with torch.no_grad():
                     # Use the model to choose the best action
@@ -262,7 +267,7 @@ class CustomSchedulerDQN:
                 self.target_network.load_state_dict(self.dqn.state_dict())
         self.logger.info(f"AGENT :: Updated the Policy Network. Loss: {np.round(loss.cpu().detach().numpy().item(),5)}")
         self.train_iter += 1
-        self.writer.add_scalar('Loss/Train',np.round(loss.cpu().detach().numpy().item(),7),self.train_iter)
+        self.writer.add_scalar('DQN Loss/Train',np.round(loss.cpu().detach().numpy().item(),7),self.train_iter)
 
 
 
@@ -362,9 +367,9 @@ class CustomSchedulerDQN:
                             # Each Deployment is an "episode" 
                             if len(deployments_pods[deployment_name]) == deployment_counts[deployment_name]:
                                 done = 1
-
-                            # Store experience in replay buffer
-                            self.add_to_buffer(current_state, action, reward, new_state,done)
+                            if self.agent_mode == 'train':
+                                # Store experience in replay buffer
+                                self.add_to_buffer(current_state, action, reward, new_state,done)
                             if self.progress_indication and not self.log_propogate:
                                 print(f"\rDecay Rate at {np.round(self.epsilon,4)}. {agent_type} Agent Receieved Reward {np.round(reward,3)}",end='', flush=True)
 
@@ -372,26 +377,27 @@ class CustomSchedulerDQN:
                             self.logger.error(f"1. AGENT :: Unexpected error in section 1: {e}")
                         
                         try:    
-                            self.decay_epsilon()
-                            self.logger.info(f"AGENT :: Decay Rate at {np.round(self.epsilon,3)}")
+                            if self.agent_mode == 'train':
+                                self.decay_epsilon()
+                                self.logger.info(f"AGENT :: Decay Rate at {np.round(self.epsilon,3)}")
                         
-                            if self.step_count != 0 and not self.step_count % self.update_frequency:
-                                experiences = self.replay_buffer.sample(self.BATCH_SIZE)
-                                self.logger.info("AGENT :: Updating the policy")
-                                self.train_policy_network(experiences,epochs=epochs)
-                            self.step_count += 1
-                            self.writer.add_scalar('CSR',c_sum_reward,self.step_count)
+                                if self.step_count != 0 and not self.step_count % self.update_frequency:
+                                    experiences = self.replay_buffer.sample(self.BATCH_SIZE)
+                                    self.logger.info("AGENT :: Updating the policy")
+                                    self.train_policy_network(experiences,epochs=epochs)
+                                self.step_count += 1
+                                self.writer.add_scalar('DQN CSR',c_sum_reward,self.step_count)
                         except Exception as e:
                             self.logger.error(f"2. AGENT :: Unexpected error in section 2: {e}")
                         
                         try:
                             if not self.step_count %5:
-                                self.writer.add_histogram('actions',torch.tensor(self.action_list),self.step_count)
+                                self.writer.add_histogram('DQN actions',torch.tensor(self.action_list),self.step_count)
                                 temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
                                 cpu_info = []
                                 for node in temp_state:
                                     cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
-                                self.writer.add_scalar('Cluster Variance',np.var(cpu_info),self.step_count)
+                                self.writer.add_scalar('DQN Cluster Variance',np.var(cpu_info),self.step_count)
 
                         except client.exceptions.ApiException as e:
                             if e.status == 410:
@@ -519,7 +525,19 @@ if __name__ == "__main__":
     agent.populate_replay(main_df)
     # run the agent
     agent.run()
-    
+
+    agent_eval = CustomSchedulerDQN(hidden_layers=args.hidden_layers,init_epsi=args.init_epsi,gamma=args.gamma, \
+                            learning_rate=args.learning_rate,epsi_decay=args.epsi_decay, \
+                            replay_buffer_size=args.replay_buffer_size,update_frequency=args.update_frequency, \
+                            target_update_frequency=args.target_update_frequency,batch_size=args.batch_size, \
+                            progress_indication=args.progress,log_propogate=args.log_scrolling)
+
     # Place Model in eval
-    agent.dqn.eval()
+    agent_state_dict = agent.dqn.state_dict()
+    
+    agent_eval.dqn.load_state_dict(agent_state_dict)
+    agent_eval.agent_mode = 'eval'
+    agent_eval.dqn.eval()
     print("Please restart the simulator for evaluation with `runsim --cluster_resets=1`")
+    agent_eval.run()
+    

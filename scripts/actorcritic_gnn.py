@@ -28,6 +28,7 @@ import random
 import networkx as nx
 import os
 import numpy as np
+import argparse
 import datetime
 from datetime import datetime, timezone
 import time
@@ -35,31 +36,33 @@ from cluster_env import ClusterEnvironment
 
 ### ---- Preparing the logging ---- ###
 import logging
-# Create a unique filename based on the current date and time
-current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
-filename = f"logs/acgnn_log_{current_time}.log"
+def def_logging(log_propogate=False):
+    # Create a unique filename based on the current date and time
+    current_time = datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
+    filename = f"logs/acgnn_log_{current_time}.log"
 
-# Create a named logger
-logger = logging.getLogger('MyACGNNLogger')
-logger.setLevel(logging.INFO)
+    # Create a named logger
+    logger = logging.getLogger('MyACGNNLogger')
+    logger.setLevel(logging.INFO)
 
-# Create file handler which logs even debug messages
-fh = logging.FileHandler(filename)
-fh.setLevel(logging.INFO)
+    # Create file handler which logs even debug messages
+    fh = logging.FileHandler(filename)
+    fh.setLevel(logging.INFO)
 
-# Create formatter and add it to the handlers
-formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
-fh.setFormatter(formatter)
+    # Create formatter and add it to the handlers
+    formatter = logging.Formatter('%(asctime)s - %(levelname)s - %(message)s')
+    fh.setFormatter(formatter)
 
-# Add the handlers to the logger
-logger.addHandler(fh)
+    # Add the handlers to the logger
+    logger.addHandler(fh)
 
-# Prevent the log messages from being propagated to the Jupyter notebook 
-# Set to true for logging to appear in log file as well as on screen.
-# Set to False to only appear in file.
-logger.propagate = True
+    # Prevent the log messages from being propagated to the Jupyter notebook 
+    # Set to true for logging to appear in log file as well as on screen.
+    # Set to False to only appear in file.
+    logger.propagate = log_propogate
+    return logger
 
-### ---- End of Logging Prep ---- ###
+    ### ---- End of Logging Prep ---- ###
 
 
 class ActorCriticGNN:
@@ -69,11 +72,14 @@ class ActorCriticGNN:
     '''
 
 
-    def __init__(self,namespace='default',scheduler_name ="custom-scheduler",hidden_layers=64,actor_learning_rate=1e-4,critic_learning_rate=1e-4,gamma=0.99,progress_indication=True,tensorboard_name=None,optimizer=0):
+    def __init__(self,namespace='default',scheduler_name ="custom-scheduler",hidden_layers=64,actor_learning_rate=1e-4, \
+                critic_learning_rate=1e-4,gamma=0.99,progress_indication=True,tensorboard_name=None,optimizer=0, \
+                log_propogate=False):
         '''
         Constructor 
         '''
-        
+        self.log_propogate = log_propogate
+        self.logger = def_logging(log_propogate=log_propogate)
         self.scheduler_name = scheduler_name
         self.progress_indication = progress_indication
         self.namespace = namespace
@@ -92,7 +98,7 @@ class ActorCriticGNN:
         # These are used for Tensorboard
         if self.tboard_name != None:
             self.writer = SummaryWriter(f'tlogs/acgnn_{self.tboard_name}')
-            logger.info(f"AGENT: ACGNN Created TensorBoard writer {self.tboard_name}")
+            self.logger.info(f"AGENT: ACGNN Created TensorBoard writer {self.tboard_name}")
         else:
             # Generate a name if one is not provided. 
             self.writer = SummaryWriter(f'tlogs/{self.generate_funny_name()}')
@@ -115,7 +121,7 @@ class ActorCriticGNN:
 
         # If cuda is available then use it.
         if torch.cuda.is_available():
-            logger.info("AGENT :: GPU Available")
+            self.logger.info("AGENT :: GPU Available")
         self.device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
         # Put the models to the device either gpu or cpu
@@ -140,7 +146,7 @@ class ActorCriticGNN:
         self.gamma = gamma  # Discount factor for future rewards
         self.action_list = []
         self.step_count = 0
-        logger.info("AGENT :: Actor Critic GNN Agent constructed.")
+        self.logger.info("AGENT :: Actor Critic GNN Agent constructed.")
 
 
     def select_action(self, state,pod):
@@ -179,7 +185,7 @@ class ActorCriticGNN:
         '''
         So everything can shutdown about the same time
         '''
-        logger.info("AGENT :: checking shutdown status")
+        self.logger.info("AGENT :: checking shutdown status")
         return os.path.exists("shutdown_signal.txt")
 
     def new_epoch(self):
@@ -261,44 +267,44 @@ class ActorCriticGNN:
                         self.actor_optimizer.zero_grad()
                         actor_loss.backward()
                         self.actor_optimizer.step()
-                        if self.progress_indication:
+                        if self.progress_indication and not self.log_propogate:
                             print(f"Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ",end='', flush=True)
-                        logger.info(f"AGENT :: Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ")
+                        self.logger.info(f"AGENT :: Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ")
 
                         # Save off some metrics for analysis
                         self.step_count += 1
-                        self.writer.add_scalar('1. Actor Loss',actor_loss.item(),self.step_count)
-                        self.writer.add_scalar('2. Critic Loss',critic_loss.item(),self.step_count)
-                        self.writer.add_scalar('4. CSR',c_sum_reward,self.step_count)
-                        self.writer.add_scalar('3. Advantage', advantage.item(),self.step_count)
+                        self.writer.add_scalar('1. AC GNN Actor Loss',actor_loss.item(),self.step_count)
+                        self.writer.add_scalar('2. AC GNN Critic Loss',critic_loss.item(),self.step_count)
+                        self.writer.add_scalar('4. AC GNN CSR',c_sum_reward,self.step_count)
+                        self.writer.add_scalar('3. AC GNN Advantage', advantage.item(),self.step_count)
                         if not self.step_count %10:
-                            self.writer.add_histogram('6. actions',torch.tensor(self.action_list),self.step_count)
+                            self.writer.add_histogram('6. AC GNNactions',torch.tensor(self.action_list),self.step_count)
                             temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
                             cpu_info = []
                             for node in temp_state:
                                 cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
-                            self.writer.add_scalar('5. Cluster Variance',np.var(cpu_info),self.step_count)
-                            logger.info(f"AGENT :: Cluster Variance at {np.round(np.var(cpu_info),4)}")
+                            self.writer.add_scalar('5. AC GNN Cluster Variance',np.var(cpu_info),self.step_count)
+                            self.logger.info(f"AGENT :: Cluster Variance at {np.round(np.var(cpu_info),4)}")
                         if sum(1 for pod in self.api.list_namespaced_pod(namespace = self.namespace).items if pod.status.phase == 'Pending') == 0:
                             if self.new_epoch():
-                                logger.info("AGENT :: Acknowledge Epoch Complete")
+                                self.logger.info("AGENT :: Acknowledge Epoch Complete")
                                 os.remove('epoch_complete.txt')
             # Catch exceptions as things can happen. 
             except client.exceptions.ApiException as e:
                 if e.status == 410:
-                    logger.warning("AGENT :: Watch timed out")
+                    self.logger.warning("AGENT :: Watch timed out")
                     if self.should_shutdown():
-                        logger.info("AGENT :: Received shutdown signal")
+                        self.logger.info("AGENT :: Received shutdown signal")
                         break
                     else:
-                        logger.info("AGENT :: Restarting Watch")
+                        self.logger.info("AGENT :: Restarting Watch")
                         self.watcher = watch.Watch()
                 else:
-                    logger.error(f"AGENT :: Unexpected API exception: {e}")
+                    self.logger.error(f"AGENT :: Unexpected API exception: {e}")
             except Exception as e:
-                logger.error(f"AGENT :: Unexpected error: {e}")
+                self.logger.error(f"AGENT :: Unexpected error: {e}")
 
-        logger.info("AGENT :: Saving AC Model for Reuse")
+        self.logger.info("AGENT :: Saving AC Model for Reuse")
         # Save off actor critic models in case they want to be deployed.
         filename = f"AC_ModelActor_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
         filename2 = f"AC_ModelCritic_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
@@ -308,7 +314,16 @@ class ActorCriticGNN:
 
 
 if __name__ == "__main__":
-    # This is how it can be run if a cluster is up and running.  this can be run external of the cluster as the docker compose
-    # provides a cluster to work with.  
-    scheduler = ActorCriticGNN(hidden_layers=32,gamma=0.9,actor_learning_rate=1e-3,critic_learning_rate=1e-3,progress_indication=False,tensorboard_name=None)    
+    
+    parser = argparse.ArgumentParser(description="runacgnn is an alias to actorcritic_gnn.py. It is used for running the Actor Critic GNN Scheduler with various configurations.")
+    parser.add_argument('--hidden_layers',type=int, default=32,help='Number of Hidden Layers  (default: %(default)s)')
+    parser.add_argument('--gamma',type=float, default=0.95,help='Discount Factor  (default: %(default)s)')
+    parser.add_argument('--actor_learning_rate',type=float, default=0.001,help='Actor Learning Rate  (default: %(default)s)')
+    parser.add_argument('--critic_learning_rate',type=float, default=0.001,help='Critic Learning Rate  (default: %(default)s)')
+    parser.add_argument('--progress', action='store_true', help='Enable progress indication. Only when logs are not scrolling  (default: %(default)s)')
+    parser.add_argument('--log_scrolling', action='store_true', help='Enable Log Scrolling to Screen. Disables progress Indication  (default: %(default)s)')
+    args = parser.parse_args()
+
+    scheduler = ActorCriticGNN(hidden_layers=args.hidden_layers,gamma=args.gamma,actor_learning_rate=args.actor_learning_rate, \
+                              critic_learning_rate=args.critic_learning_rate, progress_indication=args.progress,log_propogate=args.log_scrolling)  
     scheduler.run()

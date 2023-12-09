@@ -273,17 +273,17 @@ class ActorCriticGNN:
 
                         # Save off some metrics for analysis
                         self.step_count += 1
-                        self.writer.add_scalar('1. AC GNN Actor Loss',actor_loss.item(),self.step_count)
-                        self.writer.add_scalar('2. AC GNN Critic Loss',critic_loss.item(),self.step_count)
-                        self.writer.add_scalar('4. AC GNN CSR',c_sum_reward,self.step_count)
-                        self.writer.add_scalar('3. AC GNN Advantage', advantage.item(),self.step_count)
+                        self.writer.add_scalar('2. Actor Loss',actor_loss.item(),self.step_count)
+                        self.writer.add_scalar('3. Critic Loss',critic_loss.item(),self.step_count)
+                        self.writer.add_scalar('1. CSR',c_sum_reward,self.step_count)
+                        self.writer.add_scalar('3. Advantage', advantage.item(),self.step_count)
                         if not self.step_count %10:
-                            self.writer.add_histogram('6. AC GNNactions',torch.tensor(self.action_list),self.step_count)
+                            self.writer.add_histogram('6. actions',torch.tensor(self.action_list),self.step_count)
                             temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
                             cpu_info = []
                             for node in temp_state:
                                 cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
-                            self.writer.add_scalar('5. AC GNN Cluster Variance',np.var(cpu_info),self.step_count)
+                            self.writer.add_scalar('5. Cluster Variance',np.var(cpu_info),self.step_count)
                             self.logger.info(f"AGENT :: Cluster Variance at {np.round(np.var(cpu_info),4)}")
                         if sum(1 for pod in self.api.list_namespaced_pod(namespace = self.namespace).items if pod.status.phase == 'Pending') == 0:
                             if self.new_epoch():

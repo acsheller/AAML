@@ -82,8 +82,10 @@ class ActorCriticDQN:
         self.scheduler_name = scheduler_name
         self.progress_indication = progress_indication
         self.namespace = namespace
-        self.tboard_name = tensorboard_name
-
+        if tensorboard_name != None:
+            self.tboard_name = tensorboard_name
+        else:
+            self.tboard_name = "acdqn_" + self.generate_funny_name()
 
         # Do K8s stuff
         config.load_kube_config()
@@ -97,7 +99,7 @@ class ActorCriticDQN:
 
         # These are used for Tensorboard
         if self.tboard_name != None:
-            self.writer = SummaryWriter(f'tlogs/acdqn_{self.tboard_name}')
+            self.writer = SummaryWriter(f'tlogs/{self.tboard_name}')
             self.logger.info(f"AGENT: Created TensorBoard writer {self.tboard_name}")
         else:
             # Generate a name if one is not provided. 
@@ -229,6 +231,9 @@ class ActorCriticDQN:
         
         '''
         c_sum_reward = 0
+        deployed_pods = []
+        deployment_counts = {}
+        deployments_pods = {}
         
         if self.progress_indication and not self.log_propogate:
             print(f"\rAC DQN Model Ready",end='', flush=True)
@@ -240,56 +245,84 @@ class ActorCriticDQN:
                     
                     pod = event['object']
                     if self.needs_scheduling(pod):
+                        try:
 
-                        # Current state will be returned as a graph
-                        current_state= self.env.get_state(dqn=True)
-
-                        # The actor selects the action in the select_action method
-                        # Action probs are needed to calculate loss
-                        action,action_probs, agent_type = self.select_action(current_state,pod,) 
-                        #self.logger.info(f'AGENT :: {action} selected based on {[np.round(i,3) for i in action_probs[0].cpu().detach().numpy().tolist()]}')
-
-                        new_state, reward, done = self.env.step(pod,action,dqn=True)
+                            # Get the deployment Information
+                            deployment_name = self.get_deployment_name(pod)
+                            if deployment_name not in deployment_counts.keys():
+                                deployment_counts[deployment_name] = self.get_num_pods_for_deployment(deployment_name)
+                                deployments_pods[deployment_name] = []
+                                self.logger.info(f"AGENT :: Processing Deployment {deployment_name} with {deployment_counts[deployment_name]}")
+                            # Process the pod so we can can count and add done = True later
+                            if pod.metadata.name not in deployed_pods:
+                                    deployed_pods.append(pod.metadata.name)
+                                    deployments_pods[deployment_name].append(pod.metadata.name)
                         
-                        c_sum_reward += reward
-                        self.action_list.append(action)
-                        
-                        # Critics Evaluation
-                        value = self.critic(torch.tensor([current_state], dtype=torch.float32).to(self.device))
-                        next_value = self.critic(torch.tensor([new_state], dtype=torch.float32).to(self.device))                        
+                            # Current state will be returned as a graph
+                            current_state= self.env.get_state(dqn=True)
 
-                        # Calculate advantage
-                        td_error = reward + self.gamma * next_value * (1 - int(done)) - value
-                        advantage = td_error.detach()
-                        # Update Critic
-                        critic_loss = td_error.pow(2)
-                        self.critic_optimizer.zero_grad()
-                        critic_loss.backward()
-                        self.critic_optimizer.step()
+                            # The actor selects the action in the select_action method
+                            # Action probs are needed to calculate loss
+                            action,action_probs, agent_type = self.select_action(current_state,pod,) 
+                            #self.logger.info(f'AGENT :: {action} selected based on {[np.round(i,3) for i in action_probs[0].cpu().detach().numpy().tolist()]}')
+
+                            new_state, reward, done = self.env.step(pod,action,dqn=True)   
+                            c_sum_reward += reward
+                            self.action_list.append(action)
+
+                            # Each Deployment is an "episode" 
+                            if len(deployments_pods[deployment_name]) == deployment_counts[deployment_name]:
+                                done = 1
+                        except Exception as e:
+                            self.logger.error(f"1. AGENT :: Unexpected error in section 1: {e}")                        
 
 
-                        # Update Actor using the advantage
-                        actor_loss = -torch.log(action_probs[0,action]) * advantage
-                        self.actor_optimizer.zero_grad()
-                        actor_loss.backward()
-                        self.actor_optimizer.step()
-                        #if self.progress_indication:
-                        #    print(f"\rReward is {np.round(reward,3)}  Cumulative sum of rewards is {np.round(c_sum_reward,3)}",end='', flush=True)
-                        self.logger.info(f"AGENT :: Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ")
+                        try:
+                            # Critics Evaluation
+                            value = self.critic(torch.tensor([current_state], dtype=torch.float32).to(self.device))
+                            next_value = self.critic(torch.tensor([new_state], dtype=torch.float32).to(self.device))                        
 
-                        # Save off some metrics for analysis
-                        self.step_count += 1
-                        self.writer.add_scalar('1. AC DQN Actor Loss',actor_loss.item(),self.step_count)
-                        self.writer.add_scalar('2. AC DQN Critic Loss',critic_loss.item(),self.step_count)
-                        self.writer.add_scalar('4. AC DQN CSR',c_sum_reward,self.step_count)
-                        self.writer.add_scalar('3. AC DQN Advantage', advantage.item(),self.step_count)
-                        if not self.step_count %10:
-                            self.writer.add_histogram('6. AC DQN actions',torch.tensor(self.action_list),self.step_count)
-                            temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
-                            cpu_info = []
-                            for node in temp_state:
-                                cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
-                            self.writer.add_scalar('5. AC DQN Cluster Variance',np.var(cpu_info),self.step_count)
+                            # Calculate advantage
+                            td_error = reward + self.gamma * next_value * (1 - int(done)) - value
+                            advantage = td_error.detach()
+                            # Update Critic
+                            critic_loss = td_error.pow(2)
+                            self.critic_optimizer.zero_grad()
+                            critic_loss.backward()
+                            self.critic_optimizer.step()
+                        except Exception as e:
+                            self.logger.error(f"2. AGENT :: Unexpected error in section 2: {e}")                        
+
+                        try:
+                            # Update Actor using the advantage
+                            actor_loss = -torch.log(action_probs[0,action]) * advantage
+                            self.actor_optimizer.zero_grad()
+                            actor_loss.backward()
+                            self.actor_optimizer.step()
+                            #if self.progress_indication:
+                            #    print(f"\rReward is {np.round(reward,3)}  Cumulative sum of rewards is {np.round(c_sum_reward,3)}",end='', flush=True)
+                            self.logger.info(f"AGENT :: Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ")
+
+                        except Exception as e:
+                            self.logger.error(f"3. AGENT :: Unexpected error in section 3: {e}")                        
+
+                        try:
+                            # Save off some metrics for analysis
+                            self.step_count += 1
+                            self.writer.add_scalar('2. Actor Loss',actor_loss.item(),self.step_count)
+                            self.writer.add_scalar('3. Critic Loss',critic_loss.item(),self.step_count)
+                            self.writer.add_scalar('1. CSR',c_sum_reward,self.step_count)
+                            self.writer.add_scalar('3. Advantage', advantage.item(),self.step_count)
+                            if not self.step_count %10:
+                                self.writer.add_histogram('6. actions',torch.tensor(self.action_list),self.step_count)
+                                temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
+                                cpu_info = []
+                                for node in temp_state:
+                                    cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
+                                self.writer.add_scalar('5. Cluster Variance',np.var(cpu_info),self.step_count)
+
+                        except Exception as e:
+                            self.logger.error(f"4. AGENT :: Unexpected error in section 4: {e}")                        
 
                         if sum(1 for pod in self.api.list_namespaced_pod(namespace = self.namespace).items if pod.status.phase == 'Pending') == 0:
                             if self.new_epoch():

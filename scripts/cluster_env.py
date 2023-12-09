@@ -250,62 +250,6 @@ class ClusterEnvironment:
 
         return data
 
-
-
-
-    def calc_scaled_reward(self,State,action):
-        #1. Get the nodes in sorted order
-        #2. 
-        step  = 2 / (len(State)-1)
-        values = [np.round(1 - i*step,4) for i in range(len(State))]
-        for index, ii in enumerate(State):
-            if ii['name'] == self.kube_info.node_index_to_name_mapping[action]:
-                return values[index]
-
-    def calc_scaled_reward2(self, State, action):
-        # Extract CPU usages and get unique values
-        cpu_usages = [np.round(node['total_cpu_used']/node['cpu_capacity'],4) for node in State]
-        unique_cpu_usages = sorted(set(cpu_usages))
-
-        # If all CPU usages are the same, return maximum reward
-        if len(unique_cpu_usages) == 1:
-            return 1
-
-        # Calculate reward values based on unique CPU usages
-        step = 1 / (len(unique_cpu_usages) - 1)
-        values = {usage: np.round(1 - i * step,4) for i, usage in enumerate(unique_cpu_usages)}
-
-        # Find the CPU usage of the node chosen by the action
-        for index,ii in enumerate(State):
-            if ii['name'] == self.kube_info.node_index_to_name_mapping[action]:
-                return values[np.round(ii['total_cpu_used']/ii['cpu_capacity'],4)]
-
-    def calc_scaled_reward3(self, State, action):
-        # Extract CPU usages and get unique values
-        cpu_usages = [np.round(node['total_cpu_used']/node['cpu_capacity'], 4) for node in State]
-        unique_cpu_usages = sorted(set(cpu_usages))
-
-        # If all CPU usages are the same, return maximum reward (which is 1 in this new scale)
-        if len(unique_cpu_usages) == 1:
-            return 1
-
-        # Calculate the original values (scaled between 0 and 1)
-        step = 1 / (len(unique_cpu_usages) - 1)
-        values = {usage: np.round(1 - i * step, 4) for i, usage in enumerate(unique_cpu_usages)}
-
-        # Transform values from [0, 1] to [-1, 1]
-        values = {key: 2 * value - 1 for key, value in values.items()}
-
-
-        # Find the CPU usage of the node chosen by the action
-        for index, ii in enumerate(State):
-            if ii['name'] == self.kube_info.node_index_to_name_mapping[action]:
-                return values[np.round(ii['total_cpu_used']/ii['cpu_capacity'], 4)]
-
-        # Fallback in case no matching node is found
-        return -1  # You might want to handle this case based on your specific requirements
-
-
     def calc_scaled_reward4(self,State, action,neg_value=False):
         # Extract CPU usages
         cpu_usages = [np.round(node['total_cpu_used']/node['cpu_capacity'], 4) for node in State]
@@ -341,7 +285,7 @@ class ClusterEnvironment:
         '''
         # 1. Get the state of the cluster
         #node_info = self.kube_info.get_nodes_data()
-        if action not in self.assignment_count:
+        if action not in self.assignment_count: 
             self.assignment_count[action] =0
         self.assignment_count[action] +=1
         node_info_before = beforeState
@@ -356,37 +300,6 @@ class ClusterEnvironment:
             self.last_node_assigned = self.kube_info.node_index_to_name_mapping[action]
         reward = self.calc_scaled_reward4(beforeState,action)
         return reward
-        #2. Get the CpuInfo for each node
-        cpu_info_before = {}
-        cpu_info_after = {}
-        mem_info_before = {}
-        mem_info_after = {}
-        pod_info_before = {}
-        pod_info_after = {}
-        for index,node in enumerate(node_info_before):
-            if node['roles'] != 'control-plane':
-                cpu_info_before[node['name']] = np.round(1- node['total_cpu_used']/node['cpu_capacity'],4)
-                node2 = node_info_after[index]
-                cpu_info_after[node2['name']]= np.round(1 - node2['total_cpu_used']/node2['cpu_capacity'],4)
-                mem_info_before[node['name']] = np.round1 - (node['total_memory_used'] / node['memory_capacity'],4)
-                mem_info_after[node2['name']] = np.round(1 - node2['total_memory_used'] / node2['memory_capacity'],4)
-
-                pod_info_before[node['name']] = np.round(1 - node['pod_count'] / node['pod_limit'],4)
-                pod_info_after[node2['name']] = np.round(1 - node2['pod_count'] / node2['pod_limit'],4)
-        # 3. Calculate balance score for CPU and Memory
-        #cpu_balance_score = np.round(self.calculate_balance_reward_avg(cpu_info),3)
-        #memory_balance_score = np.round(self.calculate_balance_reward(memory_info),3)
-        #pod_info_score = np.round(self.calculate_balance_reward(pod_info),3)
-        #cpu_reward = self.calculate_improvement_reward(cpu_info_before,cpu_info_after)
-        #mem_reward = self.calculate_improvement_reward(mem_info_before,mem_info_after)
-        cpu_reward= np.round(self.reward_for_balance(cpu_info_before,cpu_info_after)*100,5)
-        mem_reward= np.round(self.reward_for_balance(mem_info_before,mem_info_after)*100,5)
-        pod_reward = np.round(self.reward_for_balance(pod_info_before,pod_info_after)*100,5)
-        logging.info(f"  ENV :: Reward: CPU {cpu_reward} MEM {mem_reward} POD {pod_reward}")
-        #3. Now calculate reward -- note that defference functions can be tried here. 
-        #reward = self.calculate_balance_reward_avg(cpu_info)
-        #reward = min(cpu_balance_score,memory_balance_score,pod_info_score)
-        return cpu_reward
 
 
 

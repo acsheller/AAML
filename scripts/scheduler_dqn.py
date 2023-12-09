@@ -43,7 +43,7 @@ def def_logging(log_propogate=False):
 
     # Prevent the log messages from being propagated to the Jupyter notebook
     logger.propagate = log_propogate
-    logger.propagate = True
+    #logger.propagate = True
 
     return logger
 
@@ -69,7 +69,7 @@ class CustomSchedulerDQN:
         if tensorboard_name != None:
             self.tboard_name = tensorboard_name
         else:
-            self.tboard_name = self.generate_funny_name()
+            self.tboard_name = "dqn_" + self.generate_funny_name()
 
         # For connecting to Kubernetes Cluster
         config.load_kube_config()
@@ -83,14 +83,15 @@ class CustomSchedulerDQN:
 
         # These are used for Tensorboard
         if self.tboard_name:
-            self.writer = SummaryWriter(f'tlogs/dqn_{self.tboard_name}')
+            self.writer = SummaryWriter(f'tlogs/{self.tboard_name}')
             self.logger.info(f"AGENT: Created TensorBoard writer {self.tboard_name}")
         else:
-            self.writer = SummaryWriter(f'tlogs/')
+            # Generate a name if one is not provided. 
+            self.writer = SummaryWriter(f'tlogs/{self.generate_funny_name()}')
         
 
         # use a target network
-        self.train_iter =0
+        self.train_iter = 0
         self.update_frequency = update_frequency
         self.use_target_network = True
         self.target_update_frequency = target_update_frequency
@@ -218,7 +219,7 @@ class CustomSchedulerDQN:
                     selected_node = random.choice(lowest_nodes)
                     action_index = self.env.kube_info.node_name_to_index_mapping[selected_node['name']]
                     node_name = selected_node['name']
-                    self.logger.info(f"AGENT :: Heuristic {np.round(randval,3)} Selection: Assign {pod.metadata.name} to {node_name}")
+                    self.logger.info(f" HEUR :: Heuristic {np.round(randval,3)} Selection: Assign {pod.metadata.name} to {node_name}")
                     agent_type='Heuristic'
             return action_index,agent_type
 
@@ -249,6 +250,7 @@ class CustomSchedulerDQN:
 
             # Compute target Q-values (Q_targets) from next states using a target Network
             with torch.no_grad():
+                # Using the target network
                 Q_targets_next = self.target_network(next_states_batch).detach().max(1)[0].unsqueeze(-1)
                 Q_targets_next = Q_targets_next * (1 - dones.unsqueeze(-1))
 
@@ -262,12 +264,10 @@ class CustomSchedulerDQN:
             loss.backward()
             self.optimizer.step()
 
-            if self.use_target_network and self.step_count % self.target_update_frequency == 0:
-                self.logger.info("AGENT :: *** Updating the target Network")
-                self.target_network.load_state_dict(self.dqn.state_dict())
+
         self.logger.info(f"AGENT :: Updated the Policy Network. Loss: {np.round(loss.cpu().detach().numpy().item(),5)}")
         self.train_iter += 1
-        self.writer.add_scalar('DQN Loss/Train',np.round(loss.cpu().detach().numpy().item(),7),self.train_iter)
+        self.writer.add_scalar('2. Loss/Train',np.round(loss.cpu().detach().numpy().item(),7),self.train_iter)
 
 
 
@@ -385,19 +385,24 @@ class CustomSchedulerDQN:
                                     experiences = self.replay_buffer.sample(self.BATCH_SIZE)
                                     self.logger.info("AGENT :: Updating the policy")
                                     self.train_policy_network(experiences,epochs=epochs)
+
+                                if self.use_target_network and self.step_count % self.target_update_frequency == 0:
+                                    self.logger.info("AGENT :: *** Updating the target Network")
+                                    self.target_network.load_state_dict(self.dqn.state_dict())
+
                                 self.step_count += 1
-                                self.writer.add_scalar('DQN CSR',c_sum_reward,self.step_count)
+                                self.writer.add_scalar('1. CSR',c_sum_reward,self.step_count)
                         except Exception as e:
                             self.logger.error(f"2. AGENT :: Unexpected error in section 2: {e}")
                         
                         try:
                             if not self.step_count %5:
-                                self.writer.add_histogram('DQN actions',torch.tensor(self.action_list),self.step_count)
+                                self.writer.add_histogram('4. Actions',torch.tensor(self.action_list),self.step_count)
                                 temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
                                 cpu_info = []
                                 for node in temp_state:
                                     cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
-                                self.writer.add_scalar('DQN Cluster Variance',np.var(cpu_info),self.step_count)
+                                self.writer.add_scalar('3. Cluster Variance',np.var(cpu_info),self.step_count)
 
                         except client.exceptions.ApiException as e:
                             if e.status == 410:
@@ -428,9 +433,11 @@ class CustomSchedulerDQN:
 
         self.logger.info("AGENT :: Saving DQN Model for Reuse")
 
-        filename = f"DQN_Model_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
+        filename = f"./models/DQN_Model_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
         torch.save(self.dqn.state_dict(),filename)
+        self.logger.info("AGENT :: Remove shutdown signal now exiting")
         os.remove("shutdown_signal.txt")
+        return
 
     def load_model(self,f_name):
         '''
@@ -533,11 +540,11 @@ if __name__ == "__main__":
     #                         progress_indication=args.progress,log_propogate=args.log_scrolling)
 
     # Place Model in eval
-    #agent_state_dict = agent.dqn.state_dict()
     
-    #agent_eval.dqn.load_state_dict(agent_state_dict)
-    #agent_eval.agent_mode = 'eval'
-    #agent_eval.dqn.eval()
-    #print("Please restart the simulator for evaluation with `runsim --cluster_resets=1`")
-    #agent_eval.run()
+    
+    #print("\nPreparing to evaluate")
+    #agent.agent_mode = 'eval'
+    #agent.dqn.eval()
+    #print("\nPlease restart the simulator for evaluation with `runsim --cluster_resets=1`\n\n")
+    #agent.run()
     

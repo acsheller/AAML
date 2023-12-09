@@ -278,16 +278,10 @@ class CustomSchedulerGNN:
                 self.optimizer.zero_grad()
                 loss.backward()
                 self.optimizer.step()
-                #self.logger.info(f"Epoch {epoch + 1}/{epochs} - Loss: {np.round(loss.cpu().detach().numpy().item(), 5)}")
-                #self.logger.info(f"1 AGENT :: Updated the Policy Network. Loss: {np.round(loss.cpu().detach().numpy().item(),5)}")
-                # Update step count and potentially update target network
 
-                if self.use_target_network and self.step_count % self.target_update_frequency == 0:
-                    self.logger.info("AGENT :: *** Updating the target Network")
-                    self.target_network.load_state_dict(self.gnn.state_dict())
                 self.logger.info(f"AGENT :: Updated the Policy Network. Loss: {np.round(loss.cpu().detach().numpy().item(),5)}")
                 self.train_iter += 1
-                self.writer.add_scalar('GNN Loss/Train',np.round(loss.cpu().detach().numpy().item(),7),self.train_iter)
+                self.writer.add_scalar('2. Loss/Train',np.round(loss.cpu().detach().numpy().item(),7),self.train_iter)
             except Exception as e:
                 self.logger.error("3 AGENT :: ERROR in section 3 of train_policy_network".format(e))
 
@@ -408,20 +402,25 @@ class CustomSchedulerGNN:
                         
                             if self.step_count != 0 and not self.step_count % self.update_frequency:
                                 experiences = self.replay_buffer.sample(self.BATCH_SIZE)
-                                self.train_policy_network(experiences,epochs=epochs)                     
+                                self.train_policy_network(experiences,epochs=epochs)      
+
+                            if self.use_target_network and self.step_count % self.target_update_frequency == 0:
+                                self.logger.info("AGENT :: *** Updating the target Network")
+                                self.target_network.load_state_dict(self.gnn.state_dict())
+            
                             self.step_count += 1
-                            self.writer.add_scalar('GNN CSR',c_sum_reward,self.step_count)
+                            self.writer.add_scalar('1. CSR',c_sum_reward,self.step_count)
                         except Exception as e:
                             self.logger.error(f"2. AGENT :: Unexpected error in section 2: {e}")
 
                         try:
                             if not self.step_count %5:
-                                self.writer.add_histogram('GNN actions',torch.tensor(self.action_list),self.step_count)
+                                self.writer.add_histogram('4. Actions',torch.tensor(self.action_list),self.step_count)
                                 temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
                                 cpu_info = []
                                 for node in temp_state:
                                     cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
-                                self.writer.add_scalar('GNN Cluster Variance',np.var(cpu_info),self.step_count)
+                                self.writer.add_scalar('3. Cluster Variance',np.var(cpu_info),self.step_count)
                             
                         except client.exceptions.ApiException as e:
                             if e.status == 410:
@@ -455,8 +454,9 @@ class CustomSchedulerGNN:
 
         filename = f"GNN_Model_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
         torch.save(self.gnn.state_dict(),filename)
+        self.logger.info("AGENT :: Removing shutdown signal")
         os.remove("shutdown_signal.txt")
-
+        return
 
 
     def load_model(self,f_name):

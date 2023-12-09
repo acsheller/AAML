@@ -20,7 +20,14 @@ services:
       - my-network
     depends_on:
       - kwok-cluster
-
+    volumes:
+    - ./logs:/home/appuser/logs
+    - ./tlogs:/home/appuser/tlogs
+    - ./models:/home/appuser/models
+    - ./deployment_data:/home/appuser/deployment_data
+    - ./scripts:/home/appuser/scripts
+    - ./data:/home/appuser/data
+    - ./notebooks:/home/appuser/notebooks
 
 networks:
   my-network:

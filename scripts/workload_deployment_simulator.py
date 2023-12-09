@@ -439,12 +439,13 @@ class WorkloadDeploymentSimulator:
             except Exception as e:
                 logger.error(f"WDS :: Unexpected error while removing deployment: {str(e)}")
             time.sleep(10)
-        unique_filename = f"deployment_data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        unique_filename = f"./deployment_data/data_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
         self.df.to_csv(unique_filename,index=False)
         logger.info(f"Data saved to {unique_filename}")
         with open("shutdown_signal.txt","w") as file:
             file.write("shutdown")
         print("\n")
+        time.sleep(2)
         return
 
 

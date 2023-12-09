@@ -47,10 +47,14 @@ COPY docker/config /home/appuser/.kube/config
 
 RUN mkdir /home/appuser/tlogs
 RUN mkdir /home/appuser/logs
-
+RUN mkdir /home/appuser/models
+RUN mkdir /home/appuser/deployment_data
+RUN mkdir /home/appuser/scripts
+RUN mkdir /home/appuser/data
 # Copy the contents of /app/build into /desired/directory within the container
-COPY scripts /home/appuser/scripts
-COPY data /home/appuser/data
+## Changed to mounting in folders in the docker compose script.
+#COPY scripts /home/appuser/scripts
+#COPY data /home/appuser/data
 #COPY kwok_workloads /home/appuser/kwok_workloads
 #COPY scheduler /home/appuser/scheduler
 COPY docker/entrypoint.sh /home/appuser/entrypoint.sh

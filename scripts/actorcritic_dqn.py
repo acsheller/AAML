@@ -333,18 +333,18 @@ class ActorCriticDQN:
                         try:
                             # Save off some metrics for analysis
                             self.step_count += 1
-                            self.writer.add_scalar('2. Actor Loss',actor_loss.item(),self.step_count)
-                            self.writer.add_scalar('3. Critic Loss',critic_loss.item(),self.step_count)
+                            self.writer.add_scalar('5. Actor Loss',actor_loss.item(),self.step_count)
+                            self.writer.add_scalar('6. Critic Loss',critic_loss.item(),self.step_count)
                             self.writer.add_scalar('1. CSR',c_sum_reward,self.step_count)
-                            self.writer.add_scalar('4. Advantage', advantage.item(),self.step_count)
+                            self.writer.add_scalar('2. Advantage', advantage.item(),self.step_count)
                             if not self.step_count %10:
-                                self.writer.add_histogram('6. actions',torch.tensor(self.action_list),self.step_count)
+                                self.writer.add_histogram('4. Actions',torch.tensor(self.action_list),self.step_count)
                                 temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
                                 cpu_info = []
                                 for node in temp_state:
                                     cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
                                 self.logger.info(f"AGENT :: Cluster Variance at {np.round(np.var(cpu_info),4)}")
-                                self.writer.add_scalar('5. Cluster Variance',np.var(cpu_info),self.step_count)
+                                self.writer.add_scalar('3. Cluster Variance',np.var(cpu_info),self.step_count)
 
                         except Exception as e:
                             self.logger.error(f"4. AGENT :: Unexpected error in section 4: {e}")                        

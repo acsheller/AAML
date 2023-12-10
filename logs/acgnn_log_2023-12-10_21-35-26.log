@@ -1,0 +1,390 @@
+2023-12-10 21:35:26,907 - INFO - AGENT: ACGNN Created TensorBoard writer acgnn_extended-taco
+2023-12-10 21:35:27,095 - INFO - AGENT :: Actor Critic GNN Agent constructed.
+2023-12-10 21:35:27,095 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:35:41,223 - INFO - AGENT :: Processing Deployment grandioso-dog with 12 pods.
+2023-12-10 21:35:42,324 - INFO - AGENT :: Reward for binding grandioso-dog-8567c589bc-cfshh to node kwok-std-node-9 is 1.0 
+2023-12-10 21:35:43,461 - INFO - AGENT :: Reward for binding grandioso-dog-8567c589bc-cw842 to node kwok-std-node-3 is 0.991 
+2023-12-10 21:35:44,673 - INFO - AGENT :: Reward for binding grandioso-dog-8567c589bc-xmvc6 to node kwok-std-node-8 is 0.988 
+2023-12-10 21:35:45,995 - INFO - AGENT :: Reward for binding grandioso-dog-8567c589bc-2k7js to node kwok-std-node-4 is 0.986 
+2023-12-10 21:35:47,240 - INFO - AGENT :: Reward for binding grandioso-dog-8567c589bc-ldwt4 to node kwok-std-node-6 is 0.985 
+2023-12-10 21:35:48,709 - INFO - AGENT :: Reward for binding grandioso-dog-8567c589bc-djmf4 to node kwok-std-node-7 is 0.985 
+2023-12-10 21:35:50,163 - INFO - AGENT :: Reward for binding grandioso-dog-8567c589bc-xpjnp to node kwok-std-node-4 is 0.696 
+2023-12-10 21:35:51,688 - INFO - AGENT :: Reward for binding grandioso-dog-8567c589bc-zmb7m to node kwok-std-node-6 is 0.693 
+2023-12-10 21:35:53,122 - INFO - AGENT :: Reward for binding grandioso-dog-8567c589bc-n2mp5 to node kwok-std-node-5 is 0.977 
+2023-12-10 21:35:54,724 - INFO - AGENT :: Reward for binding grandioso-dog-8567c589bc-wnp4f to node kwok-std-node-9 is 0.692 
+2023-12-10 21:35:54,964 - INFO - AGENT :: Cluster Variance at 0.0001
+2023-12-10 21:35:56,441 - INFO - AGENT :: Reward for binding grandioso-dog-8567c589bc-q2d5s to node kwok-std-node-6 is 0.563 
+2023-12-10 21:35:58,164 - INFO - AGENT :: Reward for binding grandioso-dog-8567c589bc-9wq5k to node kwok-std-node-0 is 0.971 
+2023-12-10 21:36:21,451 - INFO - AGENT :: Processing Deployment massive-plate with 14 pods.
+2023-12-10 21:36:23,115 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-vksrh to node kwok-std-node-8 is 0.688 
+2023-12-10 21:36:24,918 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-s58ks to node kwok-std-node-1 is 0.971 
+2023-12-10 21:36:26,735 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-tvkwd to node kwok-std-node-5 is 0.688 
+2023-12-10 21:36:28,612 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-vfnz8 to node kwok-std-node-1 is 0.688 
+2023-12-10 21:36:30,563 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-7pmdc to node kwok-std-node-9 is 0.562 
+2023-12-10 21:36:32,393 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-9rqgd to node kwok-std-node-7 is 0.686 
+2023-12-10 21:36:34,559 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-r6n49 to node kwok-std-node-0 is 0.686 
+2023-12-10 21:36:36,607 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-68pk8 to node kwok-std-node-8 is 0.56 
+2023-12-10 21:36:36,929 - INFO - AGENT :: Cluster Variance at 0.0002
+2023-12-10 21:36:39,137 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-b42vm to node kwok-std-node-6 is 0.484 
+2023-12-10 21:36:41,406 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-lht5j to node kwok-std-node-5 is 0.557 
+2023-12-10 21:36:43,588 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-qmw59 to node kwok-std-node-1 is 0.556 
+2023-12-10 21:36:46,011 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-nl7p2 to node kwok-std-node-3 is 0.68 
+2023-12-10 21:36:48,122 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-vcdh7 to node kwok-std-node-9 is 0.482 
+2023-12-10 21:36:50,359 - INFO - AGENT :: Reward for binding massive-plate-5c58f4b76c-vxm86 to node kwok-std-node-9 is -0.961 
+2023-12-10 21:36:50,458 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:37:01,814 - INFO - AGENT :: Processing Deployment grilled-pergola with 10 pods.
+2023-12-10 21:37:04,046 - INFO - AGENT :: Reward for binding grilled-pergola-65c6c57c6f-sh2x8 to node kwok-std-node-3 is 0.552 
+2023-12-10 21:37:06,292 - INFO - AGENT :: Reward for binding grilled-pergola-65c6c57c6f-clvjk to node kwok-std-node-1 is 0.478 
+2023-12-10 21:37:08,837 - INFO - AGENT :: Reward for binding grilled-pergola-65c6c57c6f-2bx64 to node kwok-std-node-3 is 0.477 
+2023-12-10 21:37:11,301 - INFO - AGENT :: Reward for binding grilled-pergola-65c6c57c6f-2l9pp to node kwok-std-node-0 is 0.55 
+2023-12-10 21:37:11,665 - INFO - AGENT :: Cluster Variance at 0.0004
+2023-12-10 21:37:14,137 - INFO - AGENT :: Reward for binding grilled-pergola-65c6c57c6f-pn2hp to node kwok-std-node-8 is 0.476 
+2023-12-10 21:37:16,707 - INFO - AGENT :: Reward for binding grilled-pergola-65c6c57c6f-ncwds to node kwok-std-node-5 is 0.476 
+2023-12-10 21:37:19,356 - INFO - AGENT :: Reward for binding grilled-pergola-65c6c57c6f-sh5kl to node kwok-std-node-4 is 0.549 
+2023-12-10 21:37:21,923 - INFO - AGENT :: Reward for binding grilled-pergola-65c6c57c6f-8fjkp to node kwok-std-node-6 is 0.426 
+2023-12-10 21:37:24,636 - INFO - AGENT :: Reward for binding grilled-pergola-65c6c57c6f-28qtj to node kwok-std-node-9 is 0.387 
+2023-12-10 21:37:27,424 - INFO - AGENT :: Reward for binding grilled-pergola-65c6c57c6f-bjldc to node kwok-std-node-9 is -0.945 
+2023-12-10 21:37:42,299 - INFO - AGENT :: Processing Deployment lazy-glass with 9 pods.
+2023-12-10 21:37:44,824 - INFO - AGENT :: Reward for binding lazy-glass-6c85f45c88-lf7tx to node kwok-std-node-9 is -0.941 
+2023-12-10 21:37:47,581 - INFO - AGENT :: Reward for binding lazy-glass-6c85f45c88-sw5h5 to node kwok-std-node-4 is 0.468 
+2023-12-10 21:37:50,526 - INFO - AGENT :: Reward for binding lazy-glass-6c85f45c88-6rrvq to node kwok-std-node-2 is 0.935 
+2023-12-10 21:37:53,411 - INFO - AGENT :: Reward for binding lazy-glass-6c85f45c88-hxjnz to node kwok-std-node-4 is 0.42 
+2023-12-10 21:37:53,860 - INFO - AGENT :: Cluster Variance at 0.0008
+2023-12-10 21:37:56,910 - INFO - AGENT :: Reward for binding lazy-glass-6c85f45c88-bjtjp to node kwok-std-node-3 is 0.419 
+2023-12-10 21:37:59,905 - INFO - AGENT :: Reward for binding lazy-glass-6c85f45c88-jf928 to node kwok-std-node-8 is 0.419 
+2023-12-10 21:38:02,780 - INFO - AGENT :: Reward for binding lazy-glass-6c85f45c88-hbxvk to node kwok-std-node-3 is 0.382 
+2023-12-10 21:38:05,768 - INFO - AGENT :: Reward for binding lazy-glass-6c85f45c88-6z5x7 to node kwok-std-node-6 is 0.381 
+2023-12-10 21:38:08,831 - INFO - AGENT :: Reward for binding lazy-glass-6c85f45c88-h2vxj to node kwok-std-node-6 is -0.932 
+2023-12-10 21:38:09,009 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:38:22,855 - INFO - AGENT :: Processing Deployment piquant-nation with 11 pods.
+2023-12-10 21:38:25,830 - INFO - AGENT :: Reward for binding piquant-nation-79678b68b4-mzkf5 to node kwok-std-node-4 is 0.379 
+2023-12-10 21:38:29,084 - INFO - AGENT :: Reward for binding piquant-nation-79678b68b4-dnfwg to node kwok-std-node-4 is -0.928 
+2023-12-10 21:38:32,393 - INFO - AGENT :: Reward for binding piquant-nation-79678b68b4-bmfbh to node kwok-std-node-3 is 0.35 
+2023-12-10 21:38:35,869 - INFO - AGENT :: Reward for binding piquant-nation-79678b68b4-bgw6w to node kwok-std-node-9 is 0.308 
+2023-12-10 21:38:39,210 - INFO - AGENT :: Reward for binding piquant-nation-79678b68b4-fkxmr to node kwok-std-node-7 is 0.53 
+2023-12-10 21:38:39,730 - INFO - AGENT :: Cluster Variance at 0.0013
+2023-12-10 21:38:43,110 - INFO - AGENT :: Reward for binding piquant-nation-79678b68b4-4s9pl to node kwok-std-node-6 is 0.326 
+2023-12-10 21:38:46,528 - INFO - AGENT :: Reward for binding piquant-nation-79678b68b4-2m74g to node kwok-std-node-0 is 0.459 
+2023-12-10 21:38:49,923 - INFO - AGENT :: Reward for binding piquant-nation-79678b68b4-w8lx4 to node kwok-std-node-7 is 0.46 
+2023-12-10 21:38:53,425 - INFO - AGENT :: Reward for binding piquant-nation-79678b68b4-qwd8g to node kwok-std-node-0 is 0.412 
+2023-12-10 21:38:57,082 - INFO - AGENT :: Reward for binding piquant-nation-79678b68b4-fxqgv to node kwok-std-node-9 is 0.291 
+2023-12-10 21:39:00,732 - INFO - AGENT :: Reward for binding piquant-nation-79678b68b4-dhsvb to node kwok-std-node-7 is 0.41 
+2023-12-10 21:39:03,517 - INFO - AGENT :: Processing Deployment allegro-hypotenuse with 10 pods.
+2023-12-10 21:39:07,065 - INFO - AGENT :: Reward for binding allegro-hypotenuse-5fcc6d58b8-kt9zp to node kwok-std-node-4 is 0.324 
+2023-12-10 21:39:10,822 - INFO - AGENT :: Reward for binding allegro-hypotenuse-5fcc6d58b8-24nwk to node kwok-std-node-8 is 0.373 
+2023-12-10 21:39:14,524 - INFO - AGENT :: Reward for binding allegro-hypotenuse-5fcc6d58b8-58z8s to node kwok-std-node-2 is 0.646 
+2023-12-10 21:39:18,419 - INFO - AGENT :: Reward for binding allegro-hypotenuse-5fcc6d58b8-57rhx to node kwok-std-node-9 is 0.277 
+2023-12-10 21:39:18,990 - INFO - AGENT :: Cluster Variance at 0.0015
+2023-12-10 21:39:22,729 - INFO - AGENT :: Reward for binding allegro-hypotenuse-5fcc6d58b8-rnwdk to node kwok-std-node-0 is 0.373 
+2023-12-10 21:39:26,495 - INFO - AGENT :: Reward for binding allegro-hypotenuse-5fcc6d58b8-756b7 to node kwok-std-node-7 is 0.373 
+2023-12-10 21:39:30,306 - INFO - AGENT :: Reward for binding allegro-hypotenuse-5fcc6d58b8-qmjhg to node kwok-std-node-0 is 0.345 
+2023-12-10 21:39:34,163 - INFO - AGENT :: Reward for binding allegro-hypotenuse-5fcc6d58b8-prjff to node kwok-std-node-8 is 0.345 
+2023-12-10 21:39:38,281 - INFO - AGENT :: Reward for binding allegro-hypotenuse-5fcc6d58b8-c6ppm to node kwok-std-node-4 is 0.304 
+2023-12-10 21:39:42,230 - INFO - AGENT :: Reward for binding allegro-hypotenuse-5fcc6d58b8-b8mp4 to node kwok-std-node-6 is 0.303 
+2023-12-10 21:39:42,475 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:39:44,252 - INFO - AGENT :: Processing Deployment slow-chicken with 6 pods.
+2023-12-10 21:39:48,138 - INFO - AGENT :: Reward for binding slow-chicken-58f87cbc6d-hqtnn to node kwok-std-node-5 is 0.406 
+2023-12-10 21:39:52,155 - INFO - AGENT :: Reward for binding slow-chicken-58f87cbc6d-gp7xs to node kwok-std-node-0 is 0.321 
+2023-12-10 21:39:56,265 - INFO - AGENT :: Reward for binding slow-chicken-58f87cbc6d-gkwnj to node kwok-std-node-0 is -0.908 
+2023-12-10 21:40:00,487 - INFO - AGENT :: Reward for binding slow-chicken-58f87cbc6d-rxbjj to node kwok-std-node-8 is 0.32 
+2023-12-10 21:40:01,130 - INFO - AGENT :: Cluster Variance at 0.0017
+2023-12-10 21:40:05,291 - INFO - AGENT :: Reward for binding slow-chicken-58f87cbc6d-r96rk to node kwok-std-node-6 is 0.286 
+2023-12-10 21:40:09,556 - INFO - AGENT :: Reward for binding slow-chicken-58f87cbc6d-k4867 to node kwok-std-node-5 is 0.368 
+2023-12-10 21:40:25,086 - INFO - AGENT :: Processing Deployment pure-grade with 7 pods.
+2023-12-10 21:40:29,264 - INFO - AGENT :: Reward for binding pure-grade-74fcbcfb68-m22fb to node kwok-std-node-6 is 0.272 
+2023-12-10 21:40:33,687 - INFO - AGENT :: Reward for binding pure-grade-74fcbcfb68-c2mhv to node kwok-std-node-0 is 0.285 
+2023-12-10 21:40:38,137 - INFO - AGENT :: Reward for binding pure-grade-74fcbcfb68-f66kf to node kwok-std-node-7 is 0.339 
+2023-12-10 21:40:42,517 - INFO - AGENT :: Reward for binding pure-grade-74fcbcfb68-n6wlx to node kwok-std-node-2 is 0.519 
+2023-12-10 21:40:47,071 - INFO - AGENT :: Reward for binding pure-grade-74fcbcfb68-r9prv to node kwok-std-node-0 is 0.272 
+2023-12-10 21:40:51,762 - INFO - AGENT :: Reward for binding pure-grade-74fcbcfb68-87ttm to node kwok-std-node-5 is 0.34 
+2023-12-10 21:40:56,347 - INFO - AGENT :: Reward for binding pure-grade-74fcbcfb68-lswp8 to node kwok-std-node-5 is -0.899 
+2023-12-10 21:40:56,695 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:41:05,948 - INFO - AGENT :: Processing Deployment flush-helm with 14 pods.
+2023-12-10 21:41:10,246 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-4425v to node kwok-std-node-3 is 0.318 
+2023-12-10 21:41:10,927 - INFO - AGENT :: Cluster Variance at 0.0017
+2023-12-10 21:41:15,656 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-d9pbj to node kwok-std-node-6 is 0.259 
+2023-12-10 21:41:20,416 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-bqbb4 to node kwok-std-node-2 is 0.448 
+2023-12-10 21:41:25,185 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-r9ndr to node kwok-std-node-4 is 0.284 
+2023-12-10 21:41:29,997 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-l7wvv to node kwok-std-node-4 is -0.897 
+2023-12-10 21:41:34,928 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-nbg8s to node kwok-std-node-0 is 0.258 
+2023-12-10 21:41:39,896 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-5pmj9 to node kwok-std-node-0 is -0.892 
+2023-12-10 21:41:44,786 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-svpst to node kwok-std-node-3 is 0.296 
+2023-12-10 21:41:49,674 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-fnvqb to node kwok-std-node-1 is 0.397 
+2023-12-10 21:41:54,726 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-k8bdt to node kwok-std-node-4 is 0.257 
+2023-12-10 21:41:59,725 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-xxbdj to node kwok-std-node-0 is 0.238 
+2023-12-10 21:42:00,474 - INFO - AGENT :: Cluster Variance at 0.0023
+2023-12-10 21:42:05,688 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-z7zzd to node kwok-std-node-6 is 0.246 
+2023-12-10 21:42:10,907 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-2gcgj to node kwok-std-node-4 is 0.245 
+2023-12-10 21:42:16,301 - INFO - AGENT :: Reward for binding flush-helm-7bb8bf59cd-9v2t8 to node kwok-std-node-8 is 0.293 
+2023-12-10 21:42:16,622 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:42:27,156 - INFO - AGENT :: Processing Deployment mild-sheet with 12 pods.
+2023-12-10 21:42:32,068 - INFO - AGENT :: Reward for binding mild-sheet-7b9cd4496f-5wnm2 to node kwok-std-node-6 is 0.235 
+2023-12-10 21:42:37,437 - INFO - AGENT :: Reward for binding mild-sheet-7b9cd4496f-5lcch to node kwok-std-node-3 is 0.277 
+2023-12-10 21:42:42,945 - INFO - AGENT :: Reward for binding mild-sheet-7b9cd4496f-bszjg to node kwok-std-node-4 is 0.234 
+2023-12-10 21:42:48,297 - INFO - AGENT :: Reward for binding mild-sheet-7b9cd4496f-9n5nm to node kwok-std-node-1 is 0.356 
+2023-12-10 21:42:53,823 - INFO - AGENT :: Reward for binding mild-sheet-7b9cd4496f-97b7b to node kwok-std-node-6 is 0.226 
+2023-12-10 21:42:59,305 - INFO - AGENT :: Reward for binding mild-sheet-7b9cd4496f-ftkd4 to node kwok-std-node-7 is 0.308 
+2023-12-10 21:43:04,740 - INFO - AGENT :: Reward for binding mild-sheet-7b9cd4496f-8r62m to node kwok-std-node-6 is 0.218 
+2023-12-10 21:43:05,540 - INFO - AGENT :: Cluster Variance at 0.0032
+2023-12-10 21:43:11,159 - INFO - AGENT :: Reward for binding mild-sheet-7b9cd4496f-hd7ww to node kwok-std-node-6 is -0.869 
+2023-12-10 21:43:16,703 - INFO - AGENT :: Reward for binding mild-sheet-7b9cd4496f-b9v5x to node kwok-std-node-8 is 0.274 
+2023-12-10 21:43:22,294 - INFO - AGENT :: Reward for binding mild-sheet-7b9cd4496f-q7krg to node kwok-std-node-8 is -0.865 
+2023-12-10 21:43:27,954 - INFO - AGENT :: Reward for binding mild-sheet-7b9cd4496f-ncv6v to node kwok-std-node-9 is 0.25 
+2023-12-10 21:43:33,658 - INFO - AGENT :: Reward for binding mild-sheet-7b9cd4496f-562f9 to node kwok-std-node-5 is 0.288 
+2023-12-10 21:43:34,024 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:43:48,458 - INFO - AGENT :: Processing Deployment fermented-leisure with 9 pods.
+2023-12-10 21:43:54,006 - INFO - AGENT :: Reward for binding fermented-leisure-59b94576dd-x7z2c to node kwok-std-node-7 is 0.288 
+2023-12-10 21:43:59,913 - INFO - AGENT :: Reward for binding fermented-leisure-59b94576dd-qxbx2 to node kwok-std-node-5 is 0.273 
+2023-12-10 21:44:05,860 - INFO - AGENT :: Reward for binding fermented-leisure-59b94576dd-lbwrf to node kwok-std-node-7 is 0.273 
+2023-12-10 21:44:11,816 - INFO - AGENT :: Reward for binding fermented-leisure-59b94576dd-zgtkz to node kwok-std-node-8 is 0.25 
+2023-12-10 21:44:17,899 - INFO - AGENT :: Reward for binding fermented-leisure-59b94576dd-pv4qz to node kwok-std-node-6 is 0.204 
+2023-12-10 21:44:18,797 - INFO - AGENT :: Cluster Variance at 0.0036
+2023-12-10 21:44:24,772 - INFO - AGENT :: Reward for binding fermented-leisure-59b94576dd-wkgdn to node kwok-std-node-8 is 0.238 
+2023-12-10 21:44:31,062 - INFO - AGENT :: Reward for binding fermented-leisure-59b94576dd-xv8kp to node kwok-std-node-8 is -0.859 
+2023-12-10 21:44:37,108 - INFO - AGENT :: Reward for binding fermented-leisure-59b94576dd-zx7lh to node kwok-std-node-3 is 0.258 
+2023-12-10 21:44:43,368 - INFO - AGENT :: Reward for binding fermented-leisure-59b94576dd-z8c24 to node kwok-std-node-0 is 0.221 
+2023-12-10 21:44:43,732 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:45:09,951 - INFO - AGENT :: Processing Deployment uniform-feta with 15 pods.
+2023-12-10 21:45:16,047 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-f97c6 to node kwok-std-node-7 is 0.258 
+2023-12-10 21:45:22,355 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-8sf92 to node kwok-std-node-2 is 0.382 
+2023-12-10 21:45:28,921 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-qpb77 to node kwok-std-node-1 is 0.324 
+2023-12-10 21:45:35,344 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-n696q to node kwok-std-node-3 is 0.248 
+2023-12-10 21:45:41,646 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-hfb55 to node kwok-std-node-0 is 0.215 
+2023-12-10 21:45:48,092 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-jmjdf to node kwok-std-node-6 is 0.197 
+2023-12-10 21:45:49,024 - INFO - AGENT :: Cluster Variance at 0.0037
+2023-12-10 21:45:55,602 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-ggldt to node kwok-std-node-1 is 0.302 
+2023-12-10 21:46:02,155 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-xhk58 to node kwok-std-node-0 is 0.207 
+2023-12-10 21:46:08,830 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-2zrpc to node kwok-std-node-3 is 0.236 
+2023-12-10 21:46:15,517 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-996wv to node kwok-std-node-0 is 0.201 
+2023-12-10 21:46:22,194 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-6wjb7 to node kwok-std-node-0 is -0.849 
+2023-12-10 21:46:28,922 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-gxkzr to node kwok-std-node-7 is 0.244 
+2023-12-10 21:46:35,584 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-wnv64 to node kwok-std-node-0 is 0.189 
+2023-12-10 21:46:42,343 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-6t94r to node kwok-std-node-0 is -0.842 
+2023-12-10 21:46:49,399 - INFO - AGENT :: Reward for binding uniform-feta-759c5996bf-c6wmz to node kwok-std-node-4 is 0.216 
+2023-12-10 21:46:49,842 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:47:12,044 - INFO - AGENT :: Processing Deployment warm-teapot with 6 pods.
+2023-12-10 21:47:18,616 - INFO - AGENT :: Reward for binding warm-teapot-6576759d95-6jx4t to node kwok-std-node-9 is 0.232 
+2023-12-10 21:47:19,628 - INFO - AGENT :: Cluster Variance at 0.005
+2023-12-10 21:47:26,670 - INFO - AGENT :: Reward for binding warm-teapot-6576759d95-xsfqs to node kwok-std-node-1 is 0.279 
+2023-12-10 21:47:33,731 - INFO - AGENT :: Reward for binding warm-teapot-6576759d95-xqkwq to node kwok-std-node-8 is 0.216 
+2023-12-10 21:47:40,736 - INFO - AGENT :: Reward for binding warm-teapot-6576759d95-lj6lr to node kwok-std-node-4 is 0.209 
+2023-12-10 21:47:47,977 - INFO - AGENT :: Reward for binding warm-teapot-6576759d95-48m8h to node kwok-std-node-6 is 0.187 
+2023-12-10 21:47:55,414 - INFO - AGENT :: Reward for binding warm-teapot-6576759d95-x6nb7 to node kwok-std-node-1 is 0.263 
+2023-12-10 21:47:55,995 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:47:56,047 - INFO - AGENT :: Processing Deployment daring-program with 9 pods.
+2023-12-10 21:48:02,732 - INFO - AGENT :: Reward for binding daring-program-69d5db9fc9-58946 to node kwok-std-node-6 is 0.182 
+2023-12-10 21:48:10,164 - INFO - AGENT :: Reward for binding daring-program-69d5db9fc9-5b9mz to node kwok-std-node-7 is 0.23 
+2023-12-10 21:48:17,354 - INFO - AGENT :: Reward for binding daring-program-69d5db9fc9-66pmj to node kwok-std-node-2 is 0.339 
+2023-12-10 21:48:24,822 - INFO - AGENT :: Reward for binding daring-program-69d5db9fc9-jmxqc to node kwok-std-node-3 is 0.223 
+2023-12-10 21:48:32,332 - INFO - AGENT :: Reward for binding daring-program-69d5db9fc9-jnsxj to node kwok-std-node-2 is 0.315 
+2023-12-10 21:48:33,396 - INFO - AGENT :: Cluster Variance at 0.0045
+2023-12-10 21:48:40,833 - INFO - AGENT :: Reward for binding daring-program-69d5db9fc9-nhqd9 to node kwok-std-node-6 is 0.178 
+2023-12-10 21:48:48,134 - INFO - AGENT :: Reward for binding daring-program-69d5db9fc9-rwfq4 to node kwok-std-node-1 is 0.251 
+2023-12-10 21:48:55,563 - INFO - AGENT :: Reward for binding daring-program-69d5db9fc9-t2x2l to node kwok-std-node-2 is 0.294 
+2023-12-10 21:49:03,129 - INFO - AGENT :: Reward for binding daring-program-69d5db9fc9-w68xw to node kwok-std-node-0 is 0.178 
+2023-12-10 21:49:04,046 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:49:15,318 - INFO - AGENT :: Processing Deployment excited-mouth with 6 pods.
+2023-12-10 21:49:22,592 - INFO - AGENT :: Reward for binding excited-mouth-8446c6bfdb-t9nkk to node kwok-std-node-4 is 0.202 
+2023-12-10 21:49:30,367 - INFO - AGENT :: Reward for binding excited-mouth-8446c6bfdb-kmj9t to node kwok-std-node-9 is 0.222 
+2023-12-10 21:49:38,017 - INFO - AGENT :: Reward for binding excited-mouth-8446c6bfdb-bxhn4 to node kwok-std-node-5 is 0.25 
+2023-12-10 21:49:45,757 - INFO - AGENT :: Reward for binding excited-mouth-8446c6bfdb-rsvkm to node kwok-std-node-1 is 0.24 
+2023-12-10 21:49:53,489 - INFO - AGENT :: Reward for binding excited-mouth-8446c6bfdb-g6fhh to node kwok-std-node-8 is 0.208 
+2023-12-10 21:50:01,252 - INFO - AGENT :: Reward for binding excited-mouth-8446c6bfdb-qgzf4 to node kwok-std-node-3 is 0.214 
+2023-12-10 21:50:02,482 - INFO - AGENT :: Cluster Variance at 0.0044
+2023-12-10 21:50:02,941 - INFO - AGENT :: Acknowledge Epoch Complete
+2023-12-10 21:50:04,050 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:50:10,826 - INFO - AGENT :: Reward for binding lazy-glass-6c85f45c88-b4pgn to node kwok-std-node-2 is 0.333 
+2023-12-10 21:50:20,093 - INFO - AGENT :: Processing Deployment direct-halite with 6 pods.
+2023-12-10 21:50:21,161 - INFO - AGENT :: Reward for binding direct-halite-8bf7d947-qmp65 to node kwok-std-node-5 is 0.289 
+2023-12-10 21:50:22,374 - INFO - AGENT :: Reward for binding direct-halite-8bf7d947-wkb2c to node kwok-std-node-6 is 0.207 
+2023-12-10 21:50:23,641 - INFO - AGENT :: Reward for binding direct-halite-8bf7d947-fff6p to node kwok-std-node-7 is 0.264 
+2023-12-10 21:50:24,891 - INFO - AGENT :: Reward for binding direct-halite-8bf7d947-vdrp5 to node kwok-std-node-4 is 0.232 
+2023-12-10 21:50:26,119 - INFO - AGENT :: Reward for binding direct-halite-8bf7d947-s47s8 to node kwok-std-node-6 is 0.201 
+2023-12-10 21:50:27,448 - INFO - AGENT :: Reward for binding direct-halite-8bf7d947-jqmff to node kwok-std-node-9 is 0.253 
+2023-12-10 21:51:00,324 - INFO - AGENT :: Processing Deployment baked-dot with 14 pods.
+2023-12-10 21:51:01,692 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-48b88 to node kwok-std-node-1 is 0.272 
+2023-12-10 21:51:03,127 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-wspt6 to node kwok-std-node-9 is 0.245 
+2023-12-10 21:51:04,857 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-fgwwt to node kwok-std-node-7 is 0.252 
+2023-12-10 21:51:05,250 - INFO - AGENT :: Cluster Variance at 0.0002
+2023-12-10 21:51:06,828 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-ntfcm to node kwok-std-node-9 is 0.236 
+2023-12-10 21:51:08,574 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-jsfdm to node kwok-std-node-4 is 0.222 
+2023-12-10 21:51:10,174 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-84djc to node kwok-std-node-4 is -0.968 
+2023-12-10 21:51:11,993 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-g9k87 to node kwok-std-node-2 is 0.305 
+2023-12-10 21:51:13,782 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-dl5c2 to node kwok-std-node-5 is 0.268 
+2023-12-10 21:51:15,647 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-hgts2 to node kwok-std-node-2 is 0.291 
+2023-12-10 21:51:17,439 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-grr24 to node kwok-std-node-9 is 0.227 
+2023-12-10 21:51:19,329 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-qjxtb to node kwok-std-node-8 is 0.233 
+2023-12-10 21:51:21,302 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-r5lhf to node kwok-std-node-3 is 0.24 
+2023-12-10 21:51:23,235 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-2jlcj to node kwok-std-node-7 is 0.241 
+2023-12-10 21:51:23,573 - INFO - AGENT :: Cluster Variance at 0.0003
+2023-12-10 21:51:25,638 - INFO - AGENT :: Reward for binding baked-dot-9bf46749d-wrst2 to node kwok-std-node-9 is 0.221 
+2023-12-10 21:51:25,717 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:51:40,609 - INFO - AGENT :: Processing Deployment external-ricotta with 15 pods.
+2023-12-10 21:51:42,622 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-r22pl to node kwok-std-node-2 is 0.276 
+2023-12-10 21:51:44,675 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-7fxq6 to node kwok-std-node-7 is 0.232 
+2023-12-10 21:51:46,977 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-mkvhw to node kwok-std-node-0 is 0.199 
+2023-12-10 21:51:49,167 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-ht6d6 to node kwok-std-node-4 is 0.209 
+2023-12-10 21:51:51,423 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-c888s to node kwok-std-node-8 is 0.225 
+2023-12-10 21:51:53,649 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-tk45t to node kwok-std-node-7 is 0.225 
+2023-12-10 21:51:56,132 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-zbwff to node kwok-std-node-0 is 0.194 
+2023-12-10 21:51:58,505 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-4lrwv to node kwok-std-node-0 is -0.952 
+2023-12-10 21:52:00,971 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-4dwjq to node kwok-std-node-7 is 0.218 
+2023-12-10 21:52:01,350 - INFO - AGENT :: Cluster Variance at 0.0006
+2023-12-10 21:52:03,716 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-29zmm to node kwok-std-node-2 is 0.263 
+2023-12-10 21:52:06,311 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-4lxlg to node kwok-std-node-6 is 0.189 
+2023-12-10 21:52:08,888 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-jf6d8 to node kwok-std-node-2 is 0.253 
+2023-12-10 21:52:11,730 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-vhj2g to node kwok-std-node-3 is 0.229 
+2023-12-10 21:52:14,448 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-fdlqd to node kwok-std-node-2 is 0.244 
+2023-12-10 21:52:17,060 - INFO - AGENT :: Reward for binding external-ricotta-86485cc9b-fvbp8 to node kwok-std-node-8 is 0.216 
+2023-12-10 21:52:21,042 - INFO - AGENT :: Processing Deployment ordered-alphabet with 6 pods.
+2023-12-10 21:52:23,635 - INFO - AGENT :: Reward for binding ordered-alphabet-75797dc78c-gpg9b to node kwok-std-node-8 is -0.944 
+2023-12-10 21:52:26,245 - INFO - AGENT :: Reward for binding ordered-alphabet-75797dc78c-fhgrj to node kwok-std-node-9 is 0.211 
+2023-12-10 21:52:29,111 - INFO - AGENT :: Reward for binding ordered-alphabet-75797dc78c-gbv9w to node kwok-std-node-4 is 0.2 
+2023-12-10 21:52:31,999 - INFO - AGENT :: Reward for binding ordered-alphabet-75797dc78c-l9gxj to node kwok-std-node-1 is 0.251 
+2023-12-10 21:52:32,420 - INFO - AGENT :: Cluster Variance at 0.0007
+2023-12-10 21:52:35,420 - INFO - AGENT :: Reward for binding ordered-alphabet-75797dc78c-z6qrv to node kwok-std-node-3 is 0.222 
+2023-12-10 21:52:38,267 - INFO - AGENT :: Reward for binding ordered-alphabet-75797dc78c-tw9gp to node kwok-std-node-7 is 0.211 
+2023-12-10 21:52:38,401 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:53:01,551 - INFO - AGENT :: Processing Deployment chalky-electrolysis with 9 pods.
+2023-12-10 21:53:04,458 - INFO - AGENT :: Reward for binding chalky-electrolysis-5d94f5f995-gdt9r to node kwok-std-node-7 is -0.939 
+2023-12-10 21:53:07,464 - INFO - AGENT :: Reward for binding chalky-electrolysis-5d94f5f995-sxx5d to node kwok-std-node-6 is 0.183 
+2023-12-10 21:53:10,566 - INFO - AGENT :: Reward for binding chalky-electrolysis-5d94f5f995-58r8c to node kwok-std-node-7 is 0.199 
+2023-12-10 21:53:13,650 - INFO - AGENT :: Reward for binding chalky-electrolysis-5d94f5f995-6tgmm to node kwok-std-node-2 is 0.232 
+2023-12-10 21:53:16,893 - INFO - AGENT :: Reward for binding chalky-electrolysis-5d94f5f995-hfp99 to node kwok-std-node-8 is 0.202 
+2023-12-10 21:53:20,132 - INFO - AGENT :: Reward for binding chalky-electrolysis-5d94f5f995-sqqpb to node kwok-std-node-2 is 0.225 
+2023-12-10 21:53:23,438 - INFO - AGENT :: Reward for binding chalky-electrolysis-5d94f5f995-bpmgz to node kwok-std-node-9 is 0.201 
+2023-12-10 21:53:26,700 - INFO - AGENT :: Reward for binding chalky-electrolysis-5d94f5f995-hkpv8 to node kwok-std-node-5 is 0.246 
+2023-12-10 21:53:27,267 - INFO - AGENT :: Cluster Variance at 0.0012
+2023-12-10 21:53:30,616 - INFO - AGENT :: Reward for binding chalky-electrolysis-5d94f5f995-75zsp to node kwok-std-node-1 is 0.238 
+2023-12-10 21:53:38,403 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:53:42,131 - INFO - AGENT :: Processing Deployment bordeaux-seat with 11 pods.
+2023-12-10 21:53:45,298 - INFO - AGENT :: Reward for binding bordeaux-seat-68dcd4d66f-fc4m6 to node kwok-std-node-1 is -0.925 
+2023-12-10 21:53:48,762 - INFO - AGENT :: Reward for binding bordeaux-seat-68dcd4d66f-t8kq6 to node kwok-std-node-2 is 0.218 
+2023-12-10 21:53:52,221 - INFO - AGENT :: Reward for binding bordeaux-seat-68dcd4d66f-dsz7d to node kwok-std-node-6 is 0.177 
+2023-12-10 21:53:55,713 - INFO - AGENT :: Reward for binding bordeaux-seat-68dcd4d66f-zvxqh to node kwok-std-node-1 is 0.224 
+2023-12-10 21:53:59,274 - INFO - AGENT :: Reward for binding bordeaux-seat-68dcd4d66f-fdlxw to node kwok-std-node-9 is 0.197 
+2023-12-10 21:54:02,855 - INFO - AGENT :: Reward for binding bordeaux-seat-68dcd4d66f-gvx9h to node kwok-std-node-7 is 0.192 
+2023-12-10 21:54:06,515 - INFO - AGENT :: Reward for binding bordeaux-seat-68dcd4d66f-c2smm to node kwok-std-node-3 is 0.21 
+2023-12-10 21:54:10,163 - INFO - AGENT :: Reward for binding bordeaux-seat-68dcd4d66f-tq7g8 to node kwok-std-node-8 is 0.196 
+2023-12-10 21:54:13,822 - INFO - AGENT :: Reward for binding bordeaux-seat-68dcd4d66f-9kspw to node kwok-std-node-3 is 0.205 
+2023-12-10 21:54:14,473 - INFO - AGENT :: Cluster Variance at 0.0012
+2023-12-10 21:54:18,260 - INFO - AGENT :: Reward for binding bordeaux-seat-68dcd4d66f-2cfc2 to node kwok-std-node-5 is 0.237 
+2023-12-10 21:54:21,945 - INFO - AGENT :: Reward for binding bordeaux-seat-68dcd4d66f-7txz9 to node kwok-std-node-2 is 0.211 
+2023-12-10 21:54:22,794 - INFO - AGENT :: Processing Deployment urbane-empowerment with 8 pods.
+2023-12-10 21:54:26,423 - INFO - AGENT :: Reward for binding urbane-empowerment-77c5bc566c-6jcfr to node kwok-std-node-7 is 0.187 
+2023-12-10 21:54:30,378 - INFO - AGENT :: Reward for binding urbane-empowerment-77c5bc566c-chsl7 to node kwok-std-node-1 is 0.215 
+2023-12-10 21:54:34,317 - INFO - AGENT :: Reward for binding urbane-empowerment-77c5bc566c-ssx8w to node kwok-std-node-5 is 0.228 
+2023-12-10 21:54:38,453 - INFO - AGENT :: Reward for binding urbane-empowerment-77c5bc566c-6l5pp to node kwok-std-node-5 is -0.913 
+2023-12-10 21:54:42,509 - INFO - AGENT :: Reward for binding urbane-empowerment-77c5bc566c-v7mmq to node kwok-std-node-8 is 0.19 
+2023-12-10 21:54:46,638 - INFO - AGENT :: Reward for binding urbane-empowerment-77c5bc566c-7c5sz to node kwok-std-node-7 is 0.182 
+2023-12-10 21:54:50,738 - INFO - AGENT :: Reward for binding urbane-empowerment-77c5bc566c-gf2qm to node kwok-std-node-2 is 0.203 
+2023-12-10 21:54:54,922 - INFO - AGENT :: Reward for binding urbane-empowerment-77c5bc566c-r9jln to node kwok-std-node-6 is 0.171 
+2023-12-10 21:54:55,564 - INFO - AGENT :: Cluster Variance at 0.0017
+2023-12-10 21:54:55,808 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:55:03,539 - INFO - AGENT :: Processing Deployment stale-fitting with 13 pods.
+2023-12-10 21:55:07,568 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-bmtwc to node kwok-std-node-2 is 0.198 
+2023-12-10 21:55:11,846 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-z48vq to node kwok-std-node-5 is 0.212 
+2023-12-10 21:55:16,230 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-nxtf8 to node kwok-std-node-9 is 0.188 
+2023-12-10 21:55:20,516 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-49qvx to node kwok-std-node-7 is 0.176 
+2023-12-10 21:55:24,885 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-szpbj to node kwok-std-node-4 is 0.187 
+2023-12-10 21:55:29,258 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-j8pb2 to node kwok-std-node-6 is 0.166 
+2023-12-10 21:55:33,886 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-7blgh to node kwok-std-node-5 is 0.206 
+2023-12-10 21:55:38,522 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-d5rxx to node kwok-std-node-5 is -0.896 
+2023-12-10 21:55:43,185 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-9z9v7 to node kwok-std-node-6 is 0.163 
+2023-12-10 21:55:47,774 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-d5hc6 to node kwok-std-node-1 is 0.205 
+2023-12-10 21:55:48,594 - INFO - AGENT :: Cluster Variance at 0.002
+2023-12-10 21:55:53,189 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-99jx2 to node kwok-std-node-8 is 0.183 
+2023-12-10 21:55:57,861 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-64xvl to node kwok-std-node-7 is 0.172 
+2023-12-10 21:56:02,545 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-4lsbq to node kwok-std-node-5 is 0.194 
+2023-12-10 21:56:02,851 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:56:24,636 - INFO - AGENT :: Processing Deployment regular-capitol with 13 pods.
+2023-12-10 21:56:29,220 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-lwf2s to node kwok-std-node-6 is 0.16 
+2023-12-10 21:56:34,071 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-vrhhl to node kwok-std-node-7 is 0.168 
+2023-12-10 21:56:38,996 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-dq5lj to node kwok-std-node-3 is 0.193 
+2023-12-10 21:56:44,001 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-9vh48 to node kwok-std-node-8 is 0.177 
+2023-12-10 21:56:48,976 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-hg567 to node kwok-std-node-0 is 0.173 
+2023-12-10 21:56:53,935 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-chkkz to node kwok-std-node-9 is 0.181 
+2023-12-10 21:56:59,107 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-czdfv to node kwok-std-node-6 is 0.157 
+2023-12-10 21:56:59,857 - INFO - AGENT :: Cluster Variance at 0.0023
+2023-12-10 21:57:04,916 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-l4mfc to node kwok-std-node-7 is 0.164 
+2023-12-10 21:57:09,944 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-9d4xc to node kwok-std-node-1 is 0.197 
+2023-12-10 21:57:15,471 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-pxb62 to node kwok-std-node-3 is 0.188 
+2023-12-10 21:57:20,668 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-ztk5d to node kwok-std-node-7 is 0.161 
+2023-12-10 21:57:25,946 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-h8g5j to node kwok-std-node-8 is 0.172 
+2023-12-10 21:57:31,406 - INFO - AGENT :: Reward for binding regular-capitol-566f554c6c-9wz7t to node kwok-std-node-0 is 0.169 
+2023-12-10 21:57:31,724 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:57:45,932 - INFO - AGENT :: Processing Deployment cloudy-consimilarity with 12 pods.
+2023-12-10 21:57:50,925 - INFO - AGENT :: Reward for binding cloudy-consimilarity-8575b5677d-qqqjw to node kwok-std-node-0 is -0.879 
+2023-12-10 21:57:56,275 - INFO - AGENT :: Reward for binding cloudy-consimilarity-8575b5677d-ktcsm to node kwok-std-node-8 is 0.17 
+2023-12-10 21:58:01,818 - INFO - AGENT :: Reward for binding cloudy-consimilarity-8575b5677d-zlcv7 to node kwok-std-node-7 is 0.158 
+2023-12-10 21:58:07,380 - INFO - AGENT :: Reward for binding cloudy-consimilarity-8575b5677d-bg9s9 to node kwok-std-node-9 is 0.175 
+2023-12-10 21:58:08,226 - INFO - AGENT :: Cluster Variance at 0.0028
+2023-12-10 21:58:13,722 - INFO - AGENT :: Reward for binding cloudy-consimilarity-8575b5677d-lzt75 to node kwok-std-node-5 is 0.186 
+2023-12-10 21:58:19,327 - INFO - AGENT :: Reward for binding cloudy-consimilarity-8575b5677d-n8dpp to node kwok-std-node-6 is 0.152 
+2023-12-10 21:58:25,017 - INFO - AGENT :: Reward for binding cloudy-consimilarity-8575b5677d-6bczw to node kwok-std-node-0 is 0.162 
+2023-12-10 21:58:30,607 - INFO - AGENT :: Reward for binding cloudy-consimilarity-8575b5677d-wrq4d to node kwok-std-node-2 is 0.186 
+2023-12-10 21:58:36,272 - INFO - AGENT :: Reward for binding cloudy-consimilarity-8575b5677d-r86gh to node kwok-std-node-3 is 0.182 
+2023-12-10 21:58:41,969 - INFO - AGENT :: Reward for binding cloudy-consimilarity-8575b5677d-mrwwx to node kwok-std-node-1 is 0.19 
+2023-12-10 21:58:47,629 - INFO - AGENT :: Reward for binding cloudy-consimilarity-8575b5677d-jc7fh to node kwok-std-node-2 is 0.182 
+2023-12-10 21:58:53,388 - INFO - AGENT :: Reward for binding cloudy-consimilarity-8575b5677d-9jqcl to node kwok-std-node-3 is 0.178 
+2023-12-10 21:58:53,738 - INFO - AGENT :: checking shutdown status
+2023-12-10 21:59:07,264 - INFO - AGENT :: Processing Deployment flat-electricity with 12 pods.
+2023-12-10 21:59:12,738 - INFO - AGENT :: Reward for binding flat-electricity-bd6859d66-9q2gp to node kwok-std-node-0 is 0.159 
+2023-12-10 21:59:18,678 - INFO - AGENT :: Reward for binding flat-electricity-bd6859d66-c8b8x to node kwok-std-node-1 is 0.186 
+2023-12-10 21:59:19,588 - INFO - AGENT :: Cluster Variance at 0.0024
+2023-12-10 21:59:25,466 - INFO - AGENT :: Reward for binding flat-electricity-bd6859d66-fftpd to node kwok-std-node-6 is 0.15 
+2023-12-10 21:59:31,475 - INFO - AGENT :: Reward for binding flat-electricity-bd6859d66-v79w2 to node kwok-std-node-4 is 0.178 
+2023-12-10 21:59:37,443 - INFO - AGENT :: Reward for binding flat-electricity-bd6859d66-9nr72 to node kwok-std-node-5 is 0.182 
+2023-12-10 21:59:43,457 - INFO - AGENT :: Reward for binding flat-electricity-bd6859d66-pqfth to node kwok-std-node-0 is 0.157 
+2023-12-10 21:59:49,503 - INFO - AGENT :: Reward for binding flat-electricity-bd6859d66-k2gzf to node kwok-std-node-6 is 0.148 
+2023-12-10 21:59:55,659 - INFO - AGENT :: Reward for binding flat-electricity-bd6859d66-pg898 to node kwok-std-node-5 is 0.178 
+2023-12-10 22:00:01,780 - INFO - AGENT :: Reward for binding flat-electricity-bd6859d66-6f6jc to node kwok-std-node-6 is 0.145 
+2023-12-10 22:00:07,961 - INFO - AGENT :: Reward for binding flat-electricity-bd6859d66-lp2kf to node kwok-std-node-2 is 0.178 
+2023-12-10 22:00:14,173 - INFO - AGENT :: Reward for binding flat-electricity-bd6859d66-96hfs to node kwok-std-node-4 is 0.174 
+2023-12-10 22:00:20,446 - INFO - AGENT :: Reward for binding flat-electricity-bd6859d66-27gwv to node kwok-std-node-4 is -0.87 
+2023-12-10 22:00:21,449 - INFO - AGENT :: Cluster Variance at 0.002
+2023-12-10 22:00:21,850 - INFO - AGENT :: checking shutdown status
+2023-12-10 22:00:28,754 - INFO - AGENT :: Processing Deployment cautious-geometry with 14 pods.
+2023-12-10 22:00:34,792 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-g85mp to node kwok-std-node-5 is 0.174 
+2023-12-10 22:00:41,264 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-6l7zf to node kwok-std-node-1 is 0.182 
+2023-12-10 22:00:47,754 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-fnb62 to node kwok-std-node-0 is 0.154 
+2023-12-10 22:00:54,336 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-pkmcv to node kwok-std-node-2 is 0.174 
+2023-12-10 22:01:00,798 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-bwpjp to node kwok-std-node-7 is 0.154 
+2023-12-10 22:01:07,455 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-rgd28 to node kwok-std-node-6 is 0.142 
+2023-12-10 22:01:14,058 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-t5dfh to node kwok-std-node-0 is 0.15 
+2023-12-10 22:01:20,877 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-l4mh6 to node kwok-std-node-6 is 0.14 
+2023-12-10 22:01:27,539 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-5w452 to node kwok-std-node-6 is -0.862 
+2023-12-10 22:01:34,305 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-l4gpk to node kwok-std-node-5 is 0.168 
+2023-12-10 22:01:35,396 - INFO - AGENT :: Cluster Variance at 0.0028
+2023-12-10 22:01:42,237 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-zlcln to node kwok-std-node-6 is 0.136 
+2023-12-10 22:01:49,024 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-jdwpd to node kwok-std-node-0 is 0.147 
+2023-12-10 22:01:55,895 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-wpl5b to node kwok-std-node-6 is 0.134 
+2023-12-10 22:02:02,839 - INFO - AGENT :: Reward for binding cautious-geometry-67dbcccc8-47f87 to node kwok-std-node-9 is 0.167 
+2023-12-10 22:02:03,364 - INFO - AGENT :: checking shutdown status
+2023-12-10 22:02:30,670 - INFO - AGENT :: Processing Deployment chewy-decibel with 6 pods.
+2023-12-10 22:02:37,219 - INFO - AGENT :: Reward for binding chewy-decibel-589c9d9458-p2hw2 to node kwok-std-node-8 is 0.161 
+2023-12-10 22:02:44,457 - INFO - AGENT :: Reward for binding chewy-decibel-589c9d9458-6bf8t to node kwok-std-node-6 is 0.132 
+2023-12-10 22:02:51,580 - INFO - AGENT :: Reward for binding chewy-decibel-589c9d9458-nj94q to node kwok-std-node-8 is 0.158 
+2023-12-10 22:02:58,929 - INFO - AGENT :: Reward for binding chewy-decibel-589c9d9458-76g7h to node kwok-std-node-7 is 0.148 
+2023-12-10 22:03:06,268 - INFO - AGENT :: Reward for binding chewy-decibel-589c9d9458-9vnrr to node kwok-std-node-1 is 0.173 
+2023-12-10 22:03:13,797 - INFO - AGENT :: Reward for binding chewy-decibel-589c9d9458-2f8zv to node kwok-std-node-0 is 0.143 
+2023-12-10 22:03:14,961 - INFO - AGENT :: Cluster Variance at 0.0033
+2023-12-10 22:03:15,509 - INFO - AGENT :: checking shutdown status
+2023-12-10 22:03:15,730 - INFO - AGENT :: Processing Deployment compact-taking with 10 pods.
+2023-12-10 22:03:22,768 - INFO - AGENT :: Reward for binding compact-taking-bd8c98fb6-25k5f to node kwok-std-node-5 is 0.163 
+2023-12-10 22:03:30,350 - INFO - AGENT :: Reward for binding compact-taking-bd8c98fb6-6bgfk to node kwok-std-node-7 is 0.145 
+2023-12-10 22:03:37,998 - INFO - AGENT :: Reward for binding compact-taking-bd8c98fb6-6qdc9 to node kwok-std-node-9 is 0.162 
+2023-12-10 22:03:45,658 - INFO - AGENT :: Reward for binding compact-taking-bd8c98fb6-d5t4n to node kwok-std-node-9 is -0.842 
+2023-12-10 22:03:53,343 - INFO - AGENT :: Reward for binding compact-taking-bd8c98fb6-f9924 to node kwok-std-node-5 is 0.159 
+2023-12-10 22:04:01,065 - INFO - AGENT :: Reward for binding compact-taking-bd8c98fb6-fbcm4 to node kwok-std-node-6 is 0.128 
+2023-12-10 22:04:08,948 - INFO - AGENT :: Reward for binding compact-taking-bd8c98fb6-fn8mt to node kwok-std-node-7 is 0.141 
+2023-12-10 22:04:16,748 - INFO - AGENT :: Reward for binding compact-taking-bd8c98fb6-mkggz to node kwok-std-node-4 is 0.16 
+2023-12-10 22:04:24,589 - INFO - AGENT :: Reward for binding compact-taking-bd8c98fb6-r9nb9 to node kwok-std-node-9 is 0.155 
+2023-12-10 22:04:32,422 - INFO - AGENT :: Reward for binding compact-taking-bd8c98fb6-xlv42 to node kwok-std-node-2 is 0.164 
+2023-12-10 22:04:33,716 - INFO - AGENT :: Cluster Variance at 0.0042
+2023-12-10 22:04:34,173 - INFO - AGENT :: Acknowledge Epoch Complete
+2023-12-10 22:04:34,441 - INFO - AGENT :: checking shutdown status
+2023-12-10 22:04:42,563 - INFO - AGENT :: Reward for binding compact-taking-bd8c98fb6-dfzg2 to node kwok-std-node-4 is 0.189 
+2023-12-10 22:04:44,738 - INFO - AGENT :: Reward for binding stale-fitting-56dd8b4f77-5k9zc to node kwok-std-node-2 is 0.192 
+2023-12-10 22:05:34,445 - INFO - AGENT :: checking shutdown status
+2023-12-10 22:05:34,445 - INFO - AGENT :: Saving AC Model for Reuse

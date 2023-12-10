@@ -1,0 +1,105 @@
+2023-12-10 15:57:52,526 - INFO - Deployment Simulator Initialized
+2023-12-10 15:57:52,527 - INFO - WDS :: Cluster Reset 1/2 Running
+2023-12-10 15:57:52,722 - INFO - WDS :: grim-admin Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 14
+2023-12-10 15:57:52,902 - INFO - WDS :: Current load CPU 0.0 MEM 0.0 POD 0.0
+2023-12-10 15:58:32,954 - INFO - WDS :: progressive-combustion Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 11
+2023-12-10 15:58:33,211 - INFO - WDS :: Current load CPU 0.02 MEM 0.01 POD 0.01
+2023-12-10 15:59:13,321 - INFO - WDS :: mild-class Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 11
+2023-12-10 15:59:13,640 - INFO - WDS :: Current load CPU 0.04 MEM 0.02 POD 0.02
+2023-12-10 15:59:53,825 - INFO - WDS :: coral-highlight Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 15
+2023-12-10 15:59:54,267 - INFO - WDS :: Current load CPU 0.05 MEM 0.03 POD 0.03
+2023-12-10 16:01:14,606 - INFO - WDS :: marked-tenement Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 9
+2023-12-10 16:01:15,061 - INFO - WDS :: Current load CPU 0.07 MEM 0.04 POD 0.04
+2023-12-10 16:01:55,249 - INFO - WDS :: black-cyclist Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 5
+2023-12-10 16:01:55,793 - INFO - WDS :: Current load CPU 0.09 MEM 0.04 POD 0.05
+2023-12-10 16:02:35,982 - INFO - WDS :: decidable-range Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 8
+2023-12-10 16:02:36,582 - INFO - WDS :: Current load CPU 0.09 MEM 0.05 POD 0.05
+2023-12-10 16:03:16,883 - INFO - WDS :: exponential-drawer Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 13
+2023-12-10 16:03:17,631 - INFO - WDS :: Current load CPU 0.1 MEM 0.05 POD 0.06
+2023-12-10 16:04:38,173 - INFO - WDS :: foggy-crowd Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 14
+2023-12-10 16:04:38,953 - INFO - WDS :: Current load CPU 0.12 MEM 0.06 POD 0.07
+2023-12-10 16:06:39,988 - INFO - WDS :: investor-watt Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 9
+2023-12-10 16:06:40,768 - INFO - WDS :: Current load CPU 0.14 MEM 0.07 POD 0.08
+2023-12-10 16:08:01,572 - INFO - WDS :: figurative-hamburger Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 14
+2023-12-10 16:08:02,434 - INFO - WDS :: Current load CPU 0.15 MEM 0.08 POD 0.09
+2023-12-10 16:10:03,704 - INFO - WDS :: lower-oasis Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 7
+2023-12-10 16:10:04,801 - INFO - WDS :: Current load CPU 0.17 MEM 0.09 POD 0.1
+2023-12-10 16:11:25,715 - INFO - WDS :: tangy-payment Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 10
+2023-12-10 16:11:26,740 - INFO - WDS :: Current load CPU 0.18 MEM 0.09 POD 0.11
+2023-12-10 16:12:47,697 - INFO - WDS :: plum-union Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 14
+2023-12-10 16:12:49,076 - INFO - WDS :: Current load CPU 0.2 MEM 0.1 POD 0.12
+2023-12-10 16:13:29,626 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:13:34,627 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:13:39,632 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:13:44,634 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:13:49,640 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:13:54,646 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:13:59,652 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:14:04,654 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:14:09,660 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:14:14,664 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:14:19,670 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:14:24,674 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:14:29,680 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:14:34,684 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:14:39,690 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:14:44,694 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:14:49,695 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:14:54,697 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:15:02,887 - INFO - WDS :: default Namespace cleared
+2023-12-10 16:15:12,893 - INFO - WDS :: Cluster Reset 2/2 Running
+2023-12-10 16:15:13,068 - INFO - WDS :: bitter-palisade Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 6
+2023-12-10 16:15:13,320 - INFO - WDS :: Current load CPU 0.0 MEM 0.0 POD 0.0
+2023-12-10 16:15:53,390 - INFO - WDS :: stale-event Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 13
+2023-12-10 16:15:53,641 - INFO - WDS :: Current load CPU 0.01 MEM 0.0 POD 0.0
+2023-12-10 16:16:33,720 - INFO - WDS :: radiant-ball Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 15
+2023-12-10 16:16:34,050 - INFO - WDS :: Current load CPU 0.03 MEM 0.01 POD 0.02
+2023-12-10 16:17:14,179 - INFO - WDS :: trusting-siege Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 9
+2023-12-10 16:17:14,651 - INFO - WDS :: Current load CPU 0.05 MEM 0.02 POD 0.03
+2023-12-10 16:17:54,824 - INFO - WDS :: bordeaux-radio Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 12
+2023-12-10 16:17:55,315 - INFO - WDS :: Current load CPU 0.06 MEM 0.03 POD 0.04
+2023-12-10 16:19:15,864 - INFO - WDS :: simple-vial Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 7
+2023-12-10 16:19:16,449 - INFO - WDS :: Current load CPU 0.08 MEM 0.04 POD 0.05
+2023-12-10 16:19:56,668 - INFO - WDS :: crispy-sardine Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 12
+2023-12-10 16:19:57,277 - INFO - WDS :: Current load CPU 0.09 MEM 0.04 POD 0.05
+2023-12-10 16:21:17,821 - INFO - WDS :: cloudy-burgundy Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 11
+2023-12-10 16:21:18,535 - INFO - WDS :: Current load CPU 0.11 MEM 0.05 POD 0.06
+2023-12-10 16:22:39,119 - INFO - WDS :: cream-gunwale Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 10
+2023-12-10 16:22:39,892 - INFO - WDS :: Current load CPU 0.12 MEM 0.06 POD 0.07
+2023-12-10 16:24:00,478 - INFO - WDS :: global-dialogue Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 6
+2023-12-10 16:24:01,343 - INFO - WDS :: Current load CPU 0.13 MEM 0.07 POD 0.08
+2023-12-10 16:24:41,742 - INFO - WDS :: absolute-client Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 5
+2023-12-10 16:24:42,621 - INFO - WDS :: Current load CPU 0.14 MEM 0.07 POD 0.08
+2023-12-10 16:25:22,927 - INFO - WDS :: closed-dioptre Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 10
+2023-12-10 16:25:23,977 - INFO - WDS :: Current load CPU 0.15 MEM 0.08 POD 0.09
+2023-12-10 16:26:44,799 - INFO - WDS :: big-cleat Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 8
+2023-12-10 16:26:45,739 - INFO - WDS :: Current load CPU 0.16 MEM 0.08 POD 0.1
+2023-12-10 16:28:06,587 - INFO - WDS :: linear-shape Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 13
+2023-12-10 16:28:07,749 - INFO - WDS :: Current load CPU 0.18 MEM 0.09 POD 0.1
+2023-12-10 16:30:09,140 - INFO - WDS :: noisy-submodule Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 12
+2023-12-10 16:30:10,310 - INFO - WDS :: Current load CPU 0.19 MEM 0.1 POD 0.11
+2023-12-10 16:32:11,976 - INFO - WDS :: prompt-session Deployed, cpu requests 1000m limits 1000m, mem requests 2.0Gi limits 2Gi pods 15
+2023-12-10 16:32:13,161 - INFO - WDS :: Current load CPU 0.21 MEM 0.11 POD 0.12
+2023-12-10 16:32:53,709 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:32:58,715 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:33:03,721 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:33:08,726 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:33:13,732 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:33:18,736 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:33:23,742 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:33:28,746 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:33:33,752 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:33:38,757 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:33:43,763 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:33:48,768 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:33:53,774 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:33:58,777 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:34:03,782 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:34:08,787 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:34:13,792 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:34:18,798 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:34:23,803 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:34:28,809 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:34:33,815 - INFO - WDS :: Waiting on scheduler to stop scheduling
+2023-12-10 16:34:42,190 - INFO - WDS :: default Namespace cleared
+2023-12-10 16:34:52,207 - INFO - Data saved to ./deployment_data/data_20231210_163452.csv

@@ -1,0 +1,1053 @@
+2023-12-10 18:38:16,192 - INFO - AGENT: Created TensorBoard writer composite-plugin
+2023-12-10 18:38:16,515 - INFO - AGENT :: GNN Model Created
+2023-12-10 18:38:16,517 - INFO - AGENT :: Replay Buffer Created
+2023-12-10 18:38:16,517 - INFO - AGENT :: Agent Ready.
+2023-12-10 18:38:16,517 - INFO - AGENT :: Populating Replay Buffer
+2023-12-10 18:38:16,518 - INFO - AGENT :: 0.0% Complete 
+2023-12-10 18:38:50,278 - INFO - AGENT :: 10.0% Complete 
+2023-12-10 18:39:23,901 - INFO - AGENT :: 20.0% Complete 
+2023-12-10 18:39:57,494 - INFO - AGENT :: 30.0% Complete 
+2023-12-10 18:40:31,245 - INFO - AGENT :: 40.0% Complete 
+2023-12-10 18:41:05,014 - INFO - AGENT :: 50.0% Complete 
+2023-12-10 18:41:38,746 - INFO - AGENT :: 60.0% Complete 
+2023-12-10 18:42:12,378 - INFO - AGENT :: 70.0% Complete 
+2023-12-10 18:42:46,706 - INFO - AGENT :: 79.0% Complete 
+2023-12-10 18:43:21,195 - INFO - AGENT :: 89.0% Complete 
+2023-12-10 18:43:55,387 - INFO - AGENT :: 99.0% Complete 
+2023-12-10 18:43:57,801 - INFO - AGENT :: Populating Replay Buffer Complete
+2023-12-10 18:43:57,801 - INFO - AGENT :: checking shutdown status
+2023-12-10 18:45:32,351 - INFO - AGENT :: Processing Deployment faint-taco with 11
+2023-12-10 18:45:32,848 - INFO -  RAND :: 0.386 Selection: Assign faint-taco-5bb5c56f4-lkwsw to kwok-std-node-5
+2023-12-10 18:45:33,740 - INFO - AGENT :: Reward 1.0 1
+2023-12-10 18:45:33,741 - INFO - AGENT :: Decay Rate at 0.991
+2023-12-10 18:45:34,320 - INFO -  RAND :: 0.321 Selection: Assign faint-taco-5bb5c56f4-cgszr to kwok-std-node-2
+2023-12-10 18:45:35,329 - INFO - AGENT :: Reward 0.9911 2
+2023-12-10 18:45:35,330 - INFO - AGENT :: Decay Rate at 0.982
+2023-12-10 18:45:35,902 - INFO -  RAND :: 0.632 Selection: Assign faint-taco-5bb5c56f4-79wsl to kwok-std-node-7
+2023-12-10 18:45:36,900 - INFO - AGENT :: Reward 0.988 3
+2023-12-10 18:45:36,900 - INFO - AGENT :: Decay Rate at 0.973
+2023-12-10 18:45:37,564 - INFO -  RAND :: 0.465 Selection: Assign faint-taco-5bb5c56f4-hffw2 to kwok-std-node-7
+2023-12-10 18:45:38,575 - INFO - AGENT :: Reward -0.9862 4
+2023-12-10 18:45:38,576 - INFO - AGENT :: Decay Rate at 0.964
+2023-12-10 18:45:38,776 - INFO - AGENT :: Cluster Variance at 0.0001
+2023-12-10 18:45:39,416 - INFO -  RAND :: 0.626 Selection: Assign faint-taco-5bb5c56f4-8rfc6 to kwok-std-node-5
+2023-12-10 18:45:40,570 - INFO - AGENT :: Reward 0.6931 5
+2023-12-10 18:45:40,571 - INFO - AGENT :: Decay Rate at 0.956
+2023-12-10 18:45:41,003 - INFO -   GNN :: 0.977 assign faint-taco-5bb5c56f4-rsdx6 to kwok-std-node-4
+2023-12-10 18:45:42,061 - INFO - AGENT :: Reward 0.9759 6
+2023-12-10 18:45:42,062 - INFO - AGENT :: Decay Rate at 0.947
+2023-12-10 18:45:42,717 - INFO -  RAND :: 0.458 Selection: Assign faint-taco-5bb5c56f4-5t27z to kwok-std-node-6
+2023-12-10 18:45:43,912 - INFO - AGENT :: Reward 0.9759 7
+2023-12-10 18:45:43,912 - INFO - AGENT :: Decay Rate at 0.939
+2023-12-10 18:45:44,571 - INFO -  RAND :: 0.573 Selection: Assign faint-taco-5bb5c56f4-h95lv to kwok-std-node-6
+2023-12-10 18:45:45,721 - INFO - AGENT :: Reward -0.9762 8
+2023-12-10 18:45:45,722 - INFO - AGENT :: Decay Rate at 0.93
+2023-12-10 18:45:46,455 - INFO -  RAND :: 0.025 Selection: Assign faint-taco-5bb5c56f4-mzsh6 to kwok-std-node-9
+2023-12-10 18:45:47,803 - INFO - AGENT :: Reward 0.9734 9
+2023-12-10 18:45:47,804 - INFO - AGENT :: Decay Rate at 0.922
+2023-12-10 18:45:48,042 - INFO - AGENT :: Cluster Variance at 0.0002
+2023-12-10 18:45:48,765 - INFO -  RAND :: 0.714 Selection: Assign faint-taco-5bb5c56f4-4p67q to kwok-std-node-0
+2023-12-10 18:45:50,028 - INFO - AGENT :: Reward 0.9743 10
+2023-12-10 18:45:50,029 - INFO - AGENT :: Decay Rate at 0.914
+2023-12-10 18:45:50,714 - INFO -  RAND :: 0.546 Selection: Assign faint-taco-5bb5c56f4-zpt7p to kwok-std-node-7
+2023-12-10 18:45:52,043 - INFO - AGENT :: Reward 0.5632 11
+2023-12-10 18:45:52,044 - INFO - AGENT :: Decay Rate at 0.905
+2023-12-10 18:45:57,852 - INFO - AGENT :: checking shutdown status
+2023-12-10 18:46:12,609 - INFO - AGENT :: Processing Deployment late-manuscript with 5
+2023-12-10 18:46:13,486 - INFO -  RAND :: 0.828 Selection: Assign late-manuscript-7f5c6b49f8-gxkfn to kwok-std-node-1
+2023-12-10 18:46:14,752 - INFO - AGENT :: Reward 0.9707 12
+2023-12-10 18:46:14,752 - INFO - AGENT :: Decay Rate at 0.897
+2023-12-10 18:46:15,538 - INFO -  RAND :: 0.291 Selection: Assign late-manuscript-7f5c6b49f8-rxrph to kwok-std-node-5
+2023-12-10 18:46:17,083 - INFO - AGENT :: Reward 0.5613 13
+2023-12-10 18:46:17,083 - INFO - AGENT :: Decay Rate at 0.889
+2023-12-10 18:46:17,850 - INFO -  RAND :: 0.88 Selection: Assign late-manuscript-7f5c6b49f8-prwht to kwok-std-node-4
+2023-12-10 18:46:19,310 - INFO - AGENT :: Reward 0.6847 14
+2023-12-10 18:46:19,311 - INFO - AGENT :: Decay Rate at 0.881
+2023-12-10 18:46:19,628 - INFO - AGENT :: Cluster Variance at 0.0003
+2023-12-10 18:46:20,436 - INFO -  RAND :: 0.534 Selection: Assign late-manuscript-7f5c6b49f8-ttwss to kwok-std-node-6
+2023-12-10 18:46:21,829 - INFO - AGENT :: Reward 0.5587 15
+2023-12-10 18:46:21,829 - INFO - AGENT :: Decay Rate at 0.873
+2023-12-10 18:46:22,759 - INFO -  RAND :: 0.021 Selection: Assign late-manuscript-7f5c6b49f8-knfvf to kwok-std-node-9
+2023-12-10 18:46:24,174 - INFO - AGENT :: Reward 0.6821 16
+2023-12-10 18:46:24,175 - INFO - AGENT :: Decay Rate at 0.865
+2023-12-10 18:46:52,954 - INFO - AGENT :: Processing Deployment flush-walk with 7
+2023-12-10 18:46:53,857 - INFO -  RAND :: 0.037 Selection: Assign flush-walk-7d6b588db7-vb25m to kwok-std-node-5
+2023-12-10 18:46:55,374 - INFO - AGENT :: Reward 0.4822 17
+2023-12-10 18:46:55,375 - INFO - AGENT :: Decay Rate at 0.858
+2023-12-10 18:46:56,018 - INFO -   GNN :: 0.986 assign flush-walk-7d6b588db7-74zqp to kwok-std-node-4
+2023-12-10 18:46:57,500 - INFO - AGENT :: Reward 0.5543 18
+2023-12-10 18:46:57,501 - INFO - AGENT :: Decay Rate at 0.85
+2023-12-10 18:46:58,355 - INFO -  RAND :: 0.283 Selection: Assign flush-walk-7d6b588db7-jf5gg to kwok-std-node-3
+2023-12-10 18:47:00,046 - INFO - AGENT :: Reward 0.9582 19
+2023-12-10 18:47:00,047 - INFO - AGENT :: Decay Rate at 0.842
+2023-12-10 18:47:00,334 - INFO - AGENT :: Cluster Variance at 0.0004
+2023-12-10 18:47:01,235 - INFO -  RAND :: 0.419 Selection: Assign flush-walk-7d6b588db7-qww4v to kwok-std-node-8
+2023-12-10 18:47:03,063 - INFO - AGENT :: Reward 0.9606 20
+2023-12-10 18:47:03,063 - INFO - AGENT :: Decay Rate at 0.835
+2023-12-10 18:47:03,100 - INFO - AGENT :: Updated the Policy Network. Loss: 214782.71875
+2023-12-10 18:47:04,019 - INFO -  RAND :: 0.432 Selection: Assign flush-walk-7d6b588db7-nwqfg to kwok-std-node-3
+2023-12-10 18:47:05,645 - INFO - AGENT :: Reward 0.6812 21
+2023-12-10 18:47:05,646 - INFO - AGENT :: Decay Rate at 0.827
+2023-12-10 18:47:06,646 - INFO -  RAND :: 0.021 Selection: Assign flush-walk-7d6b588db7-4fnkj to kwok-std-node-4
+2023-12-10 18:47:08,280 - INFO - AGENT :: Reward 0.4821 22
+2023-12-10 18:47:08,280 - INFO - AGENT :: Decay Rate at 0.82
+2023-12-10 18:47:09,303 - INFO -  RAND :: 0.817 Selection: Assign flush-walk-7d6b588db7-c47mp to kwok-std-node-7
+2023-12-10 18:47:10,953 - INFO - AGENT :: Reward 0.4804 23
+2023-12-10 18:47:10,953 - INFO - AGENT :: Decay Rate at 0.812
+2023-12-10 18:47:33,346 - INFO - AGENT :: Processing Deployment lean-permutation with 9
+2023-12-10 18:47:34,491 - INFO -  RAND :: 0.228 Selection: Assign lean-permutation-84d7569f67-r9wcr to kwok-std-node-5
+2023-12-10 18:47:36,228 - INFO - AGENT :: Reward 0.4283 24
+2023-12-10 18:47:36,228 - INFO - AGENT :: Decay Rate at 0.805
+2023-12-10 18:47:36,625 - INFO - AGENT :: Cluster Variance at 0.0005
+2023-12-10 18:47:37,356 - INFO -   GNN :: 0.891 assign lean-permutation-84d7569f67-qh65b to kwok-std-node-4
+2023-12-10 18:47:39,152 - INFO - AGENT :: Reward 0.4264 25
+2023-12-10 18:47:39,153 - INFO - AGENT :: Decay Rate at 0.798
+2023-12-10 18:47:40,413 - INFO -  RAND :: 0.362 Selection: Assign lean-permutation-84d7569f67-8rhcl to kwok-std-node-0
+2023-12-10 18:47:42,339 - INFO - AGENT :: Reward 0.6714 26
+2023-12-10 18:47:42,339 - INFO - AGENT :: Decay Rate at 0.791
+2023-12-10 18:47:43,584 - INFO -  RAND :: 0.58 Selection: Assign lean-permutation-84d7569f67-ws92v to kwok-std-node-1
+2023-12-10 18:47:45,413 - INFO - AGENT :: Reward 0.6724 27
+2023-12-10 18:47:45,413 - INFO - AGENT :: Decay Rate at 0.783
+2023-12-10 18:47:46,211 - INFO -   GNN :: 0.843 assign lean-permutation-84d7569f67-7rdjg to kwok-std-node-4
+2023-12-10 18:47:48,118 - INFO - AGENT :: Reward 0.3888 28
+2023-12-10 18:47:48,119 - INFO - AGENT :: Decay Rate at 0.776
+2023-12-10 18:47:48,949 - INFO -   GNN :: 0.901 assign lean-permutation-84d7569f67-zhb9z to kwok-std-node-4
+2023-12-10 18:47:50,994 - INFO - AGENT :: Reward -0.9475 29
+2023-12-10 18:47:50,995 - INFO - AGENT :: Decay Rate at 0.769
+2023-12-10 18:47:51,357 - INFO - AGENT :: Cluster Variance at 0.0008
+2023-12-10 18:47:52,087 - INFO -   GNN :: 0.948 assign lean-permutation-84d7569f67-mqm9q to kwok-std-node-4
+2023-12-10 18:47:54,204 - INFO - AGENT :: Reward -0.9417 30
+2023-12-10 18:47:54,205 - INFO - AGENT :: Decay Rate at 0.762
+2023-12-10 18:47:55,309 - INFO -  RAND :: 0.653 Selection: Assign lean-permutation-84d7569f67-wqt8j to kwok-std-node-2
+2023-12-10 18:47:57,481 - INFO - AGENT :: Reward 0.6614 31
+2023-12-10 18:47:57,481 - INFO - AGENT :: Decay Rate at 0.756
+2023-12-10 18:47:58,592 - INFO -  RAND :: 0.307 Selection: Assign lean-permutation-84d7569f67-46wlr to kwok-std-node-9
+2023-12-10 18:48:00,606 - INFO - AGENT :: Reward 0.541 32
+2023-12-10 18:48:00,606 - INFO - AGENT :: Decay Rate at 0.749
+2023-12-10 18:48:00,758 - INFO - AGENT :: checking shutdown status
+2023-12-10 18:48:13,840 - INFO - AGENT :: Processing Deployment crabby-isotope with 11
+2023-12-10 18:48:14,629 - INFO -   GNN :: 0.949 assign crabby-isotope-668f47fcdb-76bzw to kwok-std-node-4
+2023-12-10 18:48:16,931 - INFO - AGENT :: Reward 0.3125 33
+2023-12-10 18:48:16,932 - INFO - AGENT :: Decay Rate at 0.742
+2023-12-10 18:48:18,149 - INFO -  RAND :: 0.094 Selection: Assign crabby-isotope-668f47fcdb-r6gzq to kwok-std-node-2
+2023-12-10 18:48:20,275 - INFO - AGENT :: Reward 0.5374 34
+2023-12-10 18:48:20,276 - INFO - AGENT :: Decay Rate at 0.735
+2023-12-10 18:48:20,680 - INFO - AGENT :: Cluster Variance at 0.0011
+2023-12-10 18:48:22,054 - INFO -  RAND :: 0.555 Selection: Assign crabby-isotope-668f47fcdb-vb58s to kwok-std-node-8
+2023-12-10 18:48:24,179 - INFO - AGENT :: Reward 0.6586 35
+2023-12-10 18:48:24,180 - INFO - AGENT :: Decay Rate at 0.729
+2023-12-10 18:48:25,460 - INFO -  RAND :: 0.428 Selection: Assign crabby-isotope-668f47fcdb-4kx99 to kwok-std-node-0
+2023-12-10 18:48:27,594 - INFO - AGENT :: Reward 0.5388 36
+2023-12-10 18:48:27,594 - INFO - AGENT :: Decay Rate at 0.722
+2023-12-10 18:48:29,078 - INFO -  RAND :: 0.421 Selection: Assign crabby-isotope-668f47fcdb-vb22g to kwok-std-node-6
+2023-12-10 18:48:31,240 - INFO - AGENT :: Reward 0.4671 37
+2023-12-10 18:48:31,240 - INFO - AGENT :: Decay Rate at 0.716
+2023-12-10 18:48:32,620 - INFO -  RAND :: 0.208 Selection: Assign crabby-isotope-668f47fcdb-mbw47 to kwok-std-node-4
+2023-12-10 18:48:34,947 - INFO - AGENT :: Reward 0.2953 38
+2023-12-10 18:48:34,948 - INFO - AGENT :: Decay Rate at 0.709
+2023-12-10 18:48:36,293 - INFO -  RAND :: 0.39 Selection: Assign crabby-isotope-668f47fcdb-gdzn8 to kwok-std-node-8
+2023-12-10 18:48:38,529 - INFO - AGENT :: Reward 0.5352 39
+2023-12-10 18:48:38,535 - INFO - AGENT :: Decay Rate at 0.703
+2023-12-10 18:48:38,998 - INFO - AGENT :: Cluster Variance at 0.0012
+2023-12-10 18:48:39,912 - INFO -   GNN :: 0.956 assign crabby-isotope-668f47fcdb-d47mn to kwok-std-node-1
+2023-12-10 18:48:42,311 - INFO - AGENT :: Reward 0.5358 40
+2023-12-10 18:48:42,312 - INFO - AGENT :: Decay Rate at 0.697
+2023-12-10 18:48:42,345 - INFO - AGENT :: Updated the Policy Network. Loss: 225842.85938
+2023-12-10 18:48:42,346 - INFO - AGENT :: *** Updating the target Network
+2023-12-10 18:48:43,712 - INFO -  RAND :: 0.327 Selection: Assign crabby-isotope-668f47fcdb-rzppj to kwok-std-node-6
+2023-12-10 18:48:46,175 - INFO - AGENT :: Reward 0.4156 41
+2023-12-10 18:48:46,176 - INFO - AGENT :: Decay Rate at 0.69
+2023-12-10 18:48:47,270 - INFO -   GNN :: 0.906 assign crabby-isotope-668f47fcdb-t9ptl to kwok-std-node-4
+2023-12-10 18:48:49,876 - INFO - AGENT :: Reward 0.2799 42
+2023-12-10 18:48:49,877 - INFO - AGENT :: Decay Rate at 0.684
+2023-12-10 18:48:51,352 - INFO -  RAND :: 0.226 Selection: Assign crabby-isotope-668f47fcdb-4m566 to kwok-std-node-0
+2023-12-10 18:48:54,102 - INFO - AGENT :: Reward 0.4606 43
+2023-12-10 18:48:54,102 - INFO - AGENT :: Decay Rate at 0.678
+2023-12-10 18:48:54,333 - INFO - AGENT :: Processing Deployment tart-source with 13
+2023-12-10 18:48:55,836 - INFO -  RAND :: 0.037 Selection: Assign tart-source-7779d65554-gz4s8 to kwok-std-node-9
+2023-12-10 18:48:58,405 - INFO - AGENT :: Reward 0.4608 44
+2023-12-10 18:48:58,406 - INFO - AGENT :: Decay Rate at 0.672
+2023-12-10 18:48:58,931 - INFO - AGENT :: Cluster Variance at 0.0014
+2023-12-10 18:49:00,443 - INFO -  RAND :: 0.264 Selection: Assign tart-source-7779d65554-7jmhb to kwok-std-node-0
+2023-12-10 18:49:02,910 - INFO - AGENT :: Reward 0.4124 45
+2023-12-10 18:49:02,910 - INFO - AGENT :: Decay Rate at 0.666
+2023-12-10 18:49:04,497 - INFO -  RAND :: 0.306 Selection: Assign tart-source-7779d65554-hzbpm to kwok-std-node-6
+2023-12-10 18:49:07,053 - INFO - AGENT :: Reward 0.3763 46
+2023-12-10 18:49:07,054 - INFO - AGENT :: Decay Rate at 0.66
+2023-12-10 18:49:08,615 - INFO -  RAND :: 0.386 Selection: Assign tart-source-7779d65554-2g2gk to kwok-std-node-6
+2023-12-10 18:49:11,188 - INFO - AGENT :: Reward -0.9203 47
+2023-12-10 18:49:11,189 - INFO - AGENT :: Decay Rate at 0.654
+2023-12-10 18:49:12,205 - INFO -   GNN :: 0.704 assign tart-source-7779d65554-gh4nf to kwok-std-node-4
+2023-12-10 18:49:15,007 - INFO - AGENT :: Reward 0.265 48
+2023-12-10 18:49:15,007 - INFO - AGENT :: Decay Rate at 0.648
+2023-12-10 18:49:16,798 - INFO -  RAND :: 0.54 Selection: Assign tart-source-7779d65554-fk8k5 to kwok-std-node-4
+2023-12-10 18:49:19,608 - INFO - AGENT :: Reward -0.9115 49
+2023-12-10 18:49:19,608 - INFO - AGENT :: Decay Rate at 0.642
+2023-12-10 18:49:20,272 - INFO - AGENT :: Cluster Variance at 0.0022
+2023-12-10 18:49:21,793 - INFO -  RAND :: 0.344 Selection: Assign tart-source-7779d65554-8zflm to kwok-std-node-0
+2023-12-10 18:49:24,584 - INFO - AGENT :: Reward 0.3694 50
+2023-12-10 18:49:24,585 - INFO - AGENT :: Decay Rate at 0.636
+2023-12-10 18:49:26,160 - INFO -  RAND :: 0.264 Selection: Assign tart-source-7779d65554-8p7hx to kwok-std-node-5
+2023-12-10 18:49:28,890 - INFO - AGENT :: Reward 0.369 51
+2023-12-10 18:49:28,890 - INFO - AGENT :: Decay Rate at 0.631
+2023-12-10 18:49:30,623 - INFO -  RAND :: 0.493 Selection: Assign tart-source-7779d65554-4b9gw to kwok-std-node-5
+2023-12-10 18:49:33,318 - INFO - AGENT :: Reward -0.9032 52
+2023-12-10 18:49:33,319 - INFO - AGENT :: Decay Rate at 0.625
+2023-12-10 18:49:35,090 - INFO -  RAND :: 0.259 Selection: Assign tart-source-7779d65554-sv6bl to kwok-std-node-7
+2023-12-10 18:49:37,835 - INFO - AGENT :: Reward 0.4033 53
+2023-12-10 18:49:37,835 - INFO - AGENT :: Decay Rate at 0.619
+2023-12-10 18:49:39,025 - INFO -   GNN :: 0.944 assign tart-source-7779d65554-j6lhr to kwok-std-node-4
+2023-12-10 18:49:41,925 - INFO - AGENT :: Reward 0.2411 54
+2023-12-10 18:49:41,926 - INFO - AGENT :: Decay Rate at 0.614
+2023-12-10 18:49:42,498 - INFO - AGENT :: Cluster Variance at 0.0027
+2023-12-10 18:49:44,284 - INFO -  RAND :: 0.546 Selection: Assign tart-source-7779d65554-tj7gg to kwok-std-node-2
+2023-12-10 18:49:47,097 - INFO - AGENT :: Reward 0.4477 55
+2023-12-10 18:49:47,098 - INFO - AGENT :: Decay Rate at 0.608
+2023-12-10 18:49:48,999 - INFO -  RAND :: 0.591 Selection: Assign tart-source-7779d65554-z9xtb to kwok-std-node-6
+2023-12-10 18:49:51,908 - INFO - AGENT :: Reward 0.317 56
+2023-12-10 18:49:51,908 - INFO - AGENT :: Decay Rate at 0.603
+2023-12-10 18:50:00,935 - INFO - AGENT :: checking shutdown status
+2023-12-10 18:50:15,106 - INFO - AGENT :: Processing Deployment brave-comptroller with 15
+2023-12-10 18:50:16,393 - INFO -   GNN :: 0.91 assign brave-comptroller-bc98c9bcc-fdxws to kwok-std-node-4
+2023-12-10 18:50:19,286 - INFO - AGENT :: Reward 0.231 57
+2023-12-10 18:50:19,287 - INFO - AGENT :: Decay Rate at 0.597
+2023-12-10 18:50:21,101 - INFO -  RAND :: 0.44 Selection: Assign brave-comptroller-bc98c9bcc-vrcz8 to kwok-std-node-0
+2023-12-10 18:50:24,030 - INFO - AGENT :: Reward 0.3357 58
+2023-12-10 18:50:24,031 - INFO - AGENT :: Decay Rate at 0.592
+2023-12-10 18:50:25,318 - INFO -   GNN :: 0.76 assign brave-comptroller-bc98c9bcc-f2g9b to kwok-std-node-4
+2023-12-10 18:50:28,370 - INFO - AGENT :: Reward 0.2219 59
+2023-12-10 18:50:28,370 - INFO - AGENT :: Decay Rate at 0.587
+2023-12-10 18:50:29,126 - INFO - AGENT :: Cluster Variance at 0.0036
+2023-12-10 18:50:30,866 - INFO -  RAND :: 0.522 Selection: Assign brave-comptroller-bc98c9bcc-brbfv to kwok-std-node-4
+2023-12-10 18:50:33,937 - INFO - AGENT :: Reward -0.8809 60
+2023-12-10 18:50:33,938 - INFO - AGENT :: Decay Rate at 0.581
+2023-12-10 18:50:33,967 - INFO - AGENT :: Updated the Policy Network. Loss: 0.63003
+2023-12-10 18:50:35,866 - INFO -  RAND :: 0.125 Selection: Assign brave-comptroller-bc98c9bcc-5zk6l to kwok-std-node-0
+2023-12-10 18:50:38,991 - INFO - AGENT :: Reward 0.3091 61
+2023-12-10 18:50:38,992 - INFO - AGENT :: Decay Rate at 0.576
+2023-12-10 18:50:40,760 - INFO -  RAND :: 0.365 Selection: Assign brave-comptroller-bc98c9bcc-s7r49 to kwok-std-node-2
+2023-12-10 18:50:43,954 - INFO - AGENT :: Reward 0.3905 62
+2023-12-10 18:50:43,955 - INFO - AGENT :: Decay Rate at 0.571
+2023-12-10 18:50:45,132 - INFO -   GNN :: 0.7 assign brave-comptroller-bc98c9bcc-gdg59 to kwok-std-node-4
+2023-12-10 18:50:48,380 - INFO - AGENT :: Reward 0.2059 63
+2023-12-10 18:50:48,380 - INFO - AGENT :: Decay Rate at 0.566
+2023-12-10 18:50:50,487 - INFO -  RAND :: 0.323 Selection: Assign brave-comptroller-bc98c9bcc-stt5n to kwok-std-node-2
+2023-12-10 18:50:53,635 - INFO - AGENT :: Reward 0.354 64
+2023-12-10 18:50:53,635 - INFO - AGENT :: Decay Rate at 0.561
+2023-12-10 18:50:54,376 - INFO - AGENT :: Cluster Variance at 0.0046
+2023-12-10 18:50:55,610 - INFO -   GNN :: 0.968 assign brave-comptroller-bc98c9bcc-jljmn to kwok-std-node-4
+2023-12-10 18:50:58,946 - INFO - AGENT :: Reward 0.199 65
+2023-12-10 18:50:58,947 - INFO - AGENT :: Decay Rate at 0.556
+2023-12-10 18:51:00,807 - INFO -  RAND :: 0.155 Selection: Assign brave-comptroller-bc98c9bcc-bq5hk to kwok-std-node-0
+2023-12-10 18:51:04,080 - INFO - AGENT :: Reward 0.2869 66
+2023-12-10 18:51:04,080 - INFO - AGENT :: Decay Rate at 0.551
+2023-12-10 18:51:06,081 - INFO -  RAND :: 0.202 Selection: Assign brave-comptroller-bc98c9bcc-cxqfl to kwok-std-node-5
+2023-12-10 18:51:09,445 - INFO - AGENT :: Reward 0.3038 67
+2023-12-10 18:51:09,446 - INFO - AGENT :: Decay Rate at 0.546
+2023-12-10 18:51:11,359 - INFO -  RAND :: 0.42 Selection: Assign brave-comptroller-bc98c9bcc-kpwtf to kwok-std-node-7
+2023-12-10 18:51:14,742 - INFO - AGENT :: Reward 0.3505 68
+2023-12-10 18:51:14,742 - INFO - AGENT :: Decay Rate at 0.541
+2023-12-10 18:51:16,861 - INFO -  RAND :: 0.271 Selection: Assign brave-comptroller-bc98c9bcc-hm4rk to kwok-std-node-6
+2023-12-10 18:51:20,230 - INFO - AGENT :: Reward 0.2863 69
+2023-12-10 18:51:20,230 - INFO - AGENT :: Decay Rate at 0.536
+2023-12-10 18:51:20,875 - INFO - AGENT :: Cluster Variance at 0.0054
+2023-12-10 18:51:22,350 - INFO -   GNN :: 0.773 assign brave-comptroller-bc98c9bcc-n7dnl to kwok-std-node-4
+2023-12-10 18:51:25,765 - INFO - AGENT :: Reward 0.1918 70
+2023-12-10 18:51:25,766 - INFO - AGENT :: Decay Rate at 0.531
+2023-12-10 18:51:27,679 - INFO -  RAND :: 0.349 Selection: Assign brave-comptroller-bc98c9bcc-f2fks to kwok-std-node-4
+2023-12-10 18:51:31,101 - INFO - AGENT :: Reward -0.8513 71
+2023-12-10 18:51:31,102 - INFO - AGENT :: Decay Rate at 0.526
+2023-12-10 18:51:36,158 - INFO - AGENT :: Processing Deployment silly-diver with 14
+2023-12-10 18:51:37,637 - INFO -   GNN :: 0.717 assign silly-diver-7997dbf5b6-8p8vg to kwok-std-node-4
+2023-12-10 18:51:41,212 - INFO - AGENT :: Reward -0.8448 72
+2023-12-10 18:51:41,213 - INFO - AGENT :: Decay Rate at 0.522
+2023-12-10 18:51:43,307 - INFO -  RAND :: 0.425 Selection: Assign silly-diver-7997dbf5b6-xztnr to kwok-std-node-5
+2023-12-10 18:51:47,001 - INFO - AGENT :: Reward 0.2794 73
+2023-12-10 18:51:47,001 - INFO - AGENT :: Decay Rate at 0.517
+2023-12-10 18:51:49,096 - INFO -  RAND :: 0.058 Selection: Assign silly-diver-7997dbf5b6-wkcqj to kwok-std-node-0
+2023-12-10 18:51:52,678 - INFO - AGENT :: Reward 0.2648 74
+2023-12-10 18:51:52,678 - INFO - AGENT :: Decay Rate at 0.512
+2023-12-10 18:51:53,454 - INFO - AGENT :: Cluster Variance at 0.0075
+2023-12-10 18:51:54,866 - INFO -   GNN :: 0.885 assign silly-diver-7997dbf5b6-mksvq to kwok-std-node-4
+2023-12-10 18:51:58,543 - INFO - AGENT :: Reward 0.1744 75
+2023-12-10 18:51:58,544 - INFO - AGENT :: Decay Rate at 0.508
+2023-12-10 18:52:00,718 - INFO -  RAND :: 0.493 Selection: Assign silly-diver-7997dbf5b6-nbh8c to kwok-std-node-7
+2023-12-10 18:52:04,394 - INFO - AGENT :: Reward 0.3136 76
+2023-12-10 18:52:04,395 - INFO - AGENT :: Decay Rate at 0.503
+2023-12-10 18:52:06,638 - INFO -  RAND :: 0.344 Selection: Assign silly-diver-7997dbf5b6-v5jsh to kwok-std-node-6
+2023-12-10 18:52:10,716 - INFO - AGENT :: Reward 0.2625 77
+2023-12-10 18:52:10,717 - INFO - AGENT :: Decay Rate at 0.499
+2023-12-10 18:52:12,978 - INFO -  RAND :: 0.097 Selection: Assign silly-diver-7997dbf5b6-xqwcb to kwok-std-node-0
+2023-12-10 18:52:16,737 - INFO - AGENT :: Reward 0.2499 78
+2023-12-10 18:52:16,738 - INFO - AGENT :: Decay Rate at 0.494
+2023-12-10 18:52:19,096 - INFO -  RAND :: 0.141 Selection: Assign silly-diver-7997dbf5b6-vmvhl to kwok-std-node-9
+2023-12-10 18:52:22,930 - INFO - AGENT :: Reward 0.3701 79
+2023-12-10 18:52:22,931 - INFO - AGENT :: Decay Rate at 0.49
+2023-12-10 18:52:23,621 - INFO - AGENT :: Cluster Variance at 0.0083
+2023-12-10 18:52:25,930 - INFO -  RAND :: 0.356 Selection: Assign silly-diver-7997dbf5b6-pj45q to kwok-std-node-5
+2023-12-10 18:52:29,680 - INFO - AGENT :: Reward 0.262 80
+2023-12-10 18:52:29,681 - INFO - AGENT :: Decay Rate at 0.485
+2023-12-10 18:52:29,723 - INFO - AGENT :: Updated the Policy Network. Loss: 0.66311
+2023-12-10 18:52:29,725 - INFO - AGENT :: *** Updating the target Network
+2023-12-10 18:52:31,306 - INFO -   GNN :: 0.829 assign silly-diver-7997dbf5b6-9c67v to kwok-std-node-6
+2023-12-10 18:52:35,133 - INFO - AGENT :: Reward 0.2496 81
+2023-12-10 18:52:35,133 - INFO - AGENT :: Decay Rate at 0.481
+2023-12-10 18:52:37,463 - INFO -  RAND :: 0.424 Selection: Assign silly-diver-7997dbf5b6-gjgff to kwok-std-node-9
+2023-12-10 18:52:41,334 - INFO - AGENT :: Reward 0.3374 82
+2023-12-10 18:52:41,335 - INFO - AGENT :: Decay Rate at 0.476
+2023-12-10 18:52:42,826 - INFO -   GNN :: 0.969 assign silly-diver-7997dbf5b6-h9w2t to kwok-std-node-4
+2023-12-10 18:52:46,880 - INFO - AGENT :: Reward 0.1689 83
+2023-12-10 18:52:46,881 - INFO - AGENT :: Decay Rate at 0.472
+2023-12-10 18:52:48,503 - INFO -   GNN :: 0.563 assign silly-diver-7997dbf5b6-mkq85 to kwok-std-node-4
+2023-12-10 18:52:52,437 - INFO - AGENT :: Reward -0.8211 84
+2023-12-10 18:52:52,438 - INFO - AGENT :: Decay Rate at 0.468
+2023-12-10 18:52:53,330 - INFO - AGENT :: Cluster Variance at 0.0099
+2023-12-10 18:52:54,774 - INFO -   GNN :: 0.793 assign silly-diver-7997dbf5b6-47cb9 to kwok-std-node-4
+2023-12-10 18:52:58,710 - INFO - AGENT :: Reward -0.8149 85
+2023-12-10 18:52:58,711 - INFO - AGENT :: Decay Rate at 0.464
+2023-12-10 18:52:59,113 - INFO - AGENT :: checking shutdown status
+2023-12-10 18:52:59,405 - INFO - AGENT :: Processing Deployment vibrant-coda with 5
+2023-12-10 18:53:00,911 - INFO -   GNN :: 0.915 assign vibrant-coda-fc646d959-25c9w to kwok-std-node-4
+2023-12-10 18:53:04,994 - INFO - AGENT :: Reward -0.8087 86
+2023-12-10 18:53:04,995 - INFO - AGENT :: Decay Rate at 0.46
+2023-12-10 18:53:07,388 - INFO -  RAND :: 0.127 Selection: Assign vibrant-coda-fc646d959-4td7k to kwok-std-node-0
+2023-12-10 18:53:11,397 - INFO - AGENT :: Reward 0.2316 87
+2023-12-10 18:53:11,404 - INFO - AGENT :: Decay Rate at 0.455
+2023-12-10 18:53:13,129 - INFO -   GNN :: 0.714 assign vibrant-coda-fc646d959-ck79q to kwok-std-node-4
+2023-12-10 18:53:17,273 - INFO - AGENT :: Reward 0.1514 88
+2023-12-10 18:53:17,274 - INFO - AGENT :: Decay Rate at 0.451
+2023-12-10 18:53:18,979 - INFO -   GNN :: 0.622 assign vibrant-coda-fc646d959-lttrl to kwok-std-node-1
+2023-12-10 18:53:23,304 - INFO - AGENT :: Reward 0.3975 89
+2023-12-10 18:53:23,305 - INFO - AGENT :: Decay Rate at 0.447
+2023-12-10 18:53:24,078 - INFO - AGENT :: Cluster Variance at 0.0124
+2023-12-10 18:53:26,639 - INFO -  RAND :: 0.41 Selection: Assign vibrant-coda-fc646d959-p6l2g to kwok-std-node-4
+2023-12-10 18:53:30,743 - INFO - AGENT :: Reward 0.1479 90
+2023-12-10 18:53:30,744 - INFO - AGENT :: Decay Rate at 0.443
+2023-12-10 18:53:38,294 - INFO - AGENT :: Processing Deployment yellow-algorithm with 15
+2023-12-10 18:53:40,041 - INFO -   GNN :: 0.544 assign yellow-algorithm-659c9bff7d-m5qjx to kwok-std-node-4
+2023-12-10 18:53:44,254 - INFO - AGENT :: Reward -0.7901 91
+2023-12-10 18:53:44,254 - INFO - AGENT :: Decay Rate at 0.439
+2023-12-10 18:53:46,749 - INFO -  RAND :: 0.277 Selection: Assign yellow-algorithm-659c9bff7d-5smfg to kwok-std-node-3
+2023-12-10 18:53:50,930 - INFO - AGENT :: Reward 0.4525 92
+2023-12-10 18:53:50,931 - INFO - AGENT :: Decay Rate at 0.435
+2023-12-10 18:53:52,702 - INFO -   GNN :: 0.582 assign yellow-algorithm-659c9bff7d-rvd7x to kwok-std-node-4
+2023-12-10 18:53:57,054 - INFO - AGENT :: Reward 0.1411 93
+2023-12-10 18:53:57,055 - INFO - AGENT :: Decay Rate at 0.431
+2023-12-10 18:53:58,666 - INFO -   GNN :: 0.882 assign yellow-algorithm-659c9bff7d-4nvrl to kwok-std-node-4
+2023-12-10 18:54:03,017 - INFO - AGENT :: Reward -0.7791 94
+2023-12-10 18:54:03,017 - INFO - AGENT :: Decay Rate at 0.427
+2023-12-10 18:54:03,938 - INFO - AGENT :: Cluster Variance at 0.0161
+2023-12-10 18:54:05,600 - INFO -   GNN :: 0.601 assign yellow-algorithm-659c9bff7d-7qtp8 to kwok-std-node-1
+2023-12-10 18:54:10,090 - INFO - AGENT :: Reward 0.3456 95
+2023-12-10 18:54:10,090 - INFO - AGENT :: Decay Rate at 0.424
+2023-12-10 18:54:11,920 - INFO -   GNN :: 0.967 assign yellow-algorithm-659c9bff7d-jp5rg to kwok-std-node-4
+2023-12-10 18:54:16,486 - INFO - AGENT :: Reward 0.1347 96
+2023-12-10 18:54:16,486 - INFO - AGENT :: Decay Rate at 0.42
+2023-12-10 18:54:18,253 - INFO -   GNN :: 0.59 assign yellow-algorithm-659c9bff7d-bs5dh to kwok-std-node-4
+2023-12-10 18:54:22,759 - INFO - AGENT :: Reward -0.7674 97
+2023-12-10 18:54:22,760 - INFO - AGENT :: Decay Rate at 0.416
+2023-12-10 18:54:24,550 - INFO -   GNN :: 0.58 assign yellow-algorithm-659c9bff7d-mr722 to kwok-std-node-2
+2023-12-10 18:54:28,901 - INFO - AGENT :: Reward 0.2877 98
+2023-12-10 18:54:28,902 - INFO - AGENT :: Decay Rate at 0.412
+2023-12-10 18:54:30,717 - INFO -   GNN :: 0.556 assign yellow-algorithm-659c9bff7d-4jts7 to kwok-std-node-4
+2023-12-10 18:54:35,259 - INFO - AGENT :: Reward 0.1287 99
+2023-12-10 18:54:35,260 - INFO - AGENT :: Decay Rate at 0.409
+2023-12-10 18:54:36,332 - INFO - AGENT :: Cluster Variance at 0.0192
+2023-12-10 18:54:38,086 - INFO -   GNN :: 0.458 assign yellow-algorithm-659c9bff7d-5ct2t to kwok-std-node-4
+2023-12-10 18:54:42,821 - INFO - AGENT :: Reward -0.7553 100
+2023-12-10 18:54:42,822 - INFO - AGENT :: Decay Rate at 0.405
+2023-12-10 18:54:42,853 - INFO - AGENT :: Updated the Policy Network. Loss: 0.3069
+2023-12-10 18:54:44,773 - INFO -   GNN :: 0.933 assign yellow-algorithm-659c9bff7d-2rqrj to kwok-std-node-4
+2023-12-10 18:54:49,369 - INFO - AGENT :: Reward -0.7489 101
+2023-12-10 18:54:49,370 - INFO - AGENT :: Decay Rate at 0.401
+2023-12-10 18:54:51,190 - INFO -   GNN :: 0.492 assign yellow-algorithm-659c9bff7d-v8j9q to kwok-std-node-4
+2023-12-10 18:54:55,890 - INFO - AGENT :: Reward -0.7425 102
+2023-12-10 18:54:55,891 - INFO - AGENT :: Decay Rate at 0.398
+2023-12-10 18:54:58,562 - INFO -  RAND :: 0.105 Selection: Assign yellow-algorithm-659c9bff7d-2vcn2 to kwok-std-node-3
+2023-12-10 18:55:03,283 - INFO - AGENT :: Reward 0.3681 103
+2023-12-10 18:55:03,286 - INFO - AGENT :: Decay Rate at 0.394
+2023-12-10 18:55:05,246 - INFO -   GNN :: 0.792 assign yellow-algorithm-659c9bff7d-c4nct to kwok-std-node-4
+2023-12-10 18:55:10,004 - INFO - AGENT :: Reward 0.1181 104
+2023-12-10 18:55:10,004 - INFO - AGENT :: Decay Rate at 0.391
+2023-12-10 18:55:10,842 - INFO - AGENT :: Cluster Variance at 0.0241
+2023-12-10 18:55:13,705 - INFO -  RAND :: 0.278 Selection: Assign yellow-algorithm-659c9bff7d-2f49m to kwok-std-node-5
+2023-12-10 18:55:18,364 - INFO - AGENT :: Reward 0.2204 105
+2023-12-10 18:55:18,365 - INFO - AGENT :: Decay Rate at 0.387
+2023-12-10 18:55:18,849 - INFO - AGENT :: checking shutdown status
+2023-12-10 18:55:39,974 - INFO - AGENT :: Processing Deployment giant-capacity with 6
+2023-12-10 18:55:41,761 - INFO -   GNN :: 0.804 assign giant-capacity-d8c4b5dc8-7fcv5 to kwok-std-node-4
+2023-12-10 18:55:46,592 - INFO - AGENT :: Reward 0.1156 106
+2023-12-10 18:55:46,592 - INFO - AGENT :: Decay Rate at 0.384
+2023-12-10 18:55:48,489 - INFO -   GNN :: 0.51 assign giant-capacity-d8c4b5dc8-l2vbg to kwok-std-node-4
+2023-12-10 18:55:53,408 - INFO - AGENT :: Reward -0.7246 107
+2023-12-10 18:55:53,409 - INFO - AGENT :: Decay Rate at 0.38
+2023-12-10 18:55:55,193 - INFO -   GNN :: 0.789 assign giant-capacity-d8c4b5dc8-fl6gv to kwok-std-node-4
+2023-12-10 18:56:00,140 - INFO - AGENT :: Reward -0.7184 108
+2023-12-10 18:56:00,140 - INFO - AGENT :: Decay Rate at 0.377
+2023-12-10 18:56:03,060 - INFO -  RAND :: 0.308 Selection: Assign giant-capacity-d8c4b5dc8-rhrr7 to kwok-std-node-9
+2023-12-10 18:56:07,942 - INFO - AGENT :: Reward 0.2692 109
+2023-12-10 18:56:07,942 - INFO - AGENT :: Decay Rate at 0.373
+2023-12-10 18:56:08,893 - INFO - AGENT :: Cluster Variance at 0.0283
+2023-12-10 18:56:11,919 - INFO -  RAND :: 0.187 Selection: Assign giant-capacity-d8c4b5dc8-lzzrt to kwok-std-node-9
+2023-12-10 18:56:16,812 - INFO - AGENT :: Reward -0.7128 110
+2023-12-10 18:56:16,813 - INFO - AGENT :: Decay Rate at 0.37
+2023-12-10 18:56:18,843 - INFO -   GNN :: 0.946 assign giant-capacity-d8c4b5dc8-vhsq4 to kwok-std-node-4
+2023-12-10 18:56:23,915 - INFO - AGENT :: Reward 0.1088 111
+2023-12-10 18:56:23,916 - INFO - AGENT :: Decay Rate at 0.367
+2023-12-10 18:57:01,545 - INFO - AGENT :: Processing Deployment worn-admin with 13
+2023-12-10 18:57:03,694 - INFO -   GNN :: 0.871 assign worn-admin-7f9f9b4855-7686q to kwok-std-node-4
+2023-12-10 18:57:08,783 - INFO - AGENT :: Reward -0.707 112
+2023-12-10 18:57:08,784 - INFO - AGENT :: Decay Rate at 0.363
+2023-12-10 18:57:10,737 - INFO -   GNN :: 0.528 assign worn-admin-7f9f9b4855-kn25z to kwok-std-node-4
+2023-12-10 18:57:15,821 - INFO - AGENT :: Reward -0.7009 113
+2023-12-10 18:57:15,822 - INFO - AGENT :: Decay Rate at 0.36
+2023-12-10 18:57:18,899 - INFO -  RAND :: 0.32 Selection: Assign worn-admin-7f9f9b4855-8gbpk to kwok-std-node-4
+2023-12-10 18:57:24,216 - INFO - AGENT :: Reward -0.6947 114
+2023-12-10 18:57:24,216 - INFO - AGENT :: Decay Rate at 0.357
+2023-12-10 18:57:25,319 - INFO - AGENT :: Cluster Variance at 0.0345
+2023-12-10 18:57:28,341 - INFO -  RAND :: 0.287 Selection: Assign worn-admin-7f9f9b4855-6hccx to kwok-std-node-2
+2023-12-10 18:57:33,454 - INFO - AGENT :: Reward 0.2434 115
+2023-12-10 18:57:33,455 - INFO - AGENT :: Decay Rate at 0.354
+2023-12-10 18:57:36,563 - INFO -  RAND :: 0.102 Selection: Assign worn-admin-7f9f9b4855-8wprn to kwok-std-node-1
+2023-12-10 18:57:41,709 - INFO - AGENT :: Reward 0.2813 116
+2023-12-10 18:57:41,710 - INFO - AGENT :: Decay Rate at 0.35
+2023-12-10 18:57:43,685 - INFO -   GNN :: 0.929 assign worn-admin-7f9f9b4855-zkz7q to kwok-std-node-4
+2023-12-10 18:57:49,097 - INFO - AGENT :: Reward 0.1006 117
+2023-12-10 18:57:49,097 - INFO - AGENT :: Decay Rate at 0.347
+2023-12-10 18:57:52,065 - INFO -  RAND :: 0.077 Selection: Assign worn-admin-7f9f9b4855-gfk2m to kwok-std-node-2
+2023-12-10 18:57:57,337 - INFO - AGENT :: Reward 0.2279 118
+2023-12-10 18:57:57,338 - INFO - AGENT :: Decay Rate at 0.344
+2023-12-10 18:58:00,316 - INFO -  RAND :: 0.189 Selection: Assign worn-admin-7f9f9b4855-zvp7k to kwok-std-node-3
+2023-12-10 18:58:05,530 - INFO - AGENT :: Reward 0.306 119
+2023-12-10 18:58:05,531 - INFO - AGENT :: Decay Rate at 0.341
+2023-12-10 18:58:06,652 - INFO - AGENT :: Cluster Variance at 0.0352
+2023-12-10 18:58:08,709 - INFO -   GNN :: 0.703 assign worn-admin-7f9f9b4855-cnv5z to kwok-std-node-4
+2023-12-10 18:58:14,030 - INFO - AGENT :: Reward 0.0989 120
+2023-12-10 18:58:14,032 - INFO - AGENT :: Decay Rate at 0.338
+2023-12-10 18:58:14,064 - INFO - AGENT :: Updated the Policy Network. Loss: 0.33674
+2023-12-10 18:58:14,065 - INFO - AGENT :: *** Updating the target Network
+2023-12-10 18:58:17,334 - INFO -  RAND :: 0.257 Selection: Assign worn-admin-7f9f9b4855-fn4zr to kwok-std-node-8
+2023-12-10 18:58:22,516 - INFO - AGENT :: Reward 0.3396 121
+2023-12-10 18:58:22,517 - INFO - AGENT :: Decay Rate at 0.335
+2023-12-10 18:58:24,576 - INFO -   GNN :: 0.698 assign worn-admin-7f9f9b4855-k8ng8 to kwok-std-node-4
+2023-12-10 18:58:30,092 - INFO - AGENT :: Reward 0.0972 122
+2023-12-10 18:58:30,093 - INFO - AGENT :: Decay Rate at 0.332
+2023-12-10 18:58:33,241 - INFO -  RAND :: 0.326 Selection: Assign worn-admin-7f9f9b4855-x8szx to kwok-std-node-1
+2023-12-10 18:58:38,704 - INFO - AGENT :: Reward 0.2549 123
+2023-12-10 18:58:38,704 - INFO - AGENT :: Decay Rate at 0.329
+2023-12-10 18:58:41,883 - INFO -  RAND :: 0.023 Selection: Assign worn-admin-7f9f9b4855-r5rxb to kwok-std-node-8
+2023-12-10 18:58:47,512 - INFO - AGENT :: Reward 0.3019 124
+2023-12-10 18:58:47,513 - INFO - AGENT :: Decay Rate at 0.326
+2023-12-10 18:58:48,590 - INFO - AGENT :: Cluster Variance at 0.0377
+2023-12-10 18:58:49,109 - INFO - AGENT :: checking shutdown status
+2023-12-10 18:59:03,540 - INFO - AGENT :: Processing Deployment swift-codec with 5
+2023-12-10 18:59:05,772 - INFO -   GNN :: 0.549 assign swift-codec-9bb7bccd9-mvntn to kwok-std-node-1
+2023-12-10 18:59:11,468 - INFO - AGENT :: Reward 0.2391 125
+2023-12-10 18:59:11,469 - INFO - AGENT :: Decay Rate at 0.323
+2023-12-10 18:59:13,675 - INFO -   GNN :: 0.562 assign swift-codec-9bb7bccd9-4qrpc to kwok-std-node-4
+2023-12-10 18:59:19,468 - INFO - AGENT :: Reward 0.0957 126
+2023-12-10 18:59:19,469 - INFO - AGENT :: Decay Rate at 0.32
+2023-12-10 18:59:21,655 - INFO -   GNN :: 0.459 assign swift-codec-9bb7bccd9-dft5b to kwok-std-node-1
+2023-12-10 18:59:27,306 - INFO - AGENT :: Reward 0.2236 127
+2023-12-10 18:59:27,307 - INFO - AGENT :: Decay Rate at 0.317
+2023-12-10 18:59:30,684 - INFO -  RAND :: 0.314 Selection: Assign swift-codec-9bb7bccd9-6zgwb to kwok-std-node-4
+2023-12-10 18:59:36,158 - INFO - AGENT :: Reward 0.094 128
+2023-12-10 18:59:36,159 - INFO - AGENT :: Decay Rate at 0.314
+2023-12-10 18:59:38,426 - INFO -   GNN :: 0.8 assign swift-codec-9bb7bccd9-cxj8d to kwok-std-node-1
+2023-12-10 18:59:44,080 - INFO - AGENT :: Reward 0.2103 129
+2023-12-10 18:59:44,081 - INFO - AGENT :: Decay Rate at 0.312
+2023-12-10 18:59:45,301 - INFO - AGENT :: Cluster Variance at 0.0407
+2023-12-10 18:59:45,342 - INFO - AGENT :: Processing Deployment milky-space with 13
+2023-12-10 18:59:48,786 - INFO -  RAND :: 0.21 Selection: Assign milky-space-6f994b457d-6h4f7 to kwok-std-node-0
+2023-12-10 18:59:54,505 - INFO - AGENT :: Reward 0.1846 130
+2023-12-10 18:59:54,506 - INFO - AGENT :: Decay Rate at 0.309
+2023-12-10 18:59:56,738 - INFO -   GNN :: 0.807 assign milky-space-6f994b457d-tvt7x to kwok-std-node-4
+2023-12-10 19:00:02,607 - INFO - AGENT :: Reward 0.0923 131
+2023-12-10 19:00:02,608 - INFO - AGENT :: Decay Rate at 0.306
+2023-12-10 19:00:05,994 - INFO -  RAND :: 0.281 Selection: Assign milky-space-6f994b457d-2bwrq to kwok-std-node-7
+2023-12-10 19:00:12,007 - INFO - AGENT :: Reward 0.2331 132
+2023-12-10 19:00:12,008 - INFO - AGENT :: Decay Rate at 0.303
+2023-12-10 19:00:14,359 - INFO -   GNN :: 0.93 assign milky-space-6f994b457d-xqd9k to kwok-std-node-6
+2023-12-10 19:00:20,378 - INFO - AGENT :: Reward 0.1905 133
+2023-12-10 19:00:20,378 - INFO - AGENT :: Decay Rate at 0.3
+2023-12-10 19:00:22,780 - INFO -   GNN :: 0.404 assign milky-space-6f994b457d-plzxk to kwok-std-node-4
+2023-12-10 19:00:28,739 - INFO - AGENT :: Reward 0.0907 134
+2023-12-10 19:00:28,740 - INFO - AGENT :: Decay Rate at 0.298
+2023-12-10 19:00:30,082 - INFO - AGENT :: Cluster Variance at 0.0441
+2023-12-10 19:00:32,474 - INFO -   GNN :: 0.434 assign milky-space-6f994b457d-m5rv7 to kwok-std-node-4
+2023-12-10 19:00:38,368 - INFO - AGENT :: Reward -0.6542 135
+2023-12-10 19:00:38,369 - INFO - AGENT :: Decay Rate at 0.295
+2023-12-10 19:00:40,960 - INFO -   GNN :: 0.949 assign milky-space-6f994b457d-h62mr to kwok-std-node-4
+2023-12-10 19:00:46,937 - INFO - AGENT :: Reward -0.6482 136
+2023-12-10 19:00:46,941 - INFO - AGENT :: Decay Rate at 0.292
+2023-12-10 19:00:49,388 - INFO -   GNN :: 0.604 assign milky-space-6f994b457d-vckgr to kwok-std-node-4
+2023-12-10 19:00:55,442 - INFO - AGENT :: Reward -0.6423 137
+2023-12-10 19:00:55,442 - INFO - AGENT :: Decay Rate at 0.29
+2023-12-10 19:00:59,188 - INFO -  RAND :: 0.099 Selection: Assign milky-space-6f994b457d-c66b4 to kwok-std-node-6
+2023-12-10 19:01:05,359 - INFO - AGENT :: Reward 0.1765 138
+2023-12-10 19:01:05,360 - INFO - AGENT :: Decay Rate at 0.287
+2023-12-10 19:01:08,878 - INFO -  RAND :: 0.268 Selection: Assign milky-space-6f994b457d-wwn8b to kwok-std-node-7
+2023-12-10 19:01:14,860 - INFO - AGENT :: Reward 0.2122 139
+2023-12-10 19:01:14,861 - INFO - AGENT :: Decay Rate at 0.285
+2023-12-10 19:01:16,226 - INFO - AGENT :: Cluster Variance at 0.0498
+2023-12-10 19:01:19,905 - INFO -  RAND :: 0.1 Selection: Assign milky-space-6f994b457d-j4bnn to kwok-std-node-3
+2023-12-10 19:01:26,065 - INFO - AGENT :: Reward 0.2601 140
+2023-12-10 19:01:26,065 - INFO - AGENT :: Decay Rate at 0.282
+2023-12-10 19:01:26,095 - INFO - AGENT :: Updated the Policy Network. Loss: 0.3365
+2023-12-10 19:01:29,701 - INFO -  RAND :: 0.088 Selection: Assign milky-space-6f994b457d-gkj4g to kwok-std-node-1
+2023-12-10 19:01:35,685 - INFO - AGENT :: Reward 0.1924 141
+2023-12-10 19:01:35,686 - INFO - AGENT :: Decay Rate at 0.28
+2023-12-10 19:01:38,211 - INFO -   GNN :: 0.702 assign milky-space-6f994b457d-5spb9 to kwok-std-node-2
+2023-12-10 19:01:44,767 - INFO - AGENT :: Reward 0.2019 142
+2023-12-10 19:01:44,767 - INFO - AGENT :: Decay Rate at 0.277
+2023-12-10 19:01:45,257 - INFO - AGENT :: checking shutdown status
+2023-12-10 19:01:47,328 - INFO - AGENT :: Processing Deployment adaptive-sap with 5
+2023-12-10 19:01:51,151 - INFO -  RAND :: 0.031 Selection: Assign adaptive-sap-656d64b9d9-kdgl6 to kwok-std-node-1
+2023-12-10 19:01:57,391 - INFO - AGENT :: Reward 0.1844 143
+2023-12-10 19:01:57,392 - INFO - AGENT :: Decay Rate at 0.274
+2023-12-10 19:01:59,983 - INFO -   GNN :: 0.952 assign adaptive-sap-656d64b9d9-rq58c to kwok-std-node-4
+2023-12-10 19:02:06,352 - INFO - AGENT :: Reward 0.0846 144
+2023-12-10 19:02:06,353 - INFO - AGENT :: Decay Rate at 0.272
+2023-12-10 19:02:07,523 - INFO - AGENT :: Cluster Variance at 0.0509
+2023-12-10 19:02:10,113 - INFO -   GNN :: 0.308 assign adaptive-sap-656d64b9d9-xjhss to kwok-std-node-4
+2023-12-10 19:02:16,675 - INFO - AGENT :: Reward -0.6332 145
+2023-12-10 19:02:16,675 - INFO - AGENT :: Decay Rate at 0.27
+2023-12-10 19:02:19,197 - INFO -   GNN :: 0.294 assign adaptive-sap-656d64b9d9-dbbrj to kwok-std-node-4
+2023-12-10 19:02:25,763 - INFO - AGENT :: Reward -0.6274 146
+2023-12-10 19:02:25,763 - INFO - AGENT :: Decay Rate at 0.267
+2023-12-10 19:02:28,439 - INFO -   GNN :: 0.452 assign adaptive-sap-656d64b9d9-tk28b to kwok-std-node-4
+2023-12-10 19:02:35,065 - INFO - AGENT :: Reward -0.6217 147
+2023-12-10 19:02:35,066 - INFO - AGENT :: Decay Rate at 0.265
+2023-12-10 19:03:45,715 - INFO - AGENT :: Acknowledge Epoch Complete
+2023-12-10 19:04:00,731 - INFO - AGENT :: checking shutdown status
+2023-12-10 19:04:02,419 - INFO - AGENT :: Processing Deployment bitter-bed with 14
+2023-12-10 19:04:02,801 - INFO -   GNN :: 0.605 assign bitter-bed-56897db5f-52zhp to kwok-std-node-4
+2023-12-10 19:04:03,832 - INFO - AGENT :: Reward -1.0 148
+2023-12-10 19:04:03,835 - INFO - AGENT :: Decay Rate at 0.262
+2023-12-10 19:04:04,226 - INFO -   GNN :: 0.586 assign bitter-bed-56897db5f-2hlvc to kwok-std-node-1
+2023-12-10 19:04:05,236 - INFO - AGENT :: Reward 0.2749 149
+2023-12-10 19:04:05,237 - INFO - AGENT :: Decay Rate at 0.26
+2023-12-10 19:04:05,427 - INFO - AGENT :: Cluster Variance at 0.0
+2023-12-10 19:04:05,991 - INFO -   GNN :: 0.449 assign bitter-bed-56897db5f-4n2gb to kwok-std-node-4
+2023-12-10 19:04:07,159 - INFO - AGENT :: Reward 0.1255 150
+2023-12-10 19:04:07,160 - INFO - AGENT :: Decay Rate at 0.258
+2023-12-10 19:04:07,611 - INFO -   GNN :: 0.469 assign bitter-bed-56897db5f-ccjhb to kwok-std-node-1
+2023-12-10 19:04:08,694 - INFO - AGENT :: Reward 0.2622 151
+2023-12-10 19:04:08,695 - INFO - AGENT :: Decay Rate at 0.255
+2023-12-10 19:04:09,129 - INFO -   GNN :: 0.584 assign bitter-bed-56897db5f-26sfh to kwok-std-node-4
+2023-12-10 19:04:10,382 - INFO - AGENT :: Reward 0.123 152
+2023-12-10 19:04:10,383 - INFO - AGENT :: Decay Rate at 0.253
+2023-12-10 19:04:10,824 - INFO -   GNN :: 0.308 assign bitter-bed-56897db5f-jn4zv to kwok-std-node-4
+2023-12-10 19:04:11,979 - INFO - AGENT :: Reward -0.9696 153
+2023-12-10 19:04:11,980 - INFO - AGENT :: Decay Rate at 0.251
+2023-12-10 19:04:12,436 - INFO -   GNN :: 0.827 assign bitter-bed-56897db5f-cg2z2 to kwok-std-node-4
+2023-12-10 19:04:13,812 - INFO - AGENT :: Reward -0.9622 154
+2023-12-10 19:04:13,812 - INFO - AGENT :: Decay Rate at 0.249
+2023-12-10 19:04:14,060 - INFO - AGENT :: Cluster Variance at 0.0006
+2023-12-10 19:04:14,530 - INFO -   GNN :: 0.262 assign bitter-bed-56897db5f-hhg64 to kwok-std-node-4
+2023-12-10 19:04:15,830 - INFO - AGENT :: Reward -0.9544 155
+2023-12-10 19:04:15,831 - INFO - AGENT :: Decay Rate at 0.246
+2023-12-10 19:04:16,337 - INFO -   GNN :: 0.887 assign bitter-bed-56897db5f-bl8p8 to kwok-std-node-4
+2023-12-10 19:04:17,844 - INFO - AGENT :: Reward -0.9464 156
+2023-12-10 19:04:17,845 - INFO - AGENT :: Decay Rate at 0.244
+2023-12-10 19:04:18,381 - INFO -   GNN :: 0.55 assign bitter-bed-56897db5f-wffv8 to kwok-std-node-2
+2023-12-10 19:04:19,820 - INFO - AGENT :: Reward 0.2829 157
+2023-12-10 19:04:19,821 - INFO - AGENT :: Decay Rate at 0.242
+2023-12-10 19:04:20,607 - INFO -  RAND :: 0.192 Selection: Assign bitter-bed-56897db5f-pxdkg to kwok-std-node-8
+2023-12-10 19:04:22,006 - INFO - AGENT :: Reward 0.3833 158
+2023-12-10 19:04:22,007 - INFO - AGENT :: Decay Rate at 0.24
+2023-12-10 19:04:22,803 - INFO -  RAND :: 0.144 Selection: Assign bitter-bed-56897db5f-wkrkk to kwok-std-node-9
+2023-12-10 19:04:24,132 - INFO - AGENT :: Reward 0.3131 159
+2023-12-10 19:04:24,132 - INFO - AGENT :: Decay Rate at 0.238
+2023-12-10 19:04:24,411 - INFO - AGENT :: Cluster Variance at 0.001
+2023-12-10 19:04:25,263 - INFO -  RAND :: 0.146 Selection: Assign bitter-bed-56897db5f-r58mj to kwok-std-node-3
+2023-12-10 19:04:26,767 - INFO - AGENT :: Reward 0.3553 160
+2023-12-10 19:04:26,767 - INFO - AGENT :: Decay Rate at 0.235
+2023-12-10 19:04:26,799 - INFO - AGENT :: Updated the Policy Network. Loss: 0.33228
+2023-12-10 19:04:26,801 - INFO - AGENT :: *** Updating the target Network
+2023-12-10 19:04:27,693 - INFO -  RAND :: 0.091 Selection: Assign bitter-bed-56897db5f-94cxs to kwok-std-node-4
+2023-12-10 19:04:29,294 - INFO - AGENT :: Reward 0.1141 161
+2023-12-10 19:04:29,295 - INFO - AGENT :: Decay Rate at 0.233
+2023-12-10 19:04:42,688 - INFO - AGENT :: Processing Deployment clean-buck with 5
+2023-12-10 19:04:43,607 - INFO -  RAND :: 0.192 Selection: Assign clean-buck-65c5655c58-cn852 to kwok-std-node-4
+2023-12-10 19:04:45,016 - INFO - AGENT :: Reward -0.933 162
+2023-12-10 19:04:45,016 - INFO - AGENT :: Decay Rate at 0.231
+2023-12-10 19:04:45,596 - INFO -   GNN :: 0.498 assign clean-buck-65c5655c58-vnxfc to kwok-std-node-4
+2023-12-10 19:04:47,250 - INFO - AGENT :: Reward -0.9249 163
+2023-12-10 19:04:47,251 - INFO - AGENT :: Decay Rate at 0.229
+2023-12-10 19:04:47,840 - INFO -   GNN :: 0.946 assign clean-buck-65c5655c58-hrzsd to kwok-std-node-4
+2023-12-10 19:04:49,456 - INFO - AGENT :: Reward -0.9169 164
+2023-12-10 19:04:49,456 - INFO - AGENT :: Decay Rate at 0.227
+2023-12-10 19:04:49,843 - INFO - AGENT :: Cluster Variance at 0.0024
+2023-12-10 19:04:50,451 - INFO -   GNN :: 0.629 assign clean-buck-65c5655c58-t6tb7 to kwok-std-node-4
+2023-12-10 19:04:52,286 - INFO - AGENT :: Reward -0.9088 165
+2023-12-10 19:04:52,287 - INFO - AGENT :: Decay Rate at 0.225
+2023-12-10 19:04:53,034 - INFO -   GNN :: 0.442 assign clean-buck-65c5655c58-hv8z5 to kwok-std-node-4
+2023-12-10 19:04:54,622 - INFO - AGENT :: Reward -0.9009 166
+2023-12-10 19:04:54,622 - INFO - AGENT :: Decay Rate at 0.223
+2023-12-10 19:05:23,055 - INFO - AGENT :: Processing Deployment nice-batch with 6
+2023-12-10 19:05:24,053 - INFO -  RAND :: 0.13 Selection: Assign nice-batch-9ffc89b55-xts5t to kwok-std-node-0
+2023-12-10 19:05:25,655 - INFO - AGENT :: Reward 0.2386 167
+2023-12-10 19:05:25,655 - INFO - AGENT :: Decay Rate at 0.221
+2023-12-10 19:05:26,268 - INFO -   GNN :: 0.94 assign nice-batch-9ffc89b55-c2hwn to kwok-std-node-2
+2023-12-10 19:05:27,931 - INFO - AGENT :: Reward 0.258 168
+2023-12-10 19:05:27,932 - INFO - AGENT :: Decay Rate at 0.219
+2023-12-10 19:05:28,541 - INFO -   GNN :: 0.572 assign nice-batch-9ffc89b55-qr9zn to kwok-std-node-4
+2023-12-10 19:05:30,456 - INFO - AGENT :: Reward 0.1039 169
+2023-12-10 19:05:30,457 - INFO - AGENT :: Decay Rate at 0.217
+2023-12-10 19:05:30,783 - INFO - AGENT :: Cluster Variance at 0.0039
+2023-12-10 19:05:31,404 - INFO -   GNN :: 0.756 assign nice-batch-9ffc89b55-nmq52 to kwok-std-node-1
+2023-12-10 19:05:33,163 - INFO - AGENT :: Reward 0.2288 170
+2023-12-10 19:05:33,164 - INFO - AGENT :: Decay Rate at 0.215
+2023-12-10 19:05:33,840 - INFO -   GNN :: 0.717 assign nice-batch-9ffc89b55-n7wwb to kwok-std-node-4
+2023-12-10 19:05:35,601 - INFO - AGENT :: Reward 0.1023 171
+2023-12-10 19:05:35,601 - INFO - AGENT :: Decay Rate at 0.213
+2023-12-10 19:05:36,378 - INFO -   GNN :: 0.265 assign nice-batch-9ffc89b55-9cq8s to kwok-std-node-4
+2023-12-10 19:05:38,111 - INFO - AGENT :: Reward -0.8781 172
+2023-12-10 19:05:38,112 - INFO - AGENT :: Decay Rate at 0.211
+2023-12-10 19:06:00,819 - INFO - AGENT :: checking shutdown status
+2023-12-10 19:06:03,501 - INFO - AGENT :: Processing Deployment corporate-magnitude with 7
+2023-12-10 19:06:04,265 - INFO -   GNN :: 0.461 assign corporate-magnitude-7f889888c7-qn9dh to kwok-std-node-1
+2023-12-10 19:06:06,156 - INFO - AGENT :: Reward 0.2176 173
+2023-12-10 19:06:06,156 - INFO - AGENT :: Decay Rate at 0.209
+2023-12-10 19:06:06,845 - INFO -   GNN :: 0.868 assign corporate-magnitude-7f889888c7-twh5h to kwok-std-node-4
+2023-12-10 19:06:08,712 - INFO - AGENT :: Reward 0.0991 174
+2023-12-10 19:06:08,713 - INFO - AGENT :: Decay Rate at 0.207
+2023-12-10 19:06:09,056 - INFO - AGENT :: Cluster Variance at 0.0059
+2023-12-10 19:06:09,914 - INFO -   GNN :: 0.482 assign corporate-magnitude-7f889888c7-f5hcl to kwok-std-node-4
+2023-12-10 19:06:11,831 - INFO - AGENT :: Reward -0.8622 175
+2023-12-10 19:06:11,832 - INFO - AGENT :: Decay Rate at 0.206
+2023-12-10 19:06:12,531 - INFO -   GNN :: 0.994 assign corporate-magnitude-7f889888c7-qtpwl to kwok-std-node-4
+2023-12-10 19:06:14,628 - INFO - AGENT :: Reward -0.8547 176
+2023-12-10 19:06:14,629 - INFO - AGENT :: Decay Rate at 0.204
+2023-12-10 19:06:15,385 - INFO -   GNN :: 0.666 assign corporate-magnitude-7f889888c7-dd4k8 to kwok-std-node-4
+2023-12-10 19:06:17,490 - INFO - AGENT :: Reward -0.8471 177
+2023-12-10 19:06:17,491 - INFO - AGENT :: Decay Rate at 0.202
+2023-12-10 19:06:18,255 - INFO -   GNN :: 0.358 assign corporate-magnitude-7f889888c7-gdb2g to kwok-std-node-1
+2023-12-10 19:06:20,269 - INFO - AGENT :: Reward 0.2037 178
+2023-12-10 19:06:20,269 - INFO - AGENT :: Decay Rate at 0.2
+2023-12-10 19:06:21,120 - INFO -   GNN :: 0.414 assign corporate-magnitude-7f889888c7-x2gdk to kwok-std-node-4
+2023-12-10 19:06:23,173 - INFO - AGENT :: Reward 0.0932 179
+2023-12-10 19:06:23,174 - INFO - AGENT :: Decay Rate at 0.198
+2023-12-10 19:06:23,595 - INFO - AGENT :: Cluster Variance at 0.0091
+2023-12-10 19:06:43,996 - INFO - AGENT :: Processing Deployment aged-space with 7
+2023-12-10 19:06:44,769 - INFO -   GNN :: 0.713 assign aged-space-56776968c4-c4th5 to kwok-std-node-4
+2023-12-10 19:06:46,940 - INFO - AGENT :: Reward -0.8316 180
+2023-12-10 19:06:46,940 - INFO - AGENT :: Decay Rate at 0.196
+2023-12-10 19:06:46,971 - INFO - AGENT :: Updated the Policy Network. Loss: 0.2886
+2023-12-10 19:06:47,777 - INFO -   GNN :: 0.26 assign aged-space-56776968c4-srxmx to kwok-std-node-4
+2023-12-10 19:06:49,942 - INFO - AGENT :: Reward -0.8243 181
+2023-12-10 19:06:49,943 - INFO - AGENT :: Decay Rate at 0.195
+2023-12-10 19:06:50,814 - INFO -   GNN :: 0.641 assign aged-space-56776968c4-clrbv to kwok-std-node-1
+2023-12-10 19:06:53,013 - INFO - AGENT :: Reward 0.1926 182
+2023-12-10 19:06:53,014 - INFO - AGENT :: Decay Rate at 0.193
+2023-12-10 19:06:54,002 - INFO -   GNN :: 0.602 assign aged-space-56776968c4-pdkfc to kwok-std-node-1
+2023-12-10 19:06:56,225 - INFO - AGENT :: Reward -0.8161 183
+2023-12-10 19:06:56,226 - INFO - AGENT :: Decay Rate at 0.191
+2023-12-10 19:06:57,114 - INFO -   GNN :: 0.644 assign aged-space-56776968c4-msd4r to kwok-std-node-1
+2023-12-10 19:06:59,398 - INFO - AGENT :: Reward -0.815 184
+2023-12-10 19:06:59,399 - INFO - AGENT :: Decay Rate at 0.189
+2023-12-10 19:06:59,829 - INFO - AGENT :: Cluster Variance at 0.0113
+2023-12-10 19:07:00,885 - INFO -   GNN :: 0.516 assign aged-space-56776968c4-khwcb to kwok-std-node-4
+2023-12-10 19:07:03,068 - INFO - AGENT :: Reward 0.0888 185
+2023-12-10 19:07:03,068 - INFO - AGENT :: Decay Rate at 0.188
+2023-12-10 19:07:04,127 - INFO -   GNN :: 0.516 assign aged-space-56776968c4-gbqc6 to kwok-std-node-4
+2023-12-10 19:07:06,508 - INFO - AGENT :: Reward -0.8065 186
+2023-12-10 19:07:06,509 - INFO - AGENT :: Decay Rate at 0.186
+2023-12-10 19:07:24,532 - INFO - AGENT :: Processing Deployment acidic-condominium with 10
+2023-12-10 19:07:25,435 - INFO -   GNN :: 0.187 assign acidic-condominium-5c849ff59f-nmjl6 to kwok-std-node-1
+2023-12-10 19:07:27,816 - INFO - AGENT :: Reward 0.1745 187
+2023-12-10 19:07:27,816 - INFO - AGENT :: Decay Rate at 0.184
+2023-12-10 19:07:29,160 - INFO -  RAND :: 0.007 Selection: Assign acidic-condominium-5c849ff59f-jn8nb to kwok-std-node-1
+2023-12-10 19:07:31,581 - INFO - AGENT :: Reward -0.798 188
+2023-12-10 19:07:31,581 - INFO - AGENT :: Decay Rate at 0.183
+2023-12-10 19:07:32,607 - INFO -   GNN :: 0.567 assign acidic-condominium-5c849ff59f-xt8vd to kwok-std-node-4
+2023-12-10 19:07:35,106 - INFO - AGENT :: Reward 0.0859 189
+2023-12-10 19:07:35,107 - INFO - AGENT :: Decay Rate at 0.181
+2023-12-10 19:07:35,574 - INFO - AGENT :: Cluster Variance at 0.0148
+2023-12-10 19:07:36,486 - INFO -   GNN :: 0.379 assign acidic-condominium-5c849ff59f-r7w4m to kwok-std-node-4
+2023-12-10 19:07:38,988 - INFO - AGENT :: Reward -0.7895 190
+2023-12-10 19:07:38,989 - INFO - AGENT :: Decay Rate at 0.179
+2023-12-10 19:07:40,042 - INFO -   GNN :: 0.717 assign acidic-condominium-5c849ff59f-mp5vn to kwok-std-node-4
+2023-12-10 19:07:42,604 - INFO - AGENT :: Reward -0.7828 191
+2023-12-10 19:07:42,605 - INFO - AGENT :: Decay Rate at 0.178
+2023-12-10 19:07:43,549 - INFO -   GNN :: 0.936 assign acidic-condominium-5c849ff59f-pzxfv to kwok-std-node-4
+2023-12-10 19:07:46,167 - INFO - AGENT :: Reward -0.7761 192
+2023-12-10 19:07:46,168 - INFO - AGENT :: Decay Rate at 0.176
+2023-12-10 19:07:47,789 - INFO -  RAND :: 0.168 Selection: Assign acidic-condominium-5c849ff59f-2fsd9 to kwok-std-node-1
+2023-12-10 19:07:50,343 - INFO - AGENT :: Reward 0.1604 193
+2023-12-10 19:07:50,343 - INFO - AGENT :: Decay Rate at 0.175
+2023-12-10 19:07:51,352 - INFO -   GNN :: 0.424 assign acidic-condominium-5c849ff59f-xv2gc to kwok-std-node-4
+2023-12-10 19:07:54,061 - INFO - AGENT :: Reward 0.0809 194
+2023-12-10 19:07:54,061 - INFO - AGENT :: Decay Rate at 0.173
+2023-12-10 19:07:54,592 - INFO - AGENT :: Cluster Variance at 0.0197
+2023-12-10 19:07:55,569 - INFO -   GNN :: 0.578 assign acidic-condominium-5c849ff59f-sccct to kwok-std-node-4
+2023-12-10 19:07:58,209 - INFO - AGENT :: Reward -0.7612 195
+2023-12-10 19:07:58,210 - INFO - AGENT :: Decay Rate at 0.172
+2023-12-10 19:07:59,315 - INFO -   GNN :: 0.82 assign acidic-condominium-5c849ff59f-pdx7k to kwok-std-node-2
+2023-12-10 19:08:02,021 - INFO - AGENT :: Reward 0.2093 196
+2023-12-10 19:08:02,022 - INFO - AGENT :: Decay Rate at 0.17
+2023-12-10 19:08:02,223 - INFO - AGENT :: checking shutdown status
+2023-12-10 19:08:05,138 - INFO - AGENT :: Processing Deployment resolving-door with 10
+2023-12-10 19:08:06,313 - INFO -   GNN :: 0.985 assign resolving-door-55669854dd-gpmkk to kwok-std-node-1
+2023-12-10 19:08:09,057 - INFO - AGENT :: Reward 0.1541 197
+2023-12-10 19:08:09,058 - INFO - AGENT :: Decay Rate at 0.168
+2023-12-10 19:08:10,192 - INFO -   GNN :: 0.207 assign resolving-door-55669854dd-5wvnn to kwok-std-node-1
+2023-12-10 19:08:13,004 - INFO - AGENT :: Reward -0.7534 198
+2023-12-10 19:08:13,005 - INFO - AGENT :: Decay Rate at 0.167
+2023-12-10 19:08:14,030 - INFO -   GNN :: 0.831 assign resolving-door-55669854dd-xrxpq to kwok-std-node-4
+2023-12-10 19:08:16,959 - INFO - AGENT :: Reward 0.0784 199
+2023-12-10 19:08:16,959 - INFO - AGENT :: Decay Rate at 0.165
+2023-12-10 19:08:17,489 - INFO - AGENT :: Cluster Variance at 0.0228
+2023-12-10 19:08:18,594 - INFO -   GNN :: 0.445 assign resolving-door-55669854dd-gqc6x to kwok-std-node-4
+2023-12-10 19:08:21,508 - INFO - AGENT :: Reward -0.7452 200
+2023-12-10 19:08:21,509 - INFO - AGENT :: Decay Rate at 0.164
+2023-12-10 19:08:21,542 - INFO - AGENT :: Updated the Policy Network. Loss: 0.28809
+2023-12-10 19:08:21,543 - INFO - AGENT :: *** Updating the target Network
+2023-12-10 19:08:22,632 - INFO -   GNN :: 0.24 assign resolving-door-55669854dd-g6rsm to kwok-std-node-4
+2023-12-10 19:08:25,507 - INFO - AGENT :: Reward -0.7389 201
+2023-12-10 19:08:25,508 - INFO - AGENT :: Decay Rate at 0.162
+2023-12-10 19:08:26,695 - INFO -   GNN :: 0.607 assign resolving-door-55669854dd-7lmdj to kwok-std-node-1
+2023-12-10 19:08:29,640 - INFO - AGENT :: Reward 0.1437 202
+2023-12-10 19:08:29,640 - INFO - AGENT :: Decay Rate at 0.161
+2023-12-10 19:08:30,795 - INFO -   GNN :: 0.973 assign resolving-door-55669854dd-wmz6x to kwok-std-node-4
+2023-12-10 19:08:33,775 - INFO - AGENT :: Reward 0.075 203
+2023-12-10 19:08:33,776 - INFO - AGENT :: Decay Rate at 0.16
+2023-12-10 19:08:34,965 - INFO -   GNN :: 0.372 assign resolving-door-55669854dd-jcj5z to kwok-std-node-4
+2023-12-10 19:08:37,943 - INFO - AGENT :: Reward -0.7246 204
+2023-12-10 19:08:37,943 - INFO - AGENT :: Decay Rate at 0.158
+2023-12-10 19:08:38,483 - INFO - AGENT :: Cluster Variance at 0.0288
+2023-12-10 19:08:39,764 - INFO -   GNN :: 0.97 assign resolving-door-55669854dd-wgw56 to kwok-std-node-4
+2023-12-10 19:08:42,722 - INFO - AGENT :: Reward -0.7184 205
+2023-12-10 19:08:42,722 - INFO - AGENT :: Decay Rate at 0.157
+2023-12-10 19:08:43,969 - INFO -   GNN :: 0.223 assign resolving-door-55669854dd-b24x9 to kwok-std-node-4
+2023-12-10 19:08:47,145 - INFO - AGENT :: Reward -0.7123 206
+2023-12-10 19:08:47,145 - INFO - AGENT :: Decay Rate at 0.155
+2023-12-10 19:08:47,203 - INFO - AGENT :: Processing Deployment active-event with 6
+2023-12-10 19:08:48,327 - INFO -   GNN :: 0.259 assign active-event-5dff766c54-q956f to kwok-std-node-4
+2023-12-10 19:08:51,500 - INFO - AGENT :: Reward -0.7061 207
+2023-12-10 19:08:51,501 - INFO - AGENT :: Decay Rate at 0.154
+2023-12-10 19:08:52,727 - INFO -   GNN :: 0.173 assign active-event-5dff766c54-9b8z8 to kwok-std-node-4
+2023-12-10 19:08:55,857 - INFO - AGENT :: Reward -0.7 208
+2023-12-10 19:08:55,858 - INFO - AGENT :: Decay Rate at 0.153
+2023-12-10 19:08:57,195 - INFO -   GNN :: 0.254 assign active-event-5dff766c54-mgrfz to kwok-std-node-1
+2023-12-10 19:09:00,456 - INFO - AGENT :: Reward 0.1335 209
+2023-12-10 19:09:00,457 - INFO - AGENT :: Decay Rate at 0.151
+2023-12-10 19:09:01,064 - INFO - AGENT :: Cluster Variance at 0.0355
+2023-12-10 19:09:02,371 - INFO -   GNN :: 0.304 assign active-event-5dff766c54-z8qc7 to kwok-std-node-1
+2023-12-10 19:09:05,544 - INFO - AGENT :: Reward -0.6924 210
+2023-12-10 19:09:05,545 - INFO - AGENT :: Decay Rate at 0.15
+2023-12-10 19:09:06,841 - INFO -   GNN :: 0.63 assign active-event-5dff766c54-495qp to kwok-std-node-2
+2023-12-10 19:09:10,160 - INFO - AGENT :: Reward 0.1846 211
+2023-12-10 19:09:10,160 - INFO - AGENT :: Decay Rate at 0.148
+2023-12-10 19:09:11,444 - INFO -   GNN :: 0.667 assign active-event-5dff766c54-ghg65 to kwok-std-node-4
+2023-12-10 19:09:14,781 - INFO - AGENT :: Reward 0.0688 212
+2023-12-10 19:09:14,782 - INFO - AGENT :: Decay Rate at 0.147
+2023-12-10 19:09:26,701 - INFO - AGENT :: Processing Deployment glum-class with 5
+2023-12-10 19:09:28,657 - INFO -  RAND :: 0.031 Selection: Assign glum-class-7bb857f84b-wrlc4 to kwok-std-node-3
+2023-12-10 19:09:31,941 - INFO - AGENT :: Reward 0.2422 213
+2023-12-10 19:09:31,942 - INFO - AGENT :: Decay Rate at 0.146
+2023-12-10 19:09:33,406 - INFO -   GNN :: 0.722 assign glum-class-7bb857f84b-ztcj6 to kwok-std-node-4
+2023-12-10 19:09:36,849 - INFO - AGENT :: Reward 0.0679 214
+2023-12-10 19:09:36,849 - INFO - AGENT :: Decay Rate at 0.144
+2023-12-10 19:09:37,598 - INFO - AGENT :: Cluster Variance at 0.0389
+2023-12-10 19:09:38,833 - INFO -   GNN :: 0.728 assign glum-class-7bb857f84b-k7d7h to kwok-std-node-4
+2023-12-10 19:09:42,269 - INFO - AGENT :: Reward -0.68 215
+2023-12-10 19:09:42,269 - INFO - AGENT :: Decay Rate at 0.143
+2023-12-10 19:09:43,663 - INFO -   GNN :: 0.535 assign glum-class-7bb857f84b-257t8 to kwok-std-node-4
+2023-12-10 19:09:47,181 - INFO - AGENT :: Reward -0.6741 216
+2023-12-10 19:09:47,182 - INFO - AGENT :: Decay Rate at 0.142
+2023-12-10 19:09:49,220 - INFO -  RAND :: 0.123 Selection: Assign glum-class-7bb857f84b-q8hzn to kwok-std-node-1
+2023-12-10 19:09:52,764 - INFO - AGENT :: Reward 0.1241 217
+2023-12-10 19:09:52,765 - INFO - AGENT :: Decay Rate at 0.141
+2023-12-10 19:10:02,437 - INFO - AGENT :: checking shutdown status
+2023-12-10 19:10:07,470 - INFO - AGENT :: Processing Deployment descriptive-wattage with 7
+2023-12-10 19:10:08,923 - INFO -   GNN :: 0.297 assign descriptive-wattage-87d466786-xnkrs to kwok-std-node-1
+2023-12-10 19:10:12,426 - INFO - AGENT :: Reward -0.6666 218
+2023-12-10 19:10:12,427 - INFO - AGENT :: Decay Rate at 0.139
+2023-12-10 19:10:13,840 - INFO -   GNN :: 0.566 assign descriptive-wattage-87d466786-zr8sr to kwok-std-node-4
+2023-12-10 19:10:17,458 - INFO - AGENT :: Reward 0.0649 219
+2023-12-10 19:10:17,459 - INFO - AGENT :: Decay Rate at 0.138
+2023-12-10 19:10:18,116 - INFO - AGENT :: Cluster Variance at 0.0453
+2023-12-10 19:10:19,556 - INFO -   GNN :: 0.751 assign descriptive-wattage-87d466786-cr2qx to kwok-std-node-4
+2023-12-10 19:10:23,163 - INFO - AGENT :: Reward -0.6592 220
+2023-12-10 19:10:23,163 - INFO - AGENT :: Decay Rate at 0.137
+2023-12-10 19:10:23,195 - INFO - AGENT :: Updated the Policy Network. Loss: 0.56743
+2023-12-10 19:10:24,653 - INFO -   GNN :: 0.851 assign descriptive-wattage-87d466786-fh524 to kwok-std-node-4
+2023-12-10 19:10:28,285 - INFO - AGENT :: Reward -0.6535 221
+2023-12-10 19:10:28,285 - INFO - AGENT :: Decay Rate at 0.136
+2023-12-10 19:10:29,739 - INFO -   GNN :: 0.922 assign descriptive-wattage-87d466786-9wtzn to kwok-std-node-4
+2023-12-10 19:10:33,432 - INFO - AGENT :: Reward -0.6478 222
+2023-12-10 19:10:33,433 - INFO - AGENT :: Decay Rate at 0.134
+2023-12-10 19:10:34,946 - INFO -   GNN :: 0.553 assign descriptive-wattage-87d466786-2pv58 to kwok-std-node-4
+2023-12-10 19:10:38,630 - INFO - AGENT :: Reward -0.6421 223
+2023-12-10 19:10:38,631 - INFO - AGENT :: Decay Rate at 0.133
+2023-12-10 19:10:40,110 - INFO -   GNN :: 0.756 assign descriptive-wattage-87d466786-2phpf to kwok-std-node-2
+2023-12-10 19:10:43,832 - INFO - AGENT :: Reward 0.1643 224
+2023-12-10 19:10:43,832 - INFO - AGENT :: Decay Rate at 0.132
+2023-12-10 19:10:44,533 - INFO - AGENT :: Cluster Variance at 0.0528
+2023-12-10 19:10:48,308 - INFO - AGENT :: Processing Deployment augmenting-formation with 6
+2023-12-10 19:10:49,815 - INFO -   GNN :: 0.99 assign augmenting-formation-677b78bccf-tx54m to kwok-std-node-6
+2023-12-10 19:10:53,553 - INFO - AGENT :: Reward 0.1702 225
+2023-12-10 19:10:53,553 - INFO - AGENT :: Decay Rate at 0.131
+2023-12-10 19:10:55,076 - INFO -   GNN :: 0.515 assign augmenting-formation-677b78bccf-8p664 to kwok-std-node-4
+2023-12-10 19:10:58,926 - INFO - AGENT :: Reward 0.0608 226
+2023-12-10 19:10:58,927 - INFO - AGENT :: Decay Rate at 0.13
+2023-12-10 19:11:00,438 - INFO -   GNN :: 0.82 assign augmenting-formation-677b78bccf-xhwlk to kwok-std-node-1
+2023-12-10 19:11:04,304 - INFO - AGENT :: Reward 0.1135 227
+2023-12-10 19:11:04,304 - INFO - AGENT :: Decay Rate at 0.128
+2023-12-10 19:11:05,827 - INFO -   GNN :: 0.549 assign augmenting-formation-677b78bccf-4x594 to kwok-std-node-6
+2023-12-10 19:11:09,701 - INFO - AGENT :: Reward 0.1628 228
+2023-12-10 19:11:09,702 - INFO - AGENT :: Decay Rate at 0.127
+2023-12-10 19:11:11,285 - INFO -   GNN :: 0.237 assign augmenting-formation-677b78bccf-dpqwb to kwok-std-node-1
+2023-12-10 19:11:15,325 - INFO - AGENT :: Reward 0.1116 229
+2023-12-10 19:11:15,325 - INFO - AGENT :: Decay Rate at 0.126
+2023-12-10 19:11:16,044 - INFO - AGENT :: Cluster Variance at 0.0553
+2023-12-10 19:11:17,654 - INFO -   GNN :: 0.594 assign augmenting-formation-677b78bccf-97j8z to kwok-std-node-4
+2023-12-10 19:11:21,584 - INFO - AGENT :: Reward 0.0598 230
+2023-12-10 19:11:21,584 - INFO - AGENT :: Decay Rate at 0.125
+2023-12-10 19:11:29,188 - INFO - AGENT :: Processing Deployment refined-queso with 15
+2023-12-10 19:11:30,868 - INFO -   GNN :: 0.719 assign refined-queso-658dfbdb4c-stkl2 to kwok-std-node-4
+2023-12-10 19:11:34,859 - INFO - AGENT :: Reward -0.6243 231
+2023-12-10 19:11:34,860 - INFO - AGENT :: Decay Rate at 0.124
+2023-12-10 19:11:37,289 - INFO -  RAND :: 0.027 Selection: Assign refined-queso-658dfbdb4c-8ppfp to kwok-std-node-0
+2023-12-10 19:11:41,408 - INFO - AGENT :: Reward 0.1598 232
+2023-12-10 19:11:41,409 - INFO - AGENT :: Decay Rate at 0.123
+2023-12-10 19:11:43,778 - INFO -  RAND :: 0.027 Selection: Assign refined-queso-658dfbdb4c-n7kpg to kwok-std-node-8
+2023-12-10 19:11:47,957 - INFO - AGENT :: Reward 0.2342 233
+2023-12-10 19:11:47,958 - INFO - AGENT :: Decay Rate at 0.122
+2023-12-10 19:11:49,566 - INFO -   GNN :: 0.87 assign refined-queso-658dfbdb4c-d2wdh to kwok-std-node-4
+2023-12-10 19:11:53,729 - INFO - AGENT :: Reward 0.0584 234
+2023-12-10 19:11:53,729 - INFO - AGENT :: Decay Rate at 0.121
+2023-12-10 19:11:54,592 - INFO - AGENT :: Cluster Variance at 0.0609
+2023-12-10 19:11:56,236 - INFO -   GNN :: 0.868 assign refined-queso-658dfbdb4c-5gbqj to kwok-std-node-4
+2023-12-10 19:12:00,456 - INFO - AGENT :: Reward -0.6149 235
+2023-12-10 19:12:00,456 - INFO - AGENT :: Decay Rate at 0.119
+2023-12-10 19:12:02,848 - INFO -  RAND :: 0.112 Selection: Assign refined-queso-658dfbdb4c-6jwd7 to kwok-std-node-7
+2023-12-10 19:12:07,178 - INFO - AGENT :: Reward 0.1927 236
+2023-12-10 19:12:07,179 - INFO - AGENT :: Decay Rate at 0.118
+2023-12-10 19:12:08,829 - INFO -   GNN :: 0.236 assign refined-queso-658dfbdb4c-r92zl to kwok-std-node-4
+2023-12-10 19:12:13,008 - INFO - AGENT :: Reward 0.0569 237
+2023-12-10 19:12:13,009 - INFO - AGENT :: Decay Rate at 0.117
+2023-12-10 19:12:14,699 - INFO -   GNN :: 0.623 assign refined-queso-658dfbdb4c-8brtl to kwok-std-node-6
+2023-12-10 19:12:19,033 - INFO - AGENT :: Reward 0.1512 238
+2023-12-10 19:12:19,034 - INFO - AGENT :: Decay Rate at 0.116
+2023-12-10 19:12:20,702 - INFO -   GNN :: 0.882 assign refined-queso-658dfbdb4c-zft9v to kwok-std-node-6
+2023-12-10 19:12:25,129 - INFO - AGENT :: Reward -0.6055 239
+2023-12-10 19:12:25,130 - INFO - AGENT :: Decay Rate at 0.115
+2023-12-10 19:12:25,940 - INFO - AGENT :: Cluster Variance at 0.0643
+2023-12-10 19:12:27,673 - INFO -   GNN :: 0.572 assign refined-queso-658dfbdb4c-z6znq to kwok-std-node-6
+2023-12-10 19:12:32,053 - INFO - AGENT :: Reward -0.6061 240
+2023-12-10 19:12:32,053 - INFO - AGENT :: Decay Rate at 0.114
+2023-12-10 19:12:32,083 - INFO - AGENT :: Updated the Policy Network. Loss: 0.56515
+2023-12-10 19:12:32,084 - INFO - AGENT :: *** Updating the target Network
+2023-12-10 19:12:33,851 - INFO -   GNN :: 0.575 assign refined-queso-658dfbdb4c-72kmq to kwok-std-node-4
+2023-12-10 19:12:38,217 - INFO - AGENT :: Reward 0.0563 241
+2023-12-10 19:12:38,217 - INFO - AGENT :: Decay Rate at 0.113
+2023-12-10 19:12:39,953 - INFO -   GNN :: 0.561 assign refined-queso-658dfbdb4c-zmhxp to kwok-std-node-1
+2023-12-10 19:12:44,465 - INFO - AGENT :: Reward 0.1046 242
+2023-12-10 19:12:44,465 - INFO - AGENT :: Decay Rate at 0.112
+2023-12-10 19:12:46,233 - INFO -   GNN :: 0.404 assign refined-queso-658dfbdb4c-q4kfq to kwok-std-node-4
+2023-12-10 19:12:50,634 - INFO - AGENT :: Reward 0.0554 243
+2023-12-10 19:12:50,634 - INFO - AGENT :: Decay Rate at 0.111
+2023-12-10 19:12:53,294 - INFO -  RAND :: 0.056 Selection: Assign refined-queso-658dfbdb4c-gmch9 to kwok-std-node-8
+2023-12-10 19:12:57,825 - INFO - AGENT :: Reward 0.2101 244
+2023-12-10 19:12:57,825 - INFO - AGENT :: Decay Rate at 0.11
+2023-12-10 19:12:58,655 - INFO - AGENT :: Cluster Variance at 0.0688
+2023-12-10 19:13:00,389 - INFO -   GNN :: 0.599 assign refined-queso-658dfbdb4c-hl9lc to kwok-std-node-4
+2023-12-10 19:13:05,034 - INFO - AGENT :: Reward 0.0548 245
+2023-12-10 19:13:05,035 - INFO - AGENT :: Decay Rate at 0.109
+2023-12-10 19:13:05,355 - INFO - AGENT :: checking shutdown status
+2023-12-10 19:13:30,809 - INFO - AGENT :: Processing Deployment frosty-grapnel with 7
+2023-12-10 19:13:32,630 - INFO -   GNN :: 0.624 assign frosty-grapnel-7ff8ffdd55-fthwv to kwok-std-node-6
+2023-12-10 19:13:37,227 - INFO - AGENT :: Reward 0.1353 246
+2023-12-10 19:13:37,228 - INFO - AGENT :: Decay Rate at 0.108
+2023-12-10 19:13:39,018 - INFO -   GNN :: 0.698 assign frosty-grapnel-7ff8ffdd55-r5fw6 to kwok-std-node-4
+2023-12-10 19:13:43,653 - INFO - AGENT :: Reward 0.0541 247
+2023-12-10 19:13:43,654 - INFO - AGENT :: Decay Rate at 0.107
+2023-12-10 19:13:45,463 - INFO -   GNN :: 0.925 assign frosty-grapnel-7ff8ffdd55-kns99 to kwok-std-node-4
+2023-12-10 19:13:50,183 - INFO - AGENT :: Reward -0.5848 248
+2023-12-10 19:13:50,184 - INFO - AGENT :: Decay Rate at 0.106
+2023-12-10 19:13:52,019 - INFO -   GNN :: 0.4 assign frosty-grapnel-7ff8ffdd55-kc6fx to kwok-std-node-1
+2023-12-10 19:13:56,621 - INFO - AGENT :: Reward 0.0994 249
+2023-12-10 19:13:56,621 - INFO - AGENT :: Decay Rate at 0.105
+2023-12-10 19:13:57,609 - INFO - AGENT :: Cluster Variance at 0.0763
+2023-12-10 19:13:59,475 - INFO -   GNN :: 0.43 assign frosty-grapnel-7ff8ffdd55-gmg46 to kwok-std-node-4
+2023-12-10 19:14:04,236 - INFO - AGENT :: Reward 0.0526 250
+2023-12-10 19:14:04,236 - INFO - AGENT :: Decay Rate at 0.104
+2023-12-10 19:14:06,044 - INFO -   GNN :: 0.986 assign frosty-grapnel-7ff8ffdd55-gwndd to kwok-std-node-1
+2023-12-10 19:14:10,939 - INFO - AGENT :: Reward 0.0969 251
+2023-12-10 19:14:10,939 - INFO - AGENT :: Decay Rate at 0.103
+2023-12-10 19:14:12,871 - INFO -   GNN :: 0.422 assign frosty-grapnel-7ff8ffdd55-zmgrg to kwok-std-node-4
+2023-12-10 19:14:17,718 - INFO - AGENT :: Reward 0.0518 252
+2023-12-10 19:14:17,719 - INFO - AGENT :: Decay Rate at 0.102
+2023-12-10 19:14:52,211 - INFO - AGENT :: Processing Deployment pounded-bookshelf with 10
+2023-12-10 19:14:54,149 - INFO -   GNN :: 0.588 assign pounded-bookshelf-84f857689c-m5g9f to kwok-std-node-4
+2023-12-10 19:14:59,073 - INFO - AGENT :: Reward -0.5665 253
+2023-12-10 19:14:59,073 - INFO - AGENT :: Decay Rate at 0.102
+2023-12-10 19:15:00,971 - INFO -   GNN :: 0.667 assign pounded-bookshelf-84f857689c-nmnvh to kwok-std-node-4
+2023-12-10 19:15:06,060 - INFO - AGENT :: Reward -0.5613 254
+2023-12-10 19:15:06,060 - INFO - AGENT :: Decay Rate at 0.101
+2023-12-10 19:15:07,130 - INFO - AGENT :: Cluster Variance at 0.0869
+2023-12-10 19:15:09,034 - INFO -   GNN :: 0.109 assign pounded-bookshelf-84f857689c-d8rt4 to kwok-std-node-1
+2023-12-10 19:15:14,102 - INFO - AGENT :: Reward 0.0927 255
+2023-12-10 19:15:14,103 - INFO - AGENT :: Decay Rate at 0.1
+2023-12-10 19:15:16,103 - INFO -   GNN :: 0.81 assign pounded-bookshelf-84f857689c-2tvxr to kwok-std-node-4
+2023-12-10 19:15:21,168 - INFO - AGENT :: Reward 0.0496 256
+2023-12-10 19:15:21,168 - INFO - AGENT :: Decay Rate at 0.099
+2023-12-10 19:15:23,167 - INFO -   GNN :: 0.311 assign pounded-bookshelf-84f857689c-hjj2b to kwok-std-node-4
+2023-12-10 19:15:28,272 - INFO - AGENT :: Reward -0.5499 257
+2023-12-10 19:15:28,273 - INFO - AGENT :: Decay Rate at 0.098
+2023-12-10 19:15:30,346 - INFO -   GNN :: 0.807 assign pounded-bookshelf-84f857689c-ml72q to kwok-std-node-1
+2023-12-10 19:15:35,581 - INFO - AGENT :: Reward 0.0896 258
+2023-12-10 19:15:35,581 - INFO - AGENT :: Decay Rate at 0.097
+2023-12-10 19:15:37,559 - INFO -   GNN :: 0.224 assign pounded-bookshelf-84f857689c-htvpx to kwok-std-node-4
+2023-12-10 19:15:42,730 - INFO - AGENT :: Reward 0.0482 259
+2023-12-10 19:15:42,731 - INFO - AGENT :: Decay Rate at 0.096
+2023-12-10 19:15:43,807 - INFO - AGENT :: Cluster Variance at 0.0962
+2023-12-10 19:15:45,845 - INFO -   GNN :: 0.506 assign pounded-bookshelf-84f857689c-xn7t6 to kwok-std-node-4
+2023-12-10 19:15:51,007 - INFO - AGENT :: Reward -0.5385 260
+2023-12-10 19:15:51,008 - INFO - AGENT :: Decay Rate at 0.095
+2023-12-10 19:15:51,040 - INFO - AGENT :: Updated the Policy Network. Loss: 1.3967
+2023-12-10 19:15:53,204 - INFO -   GNN :: 0.333 assign pounded-bookshelf-84f857689c-ltvlr to kwok-std-node-2
+2023-12-10 19:15:58,318 - INFO - AGENT :: Reward 0.1334 261
+2023-12-10 19:15:58,319 - INFO - AGENT :: Decay Rate at 0.094
+2023-12-10 19:16:00,409 - INFO -   GNN :: 0.538 assign pounded-bookshelf-84f857689c-xz4x4 to kwok-std-node-1
+2023-12-10 19:16:05,675 - INFO - AGENT :: Reward 0.0866 262
+2023-12-10 19:16:05,675 - INFO - AGENT :: Decay Rate at 0.094
+2023-12-10 19:16:06,153 - INFO - AGENT :: checking shutdown status
+2023-12-10 19:16:13,729 - INFO - AGENT :: Processing Deployment arid-snare with 14
+2023-12-10 19:16:15,823 - INFO -   GNN :: 0.304 assign arid-snare-64dbb97bb4-bkrzc to kwok-std-node-1
+2023-12-10 19:16:21,053 - INFO - AGENT :: Reward -0.5327 263
+2023-12-10 19:16:21,053 - INFO - AGENT :: Decay Rate at 0.093
+2023-12-10 19:16:23,205 - INFO -   GNN :: 0.194 assign arid-snare-64dbb97bb4-9qgz9 to kwok-std-node-4
+2023-12-10 19:16:28,478 - INFO - AGENT :: Reward 0.0468 264
+2023-12-10 19:16:28,478 - INFO - AGENT :: Decay Rate at 0.092
+2023-12-10 19:16:29,441 - INFO - AGENT :: Cluster Variance at 0.1028
+2023-12-10 19:16:31,664 - INFO -   GNN :: 0.514 assign arid-snare-64dbb97bb4-w8bmt to kwok-std-node-4
+2023-12-10 19:16:37,091 - INFO - AGENT :: Reward -0.5264 265
+2023-12-10 19:16:37,091 - INFO - AGENT :: Decay Rate at 0.091
+2023-12-10 19:16:39,158 - INFO -   GNN :: 0.533 assign arid-snare-64dbb97bb4-24f9z to kwok-std-node-4
+2023-12-10 19:16:44,675 - INFO - AGENT :: Reward -0.5216 266
+2023-12-10 19:16:44,676 - INFO - AGENT :: Decay Rate at 0.09
+2023-12-10 19:16:46,754 - INFO -   GNN :: 0.855 assign arid-snare-64dbb97bb4-nf8pk to kwok-std-node-4
+2023-12-10 19:16:52,161 - INFO - AGENT :: Reward -0.5167 267
+2023-12-10 19:16:52,161 - INFO - AGENT :: Decay Rate at 0.089
+2023-12-10 19:16:54,398 - INFO -   GNN :: 0.774 assign arid-snare-64dbb97bb4-bfj4v to kwok-std-node-6
+2023-12-10 19:16:59,823 - INFO - AGENT :: Reward 0.1145 268
+2023-12-10 19:16:59,824 - INFO - AGENT :: Decay Rate at 0.089
+2023-12-10 19:17:02,108 - INFO -   GNN :: 0.207 assign arid-snare-64dbb97bb4-rnvqk to kwok-std-node-4
+2023-12-10 19:17:07,545 - INFO - AGENT :: Reward 0.0444 269
+2023-12-10 19:17:07,545 - INFO - AGENT :: Decay Rate at 0.088
+2023-12-10 19:17:08,692 - INFO - AGENT :: Cluster Variance at 0.1141
+2023-12-10 19:17:10,813 - INFO -   GNN :: 0.54 assign arid-snare-64dbb97bb4-gs4fr to kwok-std-node-4
+2023-12-10 19:17:16,405 - INFO - AGENT :: Reward -0.5075 270
+2023-12-10 19:17:16,406 - INFO - AGENT :: Decay Rate at 0.087
+2023-12-10 19:17:18,612 - INFO -   GNN :: 0.67 assign arid-snare-64dbb97bb4-kxw9j to kwok-std-node-4
+2023-12-10 19:17:24,218 - INFO - AGENT :: Reward -0.5027 271
+2023-12-10 19:17:24,218 - INFO - AGENT :: Decay Rate at 0.086
+2023-12-10 19:17:26,516 - INFO -   GNN :: 0.268 assign arid-snare-64dbb97bb4-shmn7 to kwok-std-node-4
+2023-12-10 19:17:32,103 - INFO - AGENT :: Reward -0.498 272
+2023-12-10 19:17:32,104 - INFO - AGENT :: Decay Rate at 0.086
+2023-12-10 19:17:34,279 - INFO -   GNN :: 0.434 assign arid-snare-64dbb97bb4-dj8wn to kwok-std-node-1
+2023-12-10 19:17:39,888 - INFO - AGENT :: Reward 0.078 273
+2023-12-10 19:17:39,889 - INFO - AGENT :: Decay Rate at 0.085
+2023-12-10 19:17:42,168 - INFO -   GNN :: 0.631 assign arid-snare-64dbb97bb4-d2tlq to kwok-std-node-6
+2023-12-10 19:17:47,827 - INFO - AGENT :: Reward 0.1074 274
+2023-12-10 19:17:47,827 - INFO - AGENT :: Decay Rate at 0.084
+2023-12-10 19:17:48,961 - INFO - AGENT :: Cluster Variance at 0.1237
+2023-12-10 19:17:51,284 - INFO -   GNN :: 0.343 assign arid-snare-64dbb97bb4-h29hc to kwok-std-node-4
+2023-12-10 19:17:56,925 - INFO - AGENT :: Reward 0.0421 275
+2023-12-10 19:17:56,926 - INFO - AGENT :: Decay Rate at 0.083
+2023-12-10 19:17:59,259 - INFO -   GNN :: 0.158 assign arid-snare-64dbb97bb4-gxmzs to kwok-std-node-1
+2023-12-10 19:18:05,021 - INFO - AGENT :: Reward 0.0762 276
+2023-12-10 19:18:05,021 - INFO - AGENT :: Decay Rate at 0.082
+2023-12-10 19:18:06,534 - INFO - AGENT :: checking shutdown status
+2023-12-10 19:18:15,757 - INFO - AGENT :: Processing Deployment solid-rotor with 5
+2023-12-10 19:18:19,100 - INFO -  RAND :: 0.001 Selection: Assign solid-rotor-6547d549f8-flfh7 to kwok-std-node-8
+2023-12-10 19:18:24,748 - INFO - AGENT :: Reward 0.1622 277
+2023-12-10 19:18:24,749 - INFO - AGENT :: Decay Rate at 0.082
+2023-12-10 19:18:27,084 - INFO -   GNN :: 0.733 assign solid-rotor-6547d549f8-9z6ks to kwok-std-node-1
+2023-12-10 19:18:32,807 - INFO - AGENT :: Reward 0.0752 278
+2023-12-10 19:18:32,808 - INFO - AGENT :: Decay Rate at 0.081
+2023-12-10 19:18:36,327 - INFO -  RAND :: 0.021 Selection: Assign solid-rotor-6547d549f8-ckxm7 to kwok-std-node-2
+2023-12-10 19:18:42,028 - INFO - AGENT :: Reward 0.1178 279
+2023-12-10 19:18:42,029 - INFO - AGENT :: Decay Rate at 0.08
+2023-12-10 19:18:43,216 - INFO - AGENT :: Cluster Variance at 0.1276
+2023-12-10 19:18:45,588 - INFO -   GNN :: 0.414 assign solid-rotor-6547d549f8-kxtph to kwok-std-node-4
+2023-12-10 19:18:51,290 - INFO - AGENT :: Reward 0.0414 280
+2023-12-10 19:18:51,291 - INFO - AGENT :: Decay Rate at 0.08
+2023-12-10 19:18:51,330 - INFO - AGENT :: Updated the Policy Network. Loss: 1.38795
+2023-12-10 19:18:51,331 - INFO - AGENT :: *** Updating the target Network
+2023-12-10 19:18:53,722 - INFO -   GNN :: 0.362 assign solid-rotor-6547d549f8-spkd4 to kwok-std-node-6
+2023-12-10 19:18:59,749 - INFO - AGENT :: Reward 0.1027 281
+2023-12-10 19:18:59,750 - INFO - AGENT :: Decay Rate at 0.079
+2023-12-10 19:18:59,788 - INFO - AGENT :: Processing Deployment rubbery-analogy with 14
+2023-12-10 19:19:02,033 - INFO -   GNN :: 0.257 assign rubbery-analogy-7fb68b9f6c-p62wk to kwok-std-node-4
+2023-12-10 19:19:07,962 - INFO - AGENT :: Reward 0.0409 282
+2023-12-10 19:19:07,963 - INFO - AGENT :: Decay Rate at 0.078
+2023-12-10 19:19:10,357 - INFO -   GNN :: 0.221 assign rubbery-analogy-7fb68b9f6c-2gz8d to kwok-std-node-4
+2023-12-10 19:19:16,293 - INFO - AGENT :: Reward -0.4773 283
+2023-12-10 19:19:16,294 - INFO - AGENT :: Decay Rate at 0.077
+2023-12-10 19:19:18,733 - INFO -   GNN :: 0.484 assign rubbery-analogy-7fb68b9f6c-x7c4q to kwok-std-node-4
+2023-12-10 19:19:24,722 - INFO - AGENT :: Reward -0.4727 284
+2023-12-10 19:19:24,722 - INFO - AGENT :: Decay Rate at 0.077
+2023-12-10 19:19:25,930 - INFO - AGENT :: Cluster Variance at 0.1401
+2023-12-10 19:19:28,292 - INFO -   GNN :: 0.794 assign rubbery-analogy-7fb68b9f6c-7stk4 to kwok-std-node-4
+2023-12-10 19:19:34,257 - INFO - AGENT :: Reward -0.4682 285
+2023-12-10 19:19:34,258 - INFO - AGENT :: Decay Rate at 0.076
+2023-12-10 19:19:36,701 - INFO -   GNN :: 0.352 assign rubbery-analogy-7fb68b9f6c-zcqtx to kwok-std-node-6
+2023-12-10 19:19:42,725 - INFO - AGENT :: Reward 0.0967 286
+2023-12-10 19:19:42,726 - INFO - AGENT :: Decay Rate at 0.075
+2023-12-10 19:19:45,045 - INFO -   GNN :: 0.203 assign rubbery-analogy-7fb68b9f6c-gm92f to kwok-std-node-4
+2023-12-10 19:19:51,238 - INFO - AGENT :: Reward 0.0388 287
+2023-12-10 19:19:51,239 - INFO - AGENT :: Decay Rate at 0.075
+2023-12-10 19:19:53,662 - INFO -   GNN :: 0.99 assign rubbery-analogy-7fb68b9f6c-2qgxp to kwok-std-node-4
+2023-12-10 19:19:59,748 - INFO - AGENT :: Reward -0.4594 288
+2023-12-10 19:19:59,748 - INFO - AGENT :: Decay Rate at 0.074
+2023-12-10 19:20:02,173 - INFO -   GNN :: 0.315 assign rubbery-analogy-7fb68b9f6c-bjhsf to kwok-std-node-4
+2023-12-10 19:20:08,353 - INFO - AGENT :: Reward -0.4549 289
+2023-12-10 19:20:08,354 - INFO - AGENT :: Decay Rate at 0.073
+2023-12-10 19:20:09,577 - INFO - AGENT :: Cluster Variance at 0.1534
+2023-12-10 19:20:12,076 - INFO -   GNN :: 0.528 assign rubbery-analogy-7fb68b9f6c-z54db to kwok-std-node-4
+2023-12-10 19:20:18,227 - INFO - AGENT :: Reward -0.4505 290
+2023-12-10 19:20:18,227 - INFO - AGENT :: Decay Rate at 0.073
+2023-12-10 19:20:20,746 - INFO -   GNN :: 0.954 assign rubbery-analogy-7fb68b9f6c-58sgn to kwok-std-node-4
+2023-12-10 19:20:27,129 - INFO - AGENT :: Reward -0.446 291
+2023-12-10 19:20:27,129 - INFO - AGENT :: Decay Rate at 0.072
+2023-12-10 19:20:29,653 - INFO -   GNN :: 0.127 assign rubbery-analogy-7fb68b9f6c-tc98r to kwok-std-node-4
+2023-12-10 19:20:35,908 - INFO - AGENT :: Reward -0.4416 292
+2023-12-10 19:20:35,909 - INFO - AGENT :: Decay Rate at 0.071
+2023-12-10 19:20:38,463 - INFO -   GNN :: 0.12 assign rubbery-analogy-7fb68b9f6c-hjfsh to kwok-std-node-4
+2023-12-10 19:20:44,784 - INFO - AGENT :: Reward -0.4372 293
+2023-12-10 19:20:44,784 - INFO - AGENT :: Decay Rate at 0.071
+2023-12-10 19:20:47,182 - INFO -   GNN :: 0.405 assign rubbery-analogy-7fb68b9f6c-rf8wb to kwok-std-node-4
+2023-12-10 19:20:53,657 - INFO - AGENT :: Reward -0.4329 294
+2023-12-10 19:20:53,657 - INFO - AGENT :: Decay Rate at 0.07
+2023-12-10 19:20:54,916 - INFO - AGENT :: Cluster Variance at 0.1712
+2023-12-10 19:20:57,407 - INFO -   GNN :: 0.335 assign rubbery-analogy-7fb68b9f6c-qddvl to kwok-std-node-4
+2023-12-10 19:21:03,802 - INFO - AGENT :: Reward -0.4285 295
+2023-12-10 19:21:03,802 - INFO - AGENT :: Decay Rate at 0.069
+2023-12-10 19:21:04,318 - INFO - AGENT :: checking shutdown status
+2023-12-10 19:21:39,919 - INFO - AGENT :: Processing Deployment tomato-burbot with 5
+2023-12-10 19:21:42,517 - INFO -   GNN :: 0.66 assign tomato-burbot-956fc78d5-7n974 to kwok-std-node-4
+2023-12-10 19:21:48,877 - INFO - AGENT :: Reward -0.4242 296
+2023-12-10 19:21:48,877 - INFO - AGENT :: Decay Rate at 0.069
+2023-12-10 19:21:51,485 - INFO -   GNN :: 0.098 assign tomato-burbot-956fc78d5-cjm7d to kwok-std-node-4
+2023-12-10 19:21:57,979 - INFO - AGENT :: Reward -0.4199 297
+2023-12-10 19:21:57,979 - INFO - AGENT :: Decay Rate at 0.068
+2023-12-10 19:22:00,595 - INFO -   GNN :: 0.337 assign tomato-burbot-956fc78d5-j8flk to kwok-std-node-4
+2023-12-10 19:22:07,020 - INFO - AGENT :: Reward -0.4156 298
+2023-12-10 19:22:07,021 - INFO - AGENT :: Decay Rate at 0.068
+2023-12-10 19:22:09,627 - INFO -   GNN :: 0.092 assign tomato-burbot-956fc78d5-sbhml to kwok-std-node-4
+2023-12-10 19:22:16,132 - INFO - AGENT :: Reward -0.4113 299
+2023-12-10 19:22:16,132 - INFO - AGENT :: Decay Rate at 0.067
+2023-12-10 19:22:17,398 - INFO - AGENT :: Cluster Variance at 0.1902
+2023-12-10 19:22:20,191 - INFO -   GNN :: 0.158 assign tomato-burbot-956fc78d5-qtws7 to kwok-std-node-6
+2023-12-10 19:22:26,604 - INFO - AGENT :: Reward 0.0831 300
+2023-12-10 19:22:26,605 - INFO - AGENT :: Decay Rate at 0.066
+2023-12-10 19:22:26,681 - INFO - AGENT :: Updated the Policy Network. Loss: 1.24106
+2023-12-10 19:23:04,908 - INFO - AGENT :: Acknowledge Epoch Complete
+2023-12-10 19:23:19,914 - INFO - AGENT :: checking shutdown status
+2023-12-10 19:23:19,915 - INFO - AGENT :: Saving GNN Model for Reuse
+2023-12-10 19:23:19,925 - INFO - AGENT :: Removing shutdown signal

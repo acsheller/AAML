@@ -16,7 +16,7 @@ import datetime
 from datetime import datetime, timezone
 import time
 from cluster_env import ClusterEnvironment
-from drl_models import GNNPolicyNetwork as GNN,GNNPolicyNetwork2,GNNPolicyNetwork3 as GNN3, ReplayBuffer
+from drl_models import GNNPolicyNetwork,GNNPolicyNetwork2,GNNPolicyNetwork3 as GNN, ReplayBuffer
 import numpy as np
 
 import concurrent.futures
@@ -460,7 +460,7 @@ class CustomSchedulerGNN:
 
         self.logger.info("AGENT :: Saving GNN Model for Reuse")
 
-        filename = f"GNN_Model_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
+        filename = f"models/GNN_Model_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
         torch.save(self.gnn.state_dict(),filename)
         self.logger.info("AGENT :: Removing shutdown signal")
         os.remove("shutdown_signal.txt")

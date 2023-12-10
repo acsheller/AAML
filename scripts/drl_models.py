@@ -49,7 +49,7 @@ class DQN(nn.Module):
 
 
 class DQN3(nn.Module):
-    def __init__(self, num_inputs=10, num_outputs=10, num_hidden=32, dropout_rate=0.5):
+    def __init__(self, num_inputs=10, num_outputs=10, num_hidden=32, dropout_rate=0.2):
         super().__init__()
         # Define layers
         self.fc1 = nn.Linear(num_inputs, int(num_hidden*2))
@@ -75,13 +75,9 @@ class DQN3(nn.Module):
 
     def forward(self, x):
         x = F.relu(self.fc1(x))
-        x = self.dropout(x)  # Apply dropout after first layer
         x = F.relu(self.fc2(x))
-        x = self.dropout(x)  # Apply dropout after second layer
         x = F.relu(self.fc3(x))
-        x = self.dropout(x)  # Apply dropout after third layer
         x = F.relu(self.fc4(x))
-        x = self.dropout(x)  # Apply dropout after fourth layer
         x = F.relu(self.fc5(x))
         x = self.dropout(x)  # Apply dropout after fifth layer
         x = F.relu(self.fc6(x))
@@ -190,7 +186,7 @@ class GNNPolicyNetwork2(torch.nn.Module):
         return x
 
 class GNNPolicyNetwork3(torch.nn.Module):
-    def __init__(self, input_dim, hidden_dim, output_dim, dropout_rate=0.5):
+    def __init__(self, input_dim, hidden_dim, output_dim, dropout_rate=0.2):
         super().__init__()
         self.conv1 = GCNConv(input_dim, hidden_dim)
         self.bn1 = torch.nn.BatchNorm1d(hidden_dim)
@@ -198,10 +194,11 @@ class GNNPolicyNetwork3(torch.nn.Module):
         self.bn2 = torch.nn.BatchNorm1d(hidden_dim)
         self.conv3 = GCNConv(hidden_dim, hidden_dim) 
         self.bn3 = torch.nn.BatchNorm1d(hidden_dim)
-        self.dropout = torch.nn.Dropout(dropout_rate)
         self.fc1 = torch.nn.Linear(hidden_dim, hidden_dim)
-        self.fc2 = torch.nn.Linear(hidden_dim, output_dim)
-
+        self.dropout = torch.nn.Dropout(dropout_rate)
+        self.fc2 = torch.nn.Linear(hidden_dim, hidden_dim)
+        self.fc3 = torch.nn.Linear(hidden_dim, output_dim)
+    
     def forward(self, data):
         if not isinstance(data, Batch):
             data = Batch.from_data_list([data])
@@ -209,14 +206,13 @@ class GNNPolicyNetwork3(torch.nn.Module):
         x, edge_index, batch = data.x, data.edge_index, data.batch
 
         x = F.relu(self.bn1(self.conv1(x, edge_index)))
-        x = self.dropout(x)  # Apply dropout
         x = F.relu(self.bn2(self.conv2(x, edge_index)))
-        x = self.dropout(x)  # Apply dropout
         x = F.relu(self.bn3(self.conv3(x, edge_index)))
         x = global_mean_pool(x, batch)
         x = F.relu(self.fc1(x))
         x = self.dropout(x)  # Apply dropout
-        x = self.fc2(x)  # Output raw scores (logits)
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)  # Output raw scores (logits)
         return x
 
 class Actor(nn.Module):
@@ -421,8 +417,8 @@ class ActorGNN(torch.nn.Module):
         self.conv2 = GCNConv(num_hidden, num_hidden)
         self.bn2 = torch.nn.BatchNorm1d(num_hidden)
         self.fc1 = torch.nn.Linear(num_hidden, num_hidden)
-        self.fc2 = torch.nn.Linear(num_hidden, num_outputs)
-
+        self.fc2 = torch.nn.Linear(num_hidden, num_hidden)
+        self.fc3 = torch.nn.Linear(num_hidden, num_outputs)
         self._initialize_weights()
 
 
@@ -452,7 +448,8 @@ class ActorGNN(torch.nn.Module):
         x = F.relu(self.bn2(self.conv2(x, edge_index)))
         x = global_mean_pool(x, batch)
         x = F.relu(self.fc1(x))
-        x = F.softmax(self.fc2(x), dim=1)  # Output as a probability distribution
+        x = F.relu(self.fc2(x))
+        x = F.softmax(self.fc3(x), dim=1)  # Output as a probability distribution
         return x
 
 
@@ -466,8 +463,8 @@ class CriticGNN(torch.nn.Module):
         self.conv2 = GCNConv(num_hidden, num_hidden)
         self.bn2 = torch.nn.BatchNorm1d(num_hidden)
         self.fc1 = torch.nn.Linear(num_hidden, num_hidden)
-        self.fc2 = torch.nn.Linear(num_hidden, 1)  # Scalar output
-
+        self.fc2 = torch.nn.Linear(num_hidden, num_hidden)  # Scalar output
+        self.fc3 = torch.nn.Linear(num_hidden, 1)  # Scalar output          
         self._initialize_weights()
 
     def _initialize_weights(self):
@@ -494,7 +491,8 @@ class CriticGNN(torch.nn.Module):
         x = F.relu(self.bn2(self.conv2(x, edge_index)))
         x = global_mean_pool(x, batch)
         x = F.relu(self.fc1(x))
-        x = self.fc2(x)  # <-- Scalar value
+        x = F.relu(self.fc2(x))
+        x = self.fc3(x)  # <-- Scalar value
         return x
 
 

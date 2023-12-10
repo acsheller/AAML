@@ -59,7 +59,6 @@ RUN mkdir /home/appuser/data
 #COPY scheduler /home/appuser/scheduler
 COPY docker/entrypoint.sh /home/appuser/entrypoint.sh
 COPY docker/supervisord.conf /etc/supervisor/conf.d/supervisord.conf
-COPY ProjectNotebook.ipynb /home/appuser/ProjectNotebook.ipynb
 
 
 #set a working directory

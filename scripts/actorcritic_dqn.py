@@ -220,6 +220,31 @@ class ActorCriticDQN:
             if not self.contains_non_alpha_or_dash(name):
                 return name
 
+    def get_num_pods_for_deployment(self,deployment_name):
+        try:
+            deployment = self.v1.read_namespaced_deployment(name=deployment_name,namespace = 'default')
+            desired_replicas = deployment.spec.replicas
+        except client.ApiException as e:
+            self.logger.info("AGENT :: Exception when calling AppsV1Api-read_namespace_deployment from get_num_pods_for_deployment %s\n" % e)
+            return False
+        return desired_replicas
+
+    def new_epoch(self):
+        '''
+        Checking for epoch reset of parameters
+        '''
+        if os.path.exists('epoch_complete.txt'):
+            return True
+        return False
+
+
+    def get_deployment_name(self,pod):
+        if pod.metadata.labels:
+            label_key = 'app'
+            deployment_name = pod.metadata.labels.get(label_key)
+            if deployment_name:
+                return deployment_name
+        return None
 
     def run(self):
         '''
@@ -252,7 +277,7 @@ class ActorCriticDQN:
                             if deployment_name not in deployment_counts.keys():
                                 deployment_counts[deployment_name] = self.get_num_pods_for_deployment(deployment_name)
                                 deployments_pods[deployment_name] = []
-                                self.logger.info(f"AGENT :: Processing Deployment {deployment_name} with {deployment_counts[deployment_name]}")
+                                self.logger.info(f"AGENT :: Processing Deployment {deployment_name} with {deployment_counts[deployment_name]} pods.")
                             # Process the pod so we can can count and add done = True later
                             if pod.metadata.name not in deployed_pods:
                                     deployed_pods.append(pod.metadata.name)
@@ -264,8 +289,6 @@ class ActorCriticDQN:
                             # The actor selects the action in the select_action method
                             # Action probs are needed to calculate loss
                             action,action_probs, agent_type = self.select_action(current_state,pod,) 
-                            #self.logger.info(f'AGENT :: {action} selected based on {[np.round(i,3) for i in action_probs[0].cpu().detach().numpy().tolist()]}')
-
                             new_state, reward, done = self.env.step(pod,action,dqn=True)   
                             c_sum_reward += reward
                             self.action_list.append(action)
@@ -285,6 +308,7 @@ class ActorCriticDQN:
                             # Calculate advantage
                             td_error = reward + self.gamma * next_value * (1 - int(done)) - value
                             advantage = td_error.detach()
+
                             # Update Critic
                             critic_loss = td_error.pow(2)
                             self.critic_optimizer.zero_grad()
@@ -299,8 +323,8 @@ class ActorCriticDQN:
                             self.actor_optimizer.zero_grad()
                             actor_loss.backward()
                             self.actor_optimizer.step()
-                            #if self.progress_indication:
-                            #    print(f"\rReward is {np.round(reward,3)}  Cumulative sum of rewards is {np.round(c_sum_reward,3)}",end='', flush=True)
+                            if self.progress_indication:
+                                print(f"\rReward is {np.round(reward,3)}  Cumulative sum of rewards is {np.round(c_sum_reward,3)}",end='', flush=True)
                             self.logger.info(f"AGENT :: Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ")
 
                         except Exception as e:
@@ -312,13 +336,14 @@ class ActorCriticDQN:
                             self.writer.add_scalar('2. Actor Loss',actor_loss.item(),self.step_count)
                             self.writer.add_scalar('3. Critic Loss',critic_loss.item(),self.step_count)
                             self.writer.add_scalar('1. CSR',c_sum_reward,self.step_count)
-                            self.writer.add_scalar('3. Advantage', advantage.item(),self.step_count)
+                            self.writer.add_scalar('4. Advantage', advantage.item(),self.step_count)
                             if not self.step_count %10:
                                 self.writer.add_histogram('6. actions',torch.tensor(self.action_list),self.step_count)
                                 temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
                                 cpu_info = []
                                 for node in temp_state:
                                     cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
+                                self.logger.info(f"AGENT :: Cluster Variance at {np.round(np.var(cpu_info),4)}")
                                 self.writer.add_scalar('5. Cluster Variance',np.var(cpu_info),self.step_count)
 
                         except Exception as e:
@@ -345,12 +370,12 @@ class ActorCriticDQN:
 
         self.logger.info("AGENT :: Saving AC Model for Reuse")
         # Save off actor critic models in case they want to be deployed.
-        filename = f"AC_ModelActor_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
-        filename2 = f"AC_ModelCritic_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
+        filename = f"models/Actor_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
+        filename2 = f"models/Critic_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
         torch.save(self.actor.state_dict(),filename)
         torch.save(self.critic.state_dict(),filename2)
         os.remove('shutdown_signal.txt')
-        print("")
+        return
 
 
 if __name__ == "__main__":

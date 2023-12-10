@@ -83,12 +83,16 @@ class ActorCriticGNN:
         self.scheduler_name = scheduler_name
         self.progress_indication = progress_indication
         self.namespace = namespace
-        self.tboard_name = tensorboard_name
+        if tensorboard_name != None:
+            self.tboard_name = tensorboard_name
+        else:
+            self.tboard_name = "acgnn_" + self.generate_funny_name()
 
 
         # Do K8s stuff
         config.load_kube_config()
         self.api = client.CoreV1Api()
+        self.v1 = client.AppsV1Api()
         self.watcher = watch.Watch()
         self.kube_info = KubeInfo()
 
@@ -97,7 +101,7 @@ class ActorCriticGNN:
 
         # These are used for Tensorboard
         if self.tboard_name != None:
-            self.writer = SummaryWriter(f'tlogs/acgnn_{self.tboard_name}')
+            self.writer = SummaryWriter(f'tlogs/{self.tboard_name}')
             self.logger.info(f"AGENT: ACGNN Created TensorBoard writer {self.tboard_name}")
         else:
             # Generate a name if one is not provided. 
@@ -217,6 +221,33 @@ class ActorCriticGNN:
                 return name
 
 
+    def get_num_pods_for_deployment(self,deployment_name):
+        try:
+            deployment = self.v1.read_namespaced_deployment(name=deployment_name,namespace = 'default')
+            desired_replicas = deployment.spec.replicas
+        except client.ApiException as e:
+            self.logger.info("AGENT :: Exception when calling AppsV1Api-read_namespace_deployment from get_num_pods_for_deployment %s\n" % e)
+            return False
+        return desired_replicas
+
+    def new_epoch(self):
+        '''
+        Checking for epoch reset of parameters
+        '''
+        if os.path.exists('epoch_complete.txt'):
+            return True
+        return False
+
+
+    def get_deployment_name(self,pod):
+        if pod.metadata.labels:
+            label_key = 'app'
+            deployment_name = pod.metadata.labels.get(label_key)
+            if deployment_name:
+                return deployment_name
+        return None
+
+
     def run(self):
         '''
         
@@ -227,7 +258,10 @@ class ActorCriticGNN:
         
         '''
         c_sum_reward = 0
-        
+        deployed_pods = []
+        deployment_counts = {}
+        deployments_pods = {}
+
         if self.progress_indication:
             print(f"\rAC Model Ready",end='', flush=True)
         while not self.should_shutdown():
@@ -238,57 +272,91 @@ class ActorCriticGNN:
                     
                     pod = event['object']
                     if self.needs_scheduling(pod):
+                        try:
 
-                        current_state= self.env.get_state()
-                        # The actor selects the action in the select_action method
-                        # Action probs are needed to calculate loss
-                        action,action_probs, agent_type = self.select_action(current_state,pod,) 
-                        new_state, reward, done = self.env.step(pod,action)
-                        c_sum_reward += reward
-                        self.action_list.append(action)
+                            # Get the deployment Information
+                            deployment_name = self.get_deployment_name(pod)
+                            if deployment_name not in deployment_counts.keys():
+                                deployment_counts[deployment_name] = self.get_num_pods_for_deployment(deployment_name)
+                                deployments_pods[deployment_name] = []
+                                self.logger.info(f"AGENT :: Processing Deployment {deployment_name} with {deployment_counts[deployment_name]} pods.")
+                            # Process the pod so we can can count and add done = True later
+                            if pod.metadata.name not in deployed_pods:
+                                    deployed_pods.append(pod.metadata.name)
+                                    deployments_pods[deployment_name].append(pod.metadata.name)
+
+                            current_state= self.env.get_state()
+                            # The actor selects the action in the select_action method
+                            # Action probs are needed to calculate loss
+                            action,action_probs, agent_type = self.select_action(current_state,pod,) 
+                            new_state, reward, done = self.env.step(pod,action)
+                            c_sum_reward += reward
+                            self.action_list.append(action)
+
+                            # Each Deployment is an "episode" 
+                            if len(deployments_pods[deployment_name]) == deployment_counts[deployment_name]:
+                                done = 1
+
+                        except Exception as e:
+                            self.logger.error(f"1. AGENT :: Unexpected error in section 1: {e}")                                   
                         
-                        # Critics Evaluation
-                        value = self.critic(current_state.to(self.device))
-                        next_value = self.critic(new_state.to(self.device))
+                        try:
+                            # Critics Evaluation
+                            value = self.critic(current_state.to(self.device))
+                            next_value = self.critic(new_state.to(self.device))
 
-                        # Calculate advantage
-                        td_error = reward + self.gamma * next_value * (1 - int(done)) - value
-                        advantage = td_error.detach()
+                            # Calculate advantage
+                            td_error = reward + self.gamma * next_value * (1 - int(done)) - value
+                            advantage = td_error.detach()
 
-                        # Update Critic
-                        critic_loss = td_error.pow(2)
-                        self.critic_optimizer.zero_grad()
-                        critic_loss.backward()
-                        self.critic_optimizer.step()
+                        except Exception as e:
+                            self.logger.error(f"2. AGENT :: Unexpected error in section 2: {e}")       
+                        try:
+                            # Update Critic
+                            critic_loss = td_error.pow(2)[0][0]
+                            self.critic_optimizer.zero_grad()
+                            critic_loss.backward()
+                            self.critic_optimizer.step()
+                        except Exception as e:
+                            self.logger.error(f"3. AGENT :: Unexpected error in section 3: {e}")       
 
+                        try:
+                            # Update Actor using the advantage
+                            actor_loss = -torch.log(action_probs[0,action]) * advantage
+                            self.actor_optimizer.zero_grad()
+                            actor_loss.backward()
+                            self.actor_optimizer.step()
 
-                        # Update Actor using the advantage
-                        actor_loss = -torch.log(action_probs[0,action]) * advantage
-                        self.actor_optimizer.zero_grad()
-                        actor_loss.backward()
-                        self.actor_optimizer.step()
-                        if self.progress_indication and not self.log_propogate:
-                            print(f"Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ",end='', flush=True)
-                        self.logger.info(f"AGENT :: Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ")
+                        except Exception as e:
+                            self.logger.error(f"4. AGENT :: Unexpected error in section 4: {e}")       
 
-                        # Save off some metrics for analysis
-                        self.step_count += 1
-                        self.writer.add_scalar('2. Actor Loss',actor_loss.item(),self.step_count)
-                        self.writer.add_scalar('3. Critic Loss',critic_loss.item(),self.step_count)
-                        self.writer.add_scalar('1. CSR',c_sum_reward,self.step_count)
-                        self.writer.add_scalar('3. Advantage', advantage.item(),self.step_count)
-                        if not self.step_count %10:
-                            self.writer.add_histogram('6. actions',torch.tensor(self.action_list),self.step_count)
-                            temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
-                            cpu_info = []
-                            for node in temp_state:
-                                cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
-                            self.writer.add_scalar('5. Cluster Variance',np.var(cpu_info),self.step_count)
-                            self.logger.info(f"AGENT :: Cluster Variance at {np.round(np.var(cpu_info),4)}")
-                        if sum(1 for pod in self.api.list_namespaced_pod(namespace = self.namespace).items if pod.status.phase == 'Pending') == 0:
-                            if self.new_epoch():
-                                self.logger.info("AGENT :: Acknowledge Epoch Complete")
-                                os.remove('epoch_complete.txt')
+                        try:
+
+                            if self.progress_indication and not self.log_propogate:
+                                print(f"Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ",end='', flush=True)
+                            self.logger.info(f"AGENT :: Reward for binding {pod.metadata.name} to node {self.env.kube_info.node_index_to_name_mapping[action]} is {np.round(reward,3)} ")
+
+                            # Save off some metrics for analysis
+                            self.step_count += 1
+                            self.writer.add_scalar('2. Actor Loss',actor_loss.item(),self.step_count)
+                            self.writer.add_scalar('3. Critic Loss',critic_loss.item(),self.step_count)
+                            self.writer.add_scalar('1. CSR',c_sum_reward,self.step_count)
+                            self.writer.add_scalar('4. Advantage', advantage.item(),self.step_count)
+                            if not self.step_count %10:
+                                self.writer.add_histogram('6. actions',torch.tensor(self.action_list),self.step_count)
+                                temp_state = self.env.kube_info.get_nodes_data(sort_by_cpu=False,include_controller=False)
+                                cpu_info = []
+                                for node in temp_state:
+                                    cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
+                                self.writer.add_scalar('5. Cluster Variance',np.var(cpu_info),self.step_count)
+                                self.logger.info(f"AGENT :: Cluster Variance at {np.round(np.var(cpu_info),4)}")
+                            if sum(1 for pod in self.api.list_namespaced_pod(namespace = self.namespace).items if pod.status.phase == 'Pending') == 0:
+                                if self.new_epoch():
+                                    self.logger.info("AGENT :: Acknowledge Epoch Complete")
+                                    os.remove('epoch_complete.txt')
+                        except Exception as e:
+                            self.logger.error(f"5. AGENT :: Unexpected error in section 5: {e}")       
+
             # Catch exceptions as things can happen. 
             except client.exceptions.ApiException as e:
                 if e.status == 410:
@@ -306,12 +374,12 @@ class ActorCriticGNN:
 
         self.logger.info("AGENT :: Saving AC Model for Reuse")
         # Save off actor critic models in case they want to be deployed.
-        filename = f"AC_ModelActor_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
-        filename2 = f"AC_ModelCritic_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
+        filename = f"models/Actor_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
+        filename2 = f"models/Critic_{self.tboard_name}_{datetime.now().strftime('%Y%m%d_%H%M%S')}.pth"
         torch.save(self.actor.state_dict(),filename)
         torch.save(self.critic.state_dict(),filename2)
         os.remove('shutdown_signal.txt')
-
+        return
 
 if __name__ == "__main__":
     

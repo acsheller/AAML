@@ -56,10 +56,11 @@ class CustomSchedulerDQN:
 
     def __init__(self,scheduler_name ="custom-scheduler",hidden_layers=64,replay_buffer_size=100,learning_rate=1e-4,gamma=0.95, \
                 init_epsi=1.0, min_epsi=0.01,epsi_decay =0.9954,batch_size=25,update_frequency = 25,target_update_frequency=50, \
-                progress_indication=False, tensorboard_name=None,log_propogate=False,num_inputs=10):
+                progress_indication=False, use_heuristic=False, tensorboard_name=None,log_propogate=False,num_inputs=10):
         
 
         self.agent_mode = 'train'
+        self.use_heuristic = use_heuristic
         self.log_propogate = log_propogate
         self.logger = def_logging(log_propogate=log_propogate)
         self.num_inputs = num_inputs
@@ -194,6 +195,9 @@ class CustomSchedulerDQN:
             randval = random.random()
             if self.agent_mode != 'train':
                 self.epsilon = -1
+            rand_start = 1
+            if self.use_heuristic:
+                rand_start = 0
             if randval > self.epsilon:
                 with torch.no_grad():
                     # Use the model to choose the best action
@@ -203,7 +207,7 @@ class CustomSchedulerDQN:
                     agent_type='DQN'
             else:
                 # Choose Random or Hueristic -- the latter keeps things on track
-                if random.randrange(0,2):
+                if random.randrange(rand_start,2):
                     # Choose a random action
                     nodes = self.kube_info.get_nodes_data(include_controller=False)
                     selected_node = random.choice(nodes)
@@ -403,6 +407,7 @@ class CustomSchedulerDQN:
                                 for node in temp_state:
                                     cpu_info.append(np.round(node['total_cpu_used']/node['cpu_capacity'],4))
                                 self.writer.add_scalar('3. Cluster Variance',np.var(cpu_info),self.step_count)
+                                self.logger.info(f"AGENT :: Cluster Variance at {np.round(np.var(cpu_info),4)}")
 
                         except client.exceptions.ApiException as e:
                             if e.status == 410:
@@ -519,6 +524,7 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size',type=int, default=200,help='Batch Size of replay Buffer sample to pass during training  (default: %(default)s)')
     parser.add_argument('--progress', action='store_true', help='Enable progress indication. Only when logs are not scrolling  (default: %(default)s)')
     parser.add_argument('--log_scrolling', action='store_true', help='Enable Log Scrolling to Screen. Disables progress Indication  (default: %(default)s)')
+    parser.add_argument('--use_heuristic', action='store_true', help='Enable use of Heuristic half the random time (default: %(default)s)')
     args = parser.parse_args()
 
     # Create the Custom Scheduling Agent
@@ -526,25 +532,21 @@ if __name__ == "__main__":
                                learning_rate=args.learning_rate,epsi_decay=args.epsi_decay, \
                                replay_buffer_size=args.replay_buffer_size,update_frequency=args.update_frequency, \
                                target_update_frequency=args.target_update_frequency,batch_size=args.batch_size, \
-                               progress_indication=args.progress,log_propogate=args.log_scrolling)
+                               progress_indication=args.progress,log_propogate=args.log_scrolling,use_heuristic=args.use_heuristic)
 
     # Populate the replay buffer
     agent.populate_replay(main_df)
     # run the agent
     agent.run()
 
-    # agent_eval = CustomSchedulerDQN(hidden_layers=args.hidden_layers,init_epsi=args.init_epsi,gamma=args.gamma, \
-    #                         learning_rate=args.learning_rate,epsi_decay=args.epsi_decay, \
-    #                         replay_buffer_size=args.replay_buffer_size,update_frequency=args.update_frequency, \
-    #                         target_update_frequency=args.target_update_frequency,batch_size=args.batch_size, \
-    #                         progress_indication=args.progress,log_propogate=args.log_scrolling)
+
 
     # Place Model in eval
     
-    
+    ## This did not prove useful.
     #print("\nPreparing to evaluate")
     #agent.agent_mode = 'eval'
     #agent.dqn.eval()
-    #print("\nPlease restart the simulator for evaluation with `runsim --cluster_resets=1`\n\n")
+    #print("\nPlease restart the simulator for evaluation with `runsim --cluster_resets=1 --cpu`\n\n")
     #agent.run()
     

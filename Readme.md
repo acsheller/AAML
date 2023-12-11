@@ -1,4 +1,4 @@
-# Deep Reinforcement Learning using Graph Neural Networks for Kubernetes Scheduling.
+# A Comparative Analysis of Actor-Critic and Deep Q Network Methods Using Graph Neural Networks and Multi-Layer Perceptrons for Efficient Scheduling in Kubernetes Clusters
 
 
 ## Overview 
